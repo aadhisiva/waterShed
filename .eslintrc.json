@@ -1,0 +1,20 @@
+// .eslintrc.json
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "rules": {
+    "linebreak-style": ["error", "unix"]
+  },
+  "prettier/prettier": [
+    "error",
+    {
+        "endOfLine": "auto"
+    }
+  ]
+}
