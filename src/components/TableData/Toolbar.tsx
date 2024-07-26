@@ -10,10 +10,11 @@ interface EnhancedTableToolbarProps {
     numSelected: number;
     handleSearch: any;
     searchValue: string;
+    title?: string;
   }
   
 export function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-    const { numSelected, handleSearch, searchValue } = props;
+    const { numSelected, handleSearch, searchValue, title } = props;
   
   
     return (
@@ -46,7 +47,7 @@ export function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
             id="tableTitle"
             component="div"
           >
-            Departments
+            {title}
           </Typography>
         {/* )} */}
         <TextField  placeholder="Search" onChange={handleSearch} value={searchValue}/>

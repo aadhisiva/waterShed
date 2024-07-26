@@ -12,6 +12,8 @@ import TextFieldMU from '../formhandle/TextField';
 interface DepartmentModalProps {
   open: boolean;
   handleClose?: any;
+  handleSubmitForm?: any;
+  formData?: any;
 }
 
 type Values = {
@@ -21,10 +23,12 @@ type Values = {
 export default function DepartmentModal({
   open,
   handleClose,
+  handleSubmitForm,
+  formData
 }: DepartmentModalProps) {
 
   const initialValues = {
-    DepartmentName: ""
+    DepartmentName: formData.DepartmentName 
   };
   
   const validationSchema = {
@@ -39,7 +43,8 @@ export default function DepartmentModal({
   };
   const onSubmit = (values: Values) => {
     // Handle form submission logic, e.g., API call
-    console.log('Submitting values:', values);
+    values.id = formData.id;
+    handleSubmitForm(values);
   };
 
   const {

@@ -4,11 +4,40 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/Delete';
-import DepartmentModal from '../../components/Modals/departmentModal';
 import axiosInstance from '../../axiosInstance';
-import { Snackbar } from '@mui/material';
+import RolesModal from '../../components/Modals/rolesModal';
 
 const headCells = [
+  {
+    id: 'RoleName',
+    numeric: false,
+    disablePadding: true,
+    label: 'Role Name',
+  },
+  {
+    id: 'District',
+    numeric: false,
+    disablePadding: true,
+    label: 'District',
+  },
+  {
+    id: 'Taluk',
+    numeric: false,
+    disablePadding: true,
+    label: 'Taluk',
+  },
+  {
+    id: 'Hobli',
+    numeric: false,
+    disablePadding: true,
+    label: 'Hobli',
+  },
+  {
+    id: 'Village',
+    numeric: false,
+    disablePadding: true,
+    label: 'Village',
+  },
   {
     id: 'DepartmentName',
     numeric: false,
@@ -23,14 +52,12 @@ const headCells = [
   },
 ];
 interface Data {
-  calories: string;
-  carbs: string;
-  fat: string;
-  name: string;
-  protein: string;
+  SchemeName: string;
+  DepartmentName: string;
+  ParentScheme: string;
 }
 
-export default function Department() {
+export default function Roles() {
   const [tableData, setTableData] = useState([]);
   const [copyTableData, setCopyTableData] = useState([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
@@ -47,7 +74,7 @@ export default function Department() {
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/departments', { ReqType: 'Get' });
+    let { data } = await axiosInstance.post('/addOrGetRoles', { ReqType: 'Get' });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -63,7 +90,7 @@ export default function Department() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ReqType'] = 'Add';
-    let { data } = await axiosInstance.post('/departments', values);
+    let { data } = await axiosInstance.post('/addOrGetRoles', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);
@@ -75,7 +102,7 @@ export default function Department() {
   };
 
   const renderDeoartModal = openModal && (
-    <DepartmentModal
+    <RolesModal
       open={openModal}
       formData={formData}
       handleClose={() => setOpenModal(false)}
@@ -105,7 +132,7 @@ export default function Department() {
         rows={copyTableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
-        title={"Department"}
+        title='Roles'
       />
     </Box>
   );

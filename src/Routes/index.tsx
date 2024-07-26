@@ -7,14 +7,16 @@ import {
 } from 'react-router-dom';
 import PrivateRoute from './PrivateRoutes';
 import ErrorBoundary from '../components/ErrorBoundary';
-import HeaderWithSidebar from '../components/HeaderForLogin';
-import { DASHBOARD, DEPARTMENT, SCHEMES } from '../utils/routingPath';
+import { ACTIVITY, DASHBOARD, DEPARTMENT, ROLES, SCHEMES, SECTORS } from '../utils/routingPath';
 
 const LoginPageLazy = lazy(() => import('../pages/LoginPage'));
 const SigninPageLazy = lazy(() => import('../pages/SignUpPage'));
 
 const HomeLazy = lazy(() => import('../pages/Dashboard'));
 const DepartmentLazy = lazy(() => import('../pages/admin/department'));
+const RolesLazy = lazy(() => import('../pages/admin/roles'));
+const ActivityLazy = lazy(() => import('../pages/admin/activity'));
+const SectorsLazy = lazy(() => import('../pages/admin/sectors'));
 const SchemesLazy = lazy(() => import('../pages/admin/schemes'));
 const DashboardLazy = lazy(() => import('../pages/Dashboard'));
 
@@ -27,6 +29,9 @@ export default function RoutesPro() {
           <Route path={DEPARTMENT} Component={DepartmentLazy} />
           <Route path={SCHEMES} Component={SchemesLazy} />
           <Route path={DASHBOARD} Component={DashboardLazy} />
+          <Route path={ROLES} Component={RolesLazy} />
+          <Route path={ACTIVITY} Component={ActivityLazy} />
+          <Route path={SECTORS} Component={SectorsLazy} />
         </Route>
         <Route
           path="signin"
@@ -41,6 +46,9 @@ export default function RoutesPro() {
         <Route path="*" element={<div>Page not found..</div>} />
       </Route>,
     ),
+    {
+      basename: "/watershed/"
+    }
   );
   return (
     <ErrorBoundary>

@@ -2,16 +2,20 @@
 const path = require('path');
 
 module.exports = {
+  mode: 'production',
   entry: './src/index.tsx',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js',
-    publicPath: '/',
+    filename:  '[name].[contenthash].js',
+    publicPath: '/watershed/',
   },
   devServer: {
     hot: true,
     compress: true,
     historyApiFallback: true, // It prevents the reload issue and direct searching by paths.
+  },
+  optimization: {
+    usedExports: true,
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],

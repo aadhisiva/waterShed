@@ -8,6 +8,12 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
+import TextFieldMU from '../components/formhandle/TextField';
+import useForm from '../components/formhandle/customValidation';
+import axiosInstance from '../axiosInstance';
+import useDisptachForAction from '../components/customHooks/useDis';
+import { userLoggedIn } from '../reducers/authReducer';
+import { useNavigate } from 'react-router-dom';
 
 function Copyright() {
   return (
@@ -27,19 +33,70 @@ function Copyright() {
   );
 }
 
+type Values = {
+  [key: string]: string;
+};
+
 export default function SigninPage() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+  const [loading, setLoading] = React.useState(false);
+  const initialValues = {
+    Username: '',
+    Password: '',
   };
+
+  const [dispatch] = useDisptachForAction();
+  const navigate = useNavigate();
+
+  const validationSchema = {
+    Username: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'Username is required';
+        }
+        const regex = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})|(^[0-9]{10})+$/;
+        let checked = regex.test(value);
+        if(!checked) return "Enter Email or Mobile Number";
+        return null;
+      },
+    },
+    Password: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'Password is required';
+        };
+        const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\-+.]).{6,20}$/;
+        let checked = regex.test(value);
+        if(!checked) return `Password must containe one lowercase character and one uppercase character and one 
+        special character and password should be between 6 and 20 characters length and one digit`;
+        return null;
+      },
+    },
+  };
+  const onSubmit = async (values: Values) => {
+    // Handle form submission logic, e.g., API call
+    setLoading(true);
+    let { data } = await axiosInstance.post('/superLogin', { ...{ReqType: 'Add'}, ...values });
+    if (data?.code == 200) {
+        dispatch(userLoggedIn(data.data));
+        navigate('/');
+    } else {
+      setLoading(false);
+    }
+  };
+
+  const {
+    values,
+    errors,
+    touched,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    setValues,
+  } = useForm({ initialValues, validationSchema, onSubmit });
 
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>
-      <Grid item xs={12} sm={8} md={6} component={Paper} elevation={6} square>
+      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
         <Box
           sx={{
             my: 8,
@@ -66,54 +123,29 @@ export default function SigninPage() {
               spacing={2}
               style={{ display: 'flex', flexDirection: 'row' }}
             >
-              <Grid item md={6}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  autoFocus
+              <Grid item md={12}>
+                <TextFieldMU
+                  name="Username"
+                  label="Username or Email Address"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.Username}
+                  error={touched.Username && Boolean(errors.Username)}
+                  helperText={touched.Username && errors.Username}
                 />
               </Grid>
-              <Grid item md={6}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  autoFocus
-                />
-              </Grid>
-              <Grid item sm={12}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="password"
+              <Grid item md={12}>
+                <TextFieldMU
+                  name="Password"
                   label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.Password}
+                  error={touched.Password && Boolean(errors.Password)}
+                  helperText={touched.Password && errors.Password}
                 />
               </Grid>
-              <Grid item sm={12}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                />
-              </Grid>
+              <Grid item md={12}>
               <Button
                 type="submit"
                 fullWidth
@@ -122,6 +154,7 @@ export default function SigninPage() {
               >
                 Sign Up
               </Button>
+              </Grid>
               <Grid container>
                 <Grid item>
                   <Link href="signin" variant="body2">
@@ -138,13 +171,41 @@ export default function SigninPage() {
         item
         xs={false}
         sm={4}
-        md={6}
+        md={7}
         sx={{
-          backgroundColor: '#880874',
-          backgroundSize: 'cover',
-          backgroundPosition: 'left',
+          backgroundImage: `url(${require('../assets/Images/bg_water.jpeg')})`,
+          backgroundSize: '100% 100%',
+          backgroundPosition: 'contain',
+          backgroundRepeat: 'no-repeat',
         }}
-      />
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'column',
+        }}
+      >
+        <Box
+          component="img"
+          sx={{
+            height: 250,
+            width: 280,
+            maxHeight: { xs: 250, md: 280 },
+            maxWidth: { xs: 250, md: 280 },
+          }}
+          alt="Karnataka Logo."
+          src={require('../assets/Images/karnataka.png')}
+        />
+        <Typography
+          variant="h1"
+          sx={{
+            color: 'whitesmoke',
+          }}
+          component="h2"
+        >
+          WaterShed
+        </Typography>
+      </Grid>
     </Grid>
   );
 }

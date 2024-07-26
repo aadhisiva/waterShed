@@ -4,16 +4,27 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/Delete';
-import DepartmentModal from '../../components/Modals/departmentModal';
 import axiosInstance from '../../axiosInstance';
-import { Snackbar } from '@mui/material';
+import SectorsModal from '../../components/Modals/sectorsModal';
 
 const headCells = [
+  {
+    id: 'SectorName',
+    numeric: false,
+    disablePadding: true,
+    label: 'Sector Name',
+  },
   {
     id: 'DepartmentName',
     numeric: false,
     disablePadding: true,
     label: 'Department Name',
+  },
+  {
+    id: 'ParentName',
+    numeric: false,
+    disablePadding: true,
+    label: 'Parent Activity',
   },
   {
     id: 'Action',
@@ -23,14 +34,12 @@ const headCells = [
   },
 ];
 interface Data {
-  calories: string;
-  carbs: string;
-  fat: string;
-  name: string;
-  protein: string;
+  SchemeName: string;
+  DepartmentName: string;
+  ParentScheme: string;
 }
 
-export default function Department() {
+export default function Sectors() {
   const [tableData, setTableData] = useState([]);
   const [copyTableData, setCopyTableData] = useState([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
@@ -47,7 +56,7 @@ export default function Department() {
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/departments', { ReqType: 'Get' });
+    let { data } = await axiosInstance.post('/addOrGetSectors', { ReqType: 'Get' });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -63,7 +72,7 @@ export default function Department() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ReqType'] = 'Add';
-    let { data } = await axiosInstance.post('/departments', values);
+    let { data } = await axiosInstance.post('/addOrGetSectors', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);
@@ -75,7 +84,7 @@ export default function Department() {
   };
 
   const renderDeoartModal = openModal && (
-    <DepartmentModal
+    <SectorsModal
       open={openModal}
       formData={formData}
       handleClose={() => setOpenModal(false)}
@@ -105,7 +114,7 @@ export default function Department() {
         rows={copyTableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
-        title={"Department"}
+        title='Sectors'
       />
     </Box>
   );

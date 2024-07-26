@@ -39,6 +39,8 @@ import { CSSObject } from '@emotion/react';
 import { RoutingObjects } from '../utils/routingObjects';
 import { useNavigate } from 'react-router-dom';
 import LogoutModal from './Modals/LogoutModal';
+import { clearSessionEndTime, userLoggedOut } from '../reducers/authReducer';
+import useDisptachForAction from './customHooks/useDis';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -170,6 +172,7 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
   const theme = useTheme();
   const muiUtils = React.useContext(MUIWrapperContext);
   const navigate = useNavigate();
+  const [dispatch] = useDisptachForAction();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -192,6 +195,12 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
     handleMobileMenuClose();
   };
 
+  const handleLogout = () => {
+    dispatch(userLoggedOut());
+    dispatch(clearSessionEndTime());
+    navigate('/signin', { replace: true });
+  }
+
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
@@ -213,8 +222,8 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={handleLogout}>Logout</MenuItem>
+      {/* <MenuItem onClick={handleMenuClose}>My account</MenuItem> */}
     </Menu>
   );
   const mobileMenuId = 'primary-search-account-menu-mobile';
@@ -267,7 +276,7 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
         >
           <AccountCircle />
         </IconButton>
-        <p>Profile</p>
+        <p onClick={handleLogout}>Logout</p>
       </MenuItem>
     </Menu>
   );
@@ -308,7 +317,7 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
             />
           </Search>
           <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+          {/* <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
             <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
               <InputLabel id="demo-simple-select-standard-label">
                 Age
@@ -325,7 +334,7 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
                 <MenuItem value={"ka"}>Kannada</MenuItem>
               </Select>
             </FormControl>
-          </Box>
+          </Box> */}
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
             <FormControl fullWidth>
               <InputLabel id="demo-simple-select-label">direction</InputLabel>

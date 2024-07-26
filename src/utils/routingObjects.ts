@@ -34,11 +34,6 @@ export const RoutingObjects = [
         name: "Activity",
         icon: LocalActivityIcon,
         path: ACTIVITY
-    },
-    {
-        name: "SubActiity",
-        icon: LocalActivityIcon,
-        path: SUB_ACTIVITY
     }
 ]
 

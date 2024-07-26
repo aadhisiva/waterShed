@@ -1,105 +1,3 @@
-// import React from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import useForm from '../components/formhandle/customValidation';
-// import { Button } from '@mui/material';
-
-// type Values = {
-//   [key: string]: string;
-// };
-
-// const initialValues = {
-//   username: '',
-//   password: '',
-// };
-
-// const validationSchema = {
-//   username: {
-//     validate: (value: string) => {
-//       if (!value) {
-//         return 'Username is required';
-//       }
-//       return null;
-//     },
-//   },
-//   password: {
-//     validate: (value: string) => {
-//       if (!value) {
-//         return 'Password is required';
-//       }
-//       return null;
-//     },
-//   },
-// };
-
-// export default function LoginPage() {
-//   const navigate = useNavigate();
-
-//   const onSubmit = (values: Values) => {
-//     // Handle form submission logic, e.g., API call
-//     console.log('Submitting values:', values);
-//   };
-
-//   const {
-//     values,
-//     errors,
-//     touched,
-//     handleChange,
-//     handleBlur,
-//     handleSubmit,
-//     setValues,
-//   } = useForm({ initialValues, validationSchema, onSubmit });
-
-//   const toggleTheme = () => {
-//   const checkTheme = localStorage.getItem("theme");
-//    localStorage.setItem("theme", checkTheme == "light" ? "dark" : "light");
-//    window.location.reload();
-//   };
-
-//   return (
-//     <div>
-//       <button
-//         onClick={() => {
-//           localStorage.setItem('token', 'true');
-//           navigate('/');
-//         }}
-//       >
-//         CLick to authenticate
-//       </button>
-//       <div className="App">
-//         {/* Your application components go here */}
-//         <Button variant="contained" color="primary" onClick={toggleTheme}>
-//           Toggle Theme
-//         </Button>
-//       </div>
-//       <form onSubmit={handleSubmit}>
-//         <div>
-//           <label>Username</label>
-//           <input
-//             type="text"
-//             name="username"
-//             value={values.username}
-//             onChange={handleChange}
-//             onBlur={handleBlur}
-//           />
-//           {touched.username && errors.username && <div>{errors.username}</div>}
-//         </div>
-//         <div>
-//           <label>Password</label>
-//           <input
-//             type="password"
-//             name="password"
-//             value={values.password}
-//             onChange={handleChange}
-//             onBlur={handleBlur}
-//           />
-//           {touched.password && errors.password && <div>{errors.password}</div>}
-//         </div>
-//         <button type="submit">Submit</button>
-//       </form>
-//     </div>
-//   );
-// }
-
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -115,6 +13,9 @@ import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
 import useDisptachForAction from '../components/customHooks/useDis';
 import { userLoggedIn } from '../reducers/authReducer';
+import useForm from '../components/formhandle/customValidation';
+import TextFieldMU from '../components/formhandle/TextField';
+import axiosInstance from '../axiosInstance';
 
 function Copyright() {
   return (
@@ -125,7 +26,7 @@ function Copyright() {
       sx={{ mt: 5 }}
     >
       {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
+      <Link color="inherit" href="">
         Your Website
       </Link>{' '}
       {new Date().getFullYear()}
@@ -134,20 +35,72 @@ function Copyright() {
   );
 }
 
+type Values = {
+  [key: string]: string;
+};
+
 export default function LoginPage() {
+  const [loading, setLoading] = React.useState(false);
+  const initialValues = {
+    Username: '',
+    Password: '',
+  };
+
   const navigate = useNavigate();
   const [dispatch] = useDisptachForAction();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
-    dispatch(userLoggedIn());
-    navigate('/');
+  const validationSchema = {
+    Username: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'Username is required';
+        }
+        const regex =
+          /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})|(^[0-9]{10})+$/;
+        let checked = regex.test(value);
+        if (!checked) return 'Enter Email or Mobile Number';
+        return null;
+      },
+    },
+    Password: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'Password is required';
+        }
+        const regex =
+          /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\-+.]).{6,20}$/;
+        let checked = regex.test(value);
+        if (!checked)
+          return `Password must containe one lowercase character and one uppercase character and one 
+        special character and password should be between 6 and 20 characters length and one digit`;
+        return null;
+      },
+    },
   };
+
+  const onSubmit = async (values: Values) => {
+    setLoading(true);
+    let response: any = await axiosInstance.post('/superLogin', {
+      ...{ ReqType: 'Get' },
+      ...values,
+    });
+    if (response?.data?.code == 200) {
+      dispatch(userLoggedIn(response.data.data));
+      navigate('/');
+    } else {
+      setLoading(false);
+    }
+  };
+
+  const {
+    values,
+    errors,
+    touched,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    setValues,
+  } = useForm({ initialValues, validationSchema, onSubmit });
 
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>
@@ -157,10 +110,10 @@ export default function LoginPage() {
         sm={4}
         md={7}
         sx={{
-          backgroundImage: `url(${require("../assets/Images/bg_water.jpeg")})`,
+          backgroundImage: `url(${require('../assets/Images/bg_water.jpeg')})`,
           backgroundSize: '100% 100%',
           backgroundPosition: 'contain',
-          backgroundRepeat: 'no-repeat'
+          backgroundRepeat: 'no-repeat',
         }}
         style={{
           display: 'flex',
@@ -180,9 +133,13 @@ export default function LoginPage() {
           alt="Karnataka Logo."
           src={require('../assets/Images/karnataka.png')}
         />
-        <Typography variant="h1" sx={{
-          color: 'whitesmoke'
-        }} component="h2">
+        <Typography
+          variant="h1"
+          sx={{
+            color: 'whitesmoke',
+          }}
+          component="h2"
+        >
           WaterShed
         </Typography>
       </Grid>
@@ -210,48 +167,60 @@ export default function LoginPage() {
             onSubmit={handleSubmit}
             sx={{ mt: 1 }}
           >
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label="User Name"
-              name="username"
-              autoComplete="username"
-              autoFocus
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-            />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+            <Grid
+              container
+              spacing={2}
+              style={{ display: 'flex', flexDirection: 'row' }}
             >
-              Sign In
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
+              <Grid item md={12}>
+                <TextFieldMU
+                  name="Username"
+                  label="Username or Email Address"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.Username}
+                  error={touched.Username && Boolean(errors.Username)}
+                  helperText={touched.Username && errors.Username}
+                />
               </Grid>
-              <Grid item>
-                <Link href="signup" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
+              <Grid item md={12}>
+                <TextFieldMU
+                  name="Password"
+                  label="Password"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.Password}
+                  error={touched.Password && Boolean(errors.Password)}
+                  helperText={touched.Password && errors.Password}
+                />
+              </Grid>
+              <Grid item md={12}>
+                <FormControlLabel
+                  control={<Checkbox value="remember" color="primary" />}
+                  label="Remember me"
+                />
+              </Grid>
+              <Grid item md={12}>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                >
+                  Sign In
+                </Button>
+              </Grid>
+              <Grid item md={12} style={{display: 'flex', flexDirection: 'row'}}>
+                <Grid item xs>
+                  <Link href="#" variant="body2">
+                    Forgot password?
+                  </Link>
+                </Grid>
+                <Grid item>
+                  <Link href="signup" variant="body2">
+                    {"Don't have an account? Sign Up"}
+                  </Link>
+                </Grid>
               </Grid>
             </Grid>
             <Copyright />
