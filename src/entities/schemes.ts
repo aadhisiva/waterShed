@@ -1,25 +1,40 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from "typeorm";
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    CreateDateColumn,
+    UpdateDateColumn,
+    ManyToOne,
+    JoinColumn,
+  } from "typeorm";
+import { Departments } from "./department";
+  
+  @Entity( { name: "Schemes" })
+  export class Schemes {
+  
+    @PrimaryGeneratedColumn()
+    id: number;
 
-@Entity()
-export class Schemes {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ nullable:true, type: "nvarchar", length: 500 })
-  SchemeName: string;
-
-  @Column({nullable:true,type: "nvarchar", length: 500 })
-  SchemeCode: string;
-
-  @CreateDateColumn()
-  createdDate: Date;
-
-  @UpdateDateColumn()
-  updatedDate: Date;
-}
+    @ManyToOne(() => Departments, dep => dep.Schemes)
+    @JoinColumn({name: "DepartmentId"})
+    DepartmentId: Departments
+  
+    @Column({ type: "nvarchar", length: 500 })
+    Description: number;
+  
+    @Column({ type: "nvarchar", length: 200 })
+    SchemeName: number;
+  
+    @Column({ type: "nvarchar", length: 500 })
+    SchemeLogo: number;
+  
+    @Column({ type: "int" })
+    ParentId: number;
+  
+    @CreateDateColumn()
+    createdDate: Date;
+  
+    @UpdateDateColumn()
+    updatedDate: Date;
+  };
+  

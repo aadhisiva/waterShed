@@ -7,7 +7,11 @@ export const API_VERSION_ISSUE = 'New Version Available. Please Contact To Techn
 export enum WEBPAGES {
     LOGIN_PAGE='Login Page',
     USER_MANAGEMENT='User Management',
-    SCEHEMS='Schemes' 
+    SCEHEMS='Schemes',
+    SECTORS='Sectors',
+    DEPARTMENT='Department',
+    ROLES='Roles',
+    ACTIVITY='Activity',
 }
 
 

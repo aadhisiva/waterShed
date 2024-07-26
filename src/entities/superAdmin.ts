@@ -16,25 +16,16 @@ import {
     UserId: string;
 
     @Column({ nullable:true,  type: "nvarchar", length: 500 })
-    UserRole: string;
-
-    @Column({ nullable:true,  type: "nvarchar", length: 500 })
     Name: string;
 
     @Column({ nullable:true,  type: "nvarchar", length: 500 })
     Mobile: string;
 
     @Column({ nullable:true,  type: "nvarchar", length: 500 })
-    WebOtp: string;
+    Username: string;
 
     @Column({ nullable:true,  type: "nvarchar", length: 500 })
-    WebToken: string;
-
-    @Column({ nullable:true,  type: "nvarchar", length: 500 })
-    WebTokenExpirationTime: string;
-
-    @Column({ nullable:true, type: 'text' })
-    WebVersion: string;
+    Password: string;
   
     @CreateDateColumn()
     createdDate: Date;

@@ -4,6 +4,7 @@ import { generateEOfTTime, generateOTP, generateRandomString, generateUniqueId, 
 import { RESPONSEMSG } from "../utils/statusCodes";
 import { OtpServices } from "../sms/smsServceResusable";
 import { loginData } from "../entities";
+import jsonWebToken from "jsonwebtoken";
 
 type ObjectParam = any;
 
@@ -107,5 +108,94 @@ export class AdminServices {
 
     async locations(data) {
         return await this.adminRepo.locations(data);
+    };
+
+    /* new modified apis */
+
+    async departments(data){
+        const { ReqType } = data;
+        if(ReqType == "Add") {
+            return await this.adminRepo.addDepartment(data);
+        } else if(ReqType == "Get"){
+            return await this.adminRepo.getDepartment(data);
+        } else if(ReqType == "Dd"){
+            return await this.adminRepo.getDropdownDepart();
+        } else {
+            return {code: 422, message: "Sending wrong request to server."};
+        }
+    };
+
+    async addOrGetschemes(data){
+        const { ReqType } = data;
+        if(ReqType == "Add") {
+            return await this.adminRepo.addschemes(data);
+        } else if(ReqType == "Get"){
+            return await this.adminRepo.getSchemesData();
+        } else if(ReqType == "Dd"){
+            return await this.adminRepo.getDropdownSchemes();
+        }else {
+            return {code: 422, message: "Sending wrong request to server."};
+        }
+    };
+
+    async addOrGetSectors(data){
+        const { ReqType } = data;
+        if(ReqType == "Add") {
+            return await this.adminRepo.addSectors(data);
+        } else if(ReqType == "Get"){
+            return await this.adminRepo.getSectorsData();
+        } else if(ReqType == "Dd"){
+            return await this.adminRepo.getDropdownSectors();
+        }else {
+            return {code: 422, message: "Sending wrong request to server."};
+        }
+    };
+
+    async addOrGetsActivity(data){
+        const { ReqType } = data;
+        if(ReqType == "Add") {
+            return await this.adminRepo.addActivity(data);
+        } else if(ReqType == "Get"){
+            return await this.adminRepo.getActivityData();
+        } else if(ReqType == "Dd"){
+            return await this.adminRepo.getDropdownActivty();
+        }else {
+            return {code: 422, message: "Sending wrong request to server."};
+        }
+    };
+
+    async addOrGetRoles(data){
+        const { ReqType } = data;
+        if(ReqType == "Add") {
+            return await this.adminRepo.addRoles(data);
+        } else if(ReqType == "Get"){
+            return await this.adminRepo.getRolesData();
+        } else {
+            return {code: 422, message: "Sending wrong request to server."};
+        }
+    };
+
+    async superLogin(data){
+        const { Username, Password, ReqType } = data;
+        if(!Username) return {code:400, message: "Provide Username"};
+        if(!Password) return {code:400, message: "Provide Password"};
+        if(ReqType == "Get"){
+            let check = await this.adminRepo.checkUsername(Username);
+            if(!check) return {code: 422, message: "User not found."};
+            let checkPassword = check.Password == Password;
+            if(!checkPassword) return {code: 422, message: "Passord not matched."};
+            const token = jsonWebToken.sign({ Username: check.Username, RoleId: check.Name, Mobile: check.Mobile }, 
+                process.env.SECRET_KEY, { expiresIn: '1h' });
+            return {message: "Successfully Verified.", data: {token, username: check.Username, Name: check.Name}};
+        } else if(ReqType == "Add") {
+            let check = await this.adminRepo.checkUsername(Username);
+            if(check) return {code: 422, message: "Already Registered."};
+            let savedValues = await this.adminRepo.addSuperAdminData(data);
+            const token = jsonWebToken.sign({ Username: savedValues.Username, Name: savedValues.Name, Mobile: savedValues.Mobile }, 
+                process.env.SECRET_KEY, { expiresIn: '1h' });
+            return {message: "User Registered.", data: {token, username: savedValues.Username, Name: savedValues.Name, Mobile: savedValues.Mobile}};
+        } else {
+            return {code: 422, message: "Sending wrong request to server."};
+        }
     };
 }

@@ -2,7 +2,7 @@ import { Container, Service } from 'typedi';
 import express from "express";
 import { webAppResponse, webAppResponseForLarge } from '../utils/errorHandling';
 import { AdminServices } from '../apiServices/adminServ';
-import { webAuthTokenAndVersion } from '../utils/middlewares';
+import { authenticateToken, webAuthTokenAndVersion } from '../utils/middlewares';
 import { WEBMESSAGES, WEBPAGES } from '../utils/constants';
 
 const adminRouter = express.Router()
@@ -163,6 +163,77 @@ adminRouter.post('/locations', webAuthTokenAndVersion, async (req, res) => {
         let result = await adminServices.locations(body);
         return webAppResponseForLarge(res, result, body,  WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
     } catch (error) {
+        return webAppResponse(res, error);
+    }
+});
+
+/* *********** new apis ******** */
+adminRouter.post('/departments', authenticateToken, async (req, res)=> {
+    try{
+        let body = req.body;
+        let result = await adminServices.departments(body);
+        return webAppResponseForLarge(res, result, body,  WEBPAGES.DEPARTMENT, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch(error){
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post('/addOrGetschemes', authenticateToken, async (req, res)=> {
+    try{
+        let body = req.body;
+        let result = await adminServices.addOrGetschemes(body);
+        return webAppResponseForLarge(res, result, body,  WEBPAGES.SCEHEMS, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch(error){
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post('/addOrGetSectors', authenticateToken, async (req, res)=> {
+    try{
+        let body = req.body;
+        let result = await adminServices.addOrGetSectors(body);
+        return webAppResponseForLarge(res, result, body,  WEBPAGES.SECTORS, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch(error){
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post('/addOrGetsActivity', authenticateToken, async (req, res)=> {
+    try{
+        let body = req.body;
+        let result = await adminServices.addOrGetsActivity(body);
+        return webAppResponseForLarge(res, result, body,  WEBPAGES.ACTIVITY, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch(error){
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post('/addOrGetRoles', authenticateToken, async (req, res)=> {
+    try{
+        let body = req.body;
+        let result = await adminServices.addOrGetRoles(body);
+        return webAppResponseForLarge(res, result, body,  WEBPAGES.ROLES, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch(error){
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post('/addOrGetRoles', authenticateToken, async (req, res)=> {
+    try{
+        let body = req.body;
+        let result = await adminServices.addOrGetRoles(body);
+        return webAppResponseForLarge(res, result, body,  WEBPAGES.ROLES, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch(error){
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post("/superLogin", async (req, res) =>{
+    try{
+        let body = req.body;
+        let result = await adminServices.superLogin(body);
+        return webAppResponseForLarge(res, result, body,  WEBPAGES.LOGIN_PAGE, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch(error){
         return webAppResponse(res, error);
     }
 });

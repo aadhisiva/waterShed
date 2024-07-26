@@ -2,6 +2,7 @@ import { AppDataSource } from "../db/config";
 import { loginData, superAdmin, Versions } from "../entities";
 import { API_VERSION_ISSUE, SUPER_ADMIN } from "./constants";
 import { generateCurrentTime, generateEOfTTime } from "./resuableCode";
+import jwt from "jsonwebtoken";
 
 export async function authVersion(req, res, next) {
     // Read the version from the request header
@@ -49,4 +50,21 @@ export async function webAuthTokenAndVersion(req, res, next) {
         return res.status(403).send({ code: 403, message: "Please Login Again" }); // Return 403 if there is an error verifying
     }
     next();
+};
+
+export const authenticateToken = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ code: 401, message: 'Access denied. No token provided.' });
+    }
+
+    jwt.verify(token, process.env.SECRET_KEY, async (err, user) => {
+        if (err) {
+            return res.status(403).json({ code: 403, message: 'Failed to authenticate.' });
+        }
+        req.user = user;
+        next();
+    });
 };

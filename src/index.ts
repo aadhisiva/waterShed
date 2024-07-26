@@ -34,7 +34,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // cors setup for communication of sever and client
-app.use(cors({ origin: ['http://103.138.197.145', 'http://localhost:8080', 'http://192.168.45.170:8080'] }));
+app.use(cors({ origin: ['http://localhost:8081', "http://localhost:8080", "http://10.10.140.162", "http://10.10.140.162"] }));
 
 //setting req headers and res headers 
 app.use(function (req, res, next) {
@@ -53,14 +53,14 @@ app.use(morgan('common', {
 
 app.use(morgan('dev'));
 // we are adding port connection here
-app.get("/watershed/run", (req, res) => {
+app.get("/api/run", (req, res) => {
   res.send("running")
 })
 
 // controllers
-app.use('/watershed/sector', sectorRouter);
-app.use('/watershed/login', userRouter);
-app.use('/watershed/admin', adminRouter);
+app.use('/api/sector', sectorRouter);
+app.use('/api/login', userRouter);
+app.use('/api/admin', adminRouter);
 
 
 AppDataSource.initialize().then(async (connection) => {

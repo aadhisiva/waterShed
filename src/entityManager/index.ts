@@ -1,27 +1,34 @@
 import {
-    Activity, Category, MobileLogs, OtpLogs,
-    Schemes, Sectors, SubActivity, SubSchemes, Versions,
-    WaterShedData, formats, loginData, masterData,
-    superAdmin, webLogs
+    Activity,
+    Departments,
+    MobileLogs,
+    OtpLogs,
+    Roles,
+    Schemes,
+    UserData,
+    Versions,
+    loginData, 
+    masterData,
+    superAdmin, 
+    webLogs,
+    Sectors
 } from "../entities"
 
 
 export const entities = () => {
     return [
-        Schemes,
-        Sectors,
-        Category,
-        Activity,
-        SubActivity,
-        SubSchemes,
         loginData,
-        formats,
         Versions,
         masterData,
         webLogs,
-        MobileLogs,
         superAdmin,
         OtpLogs,
-        WaterShedData
+        MobileLogs,
+        UserData,
+        Roles,
+        Activity,
+        Schemes,
+        Departments,
+        Sectors
     ]
 }

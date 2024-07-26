@@ -6,7 +6,7 @@ import { loginData, masterData, Versions } from '../entities';
 const loginDataRepo = AppDataSource.getRepository(loginData);
 const mastersRepo = AppDataSource.getRepository(masterData);
 @Service()
-export class UserRepo {
+export class MobileRepo {
 
     async saveLogin(data: loginData) {
         let loginDb = await AppDataSource.getRepository(loginData);
