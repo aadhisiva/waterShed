@@ -11,7 +11,10 @@ import {
     masterData,
     superAdmin, 
     webLogs,
-    Sectors
+    Sectors,
+    DprsPrivateLand,
+    DprsCommonLand,
+    RolesAccess
 } from "../entities"
 
 
@@ -25,10 +28,13 @@ export const entities = () => {
         OtpLogs,
         MobileLogs,
         UserData,
-        Roles,
+        RolesAccess,
         Activity,
         Schemes,
         Departments,
-        Sectors
+        Sectors,
+        DprsPrivateLand,
+        DprsCommonLand,
+        Roles
     ]
 }

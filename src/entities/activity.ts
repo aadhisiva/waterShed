@@ -8,6 +8,7 @@ import {
     JoinColumn,
   } from "typeorm";
 import { Departments } from "./department";
+import { Sectors } from "./sectors";
   
   @Entity( { name: "Activity" })
   export class Activity {
@@ -17,7 +18,11 @@ import { Departments } from "./department";
 
     @ManyToOne(() => Departments, dep => dep.Activity)
     @JoinColumn({name: "DepartmentId"})
-    DepartmentId: Departments
+    DepartmentId: Departments;
+
+    @ManyToOne(() => Sectors, sec => sec.activity)
+    @JoinColumn({name: "SectorId"})
+    SectorId: Sectors
 
     @Column({ type: "nvarchar", length: 200 })
     ActivityName: number;

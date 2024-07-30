@@ -170,6 +170,19 @@ export class AdminServices {
             return await this.adminRepo.addRoles(data);
         } else if(ReqType == "Get"){
             return await this.adminRepo.getRolesData();
+        } else if(ReqType == "Dd"){
+            return await this.adminRepo.getDropdownRoles();
+        } else {
+            return {code: 422, message: "Sending wrong request to server."};
+        }
+    };
+
+    async addOrGetRoleAccess(data){
+        const { ReqType } = data;
+        if(ReqType == "Add") {
+            return await this.adminRepo.addRoleAccess(data);
+        } else if(ReqType == "Get"){
+            return await this.adminRepo.getRolesDataAccess();
         } else {
             return {code: 422, message: "Sending wrong request to server."};
         }
@@ -198,4 +211,23 @@ export class AdminServices {
             return {code: 422, message: "Sending wrong request to server."};
         }
     };
+
+    async uploadPrivateLand(data){
+        return await this.adminRepo.uploadPrivateLand(data);
+    }
+
+    async uploadCommonLand(data){
+        return await this.adminRepo.uploadCommonLand(data);
+    }
+
+    async getDprsLand(data){
+        const {DataType} = data;
+        if(DataType == "Private"){
+            return await this.adminRepo.getDprsPrivateLand(data);
+        } else if(DataType == "Common"){
+            return await this.adminRepo.getDprsCommonLand(data);
+        } else {
+            return {code: 422, message: "Sending wrong request to server."};
+        }
+    }
 }

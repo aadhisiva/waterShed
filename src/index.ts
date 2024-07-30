@@ -29,12 +29,12 @@ const app = express();
 const port: any = process.env.PORT || 3000;
 
 // used for body parsers in apis
-app.use(express.json());
+app.use(express.json({limit: '100mb'}));
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
 // cors setup for communication of sever and client
-app.use(cors({ origin: ['http://localhost:8081', "http://localhost:8080", "http://10.10.140.162", "http://10.10.140.162"] }));
+app.use(cors({ origin: ['http://localhost:8081', "http://localhost:8080", "http://10.10.140.162", "https://spectacles.karnataka.gov.in"] }));
 
 //setting req headers and res headers 
 app.use(function (req, res, next) {
@@ -53,14 +53,14 @@ app.use(morgan('common', {
 
 app.use(morgan('dev'));
 // we are adding port connection here
-app.get("/api/run", (req, res) => {
+app.get("/wapi/run", (req, res) => {
   res.send("running")
 })
 
 // controllers
-app.use('/api/sector', sectorRouter);
-app.use('/api/login', userRouter);
-app.use('/api/admin', adminRouter);
+app.use('/wapi/sector', sectorRouter);
+app.use('/wapi/login', userRouter);
+app.use('/wapi/admin', adminRouter);
 
 
 AppDataSource.initialize().then(async (connection) => {

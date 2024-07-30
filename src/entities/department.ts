@@ -8,9 +8,10 @@ import {
   } from "typeorm";
 import { Schemes } from "./schemes";
 import { UserData } from "./userData";
-import { Roles } from "./roles";
+import { RolesAccess } from "./roleAccess";
 import { Activity } from "./activity";
 import { Sectors } from "./sectors";
+import { Roles } from "./roles";
   
   @Entity({ name: "Departments"})
   export class Departments {
@@ -29,6 +30,9 @@ import { Sectors } from "./sectors";
 
     @OneToMany(() => Roles, role => role.DepartmentId, {cascade: true, onDelete: 'CASCADE'})
     Roles: Roles[];
+
+    @OneToMany(() => RolesAccess, role => role.DepartmentId, {cascade: true, onDelete: 'CASCADE'})
+    RolesAccess: RolesAccess[];
 
     @OneToMany(() => UserData, role => role.DepartmentId, {cascade: true, onDelete: 'CASCADE'})
     UserData: UserData[];

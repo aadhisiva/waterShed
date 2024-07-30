@@ -6,8 +6,11 @@ import {
     UpdateDateColumn,
     ManyToOne,
     JoinColumn,
+    OneToMany,
   } from "typeorm";
 import { Departments } from "./department";
+import { Sectors } from "./sectors";
+import { Roles } from "./roles";
   
   @Entity( { name: "Schemes" })
   export class Schemes {
@@ -30,6 +33,13 @@ import { Departments } from "./department";
   
     @Column({ type: "int" })
     ParentId: number;
+
+    @OneToMany(() => Sectors, sec => sec.SchemeId, {cascade: true, onDelete: 'CASCADE'})
+    sectors: Sectors[];
+
+    @ManyToOne(() => Roles, rl => rl.Schemes)
+    @JoinColumn({name: "RoleId"})
+    RoleId: Roles;
   
     @CreateDateColumn()
     createdDate: Date;

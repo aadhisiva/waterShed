@@ -4,10 +4,29 @@ import { webAppResponse, webAppResponseForLarge } from '../utils/errorHandling';
 import { AdminServices } from '../apiServices/adminServ';
 import { authenticateToken, webAuthTokenAndVersion } from '../utils/middlewares';
 import { WEBMESSAGES, WEBPAGES } from '../utils/constants';
+import * as XLSX from "xlsx";
+import multer from "multer";
+import fs from 'fs';
+import path from 'path';
 
 const adminRouter = express.Router()
 
 const adminServices = Container.get(AdminServices);
+
+interface ExcelData {
+    [key: string]: string | number;
+}
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    },
+});
+const upload = multer({ storage });
+
 
 adminRouter.post('/sendOtp', async (req, res) => {
     try {
@@ -94,7 +113,7 @@ adminRouter.post('/districtWiseTaluk', webAuthTokenAndVersion, async (req, res) 
     try {
         let body = req.body;
         let result = await adminServices.districtWiseTaluk(body);
-        return webAppResponse(res, result, body,  WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
+        return webAppResponse(res, result, body, WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
     } catch (error) {
         return webAppResponse(res, error);
     }
@@ -104,7 +123,7 @@ adminRouter.post('/talukWiseHobli', webAuthTokenAndVersion, async (req, res) => 
     try {
         let body = req.body;
         let result = await adminServices.talukWiseHobli(body);
-        return webAppResponse(res, result, body,  WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
+        return webAppResponse(res, result, body, WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
     } catch (error) {
         return webAppResponse(res, error);
     }
@@ -114,7 +133,7 @@ adminRouter.post('/subWaterSheadInHobli', webAuthTokenAndVersion, async (req, re
     try {
         let body = req.body;
         let result = await adminServices.subWaterSheadInHobli(body);
-        return webAppResponse(res, result, body,  WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
+        return webAppResponse(res, result, body, WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
     } catch (error) {
         return webAppResponse(res, error);
     }
@@ -123,7 +142,7 @@ adminRouter.post('/microWaterShedInSubWaterShed', webAuthTokenAndVersion, async 
     try {
         let body = req.body;
         let result = await adminServices.microWaterShedInSubWaterShed(body);
-        return webAppResponse(res, result, body,  WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
+        return webAppResponse(res, result, body, WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
     } catch (error) {
         return webAppResponse(res, error);
     }
@@ -132,7 +151,7 @@ adminRouter.post('/schemeSelect', webAuthTokenAndVersion, async (req, res) => {
     try {
         let body = req.body;
         let result = await adminServices.schemeSelect(body);
-        return webAppResponse(res, result, body,  WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
+        return webAppResponse(res, result, body, WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
     } catch (error) {
         return webAppResponse(res, error);
     }
@@ -142,7 +161,7 @@ adminRouter.post('/sectorInSchemes', webAuthTokenAndVersion, async (req, res) =>
         let body = req.body;
         body.UserRole = req.headers["role"]
         let result = await adminServices.sectorInSchemes(body);
-        return webAppResponse(res, result, body,  WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
+        return webAppResponse(res, result, body, WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
     } catch (error) {
         return webAppResponse(res, error);
     }
@@ -151,7 +170,7 @@ adminRouter.post('/activityInSector', webAuthTokenAndVersion, async (req, res) =
     try {
         let body = req.body;
         let result = await adminServices.activityInSector(body);
-        return webAppResponse(res, result, body,  WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
+        return webAppResponse(res, result, body, WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
     } catch (error) {
         return webAppResponse(res, error);
     }
@@ -161,79 +180,161 @@ adminRouter.post('/locations', webAuthTokenAndVersion, async (req, res) => {
     try {
         let body = req.body;
         let result = await adminServices.locations(body);
-        return webAppResponseForLarge(res, result, body,  WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
+        return webAppResponseForLarge(res, result, body, WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.GET_ALLDATA, req.headers["userid"], req.headers["role"]);
     } catch (error) {
         return webAppResponse(res, error);
     }
 });
 
 /* *********** new apis ******** */
-adminRouter.post('/departments', authenticateToken, async (req, res)=> {
-    try{
+adminRouter.post('/departments', authenticateToken, async (req, res) => {
+    try {
         let body = req.body;
         let result = await adminServices.departments(body);
-        return webAppResponseForLarge(res, result, body,  WEBPAGES.DEPARTMENT, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
-    } catch(error){
+        return webAppResponseForLarge(res, result, body, WEBPAGES.DEPARTMENT, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
         return webAppResponse(res, error);
     }
 });
 
-adminRouter.post('/addOrGetschemes', authenticateToken, async (req, res)=> {
-    try{
+adminRouter.post('/addOrGetschemes', authenticateToken, async (req, res) => {
+    try {
         let body = req.body;
         let result = await adminServices.addOrGetschemes(body);
-        return webAppResponseForLarge(res, result, body,  WEBPAGES.SCEHEMS, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
-    } catch(error){
+        return webAppResponseForLarge(res, result, body, WEBPAGES.SCEHEMS, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
         return webAppResponse(res, error);
     }
 });
 
-adminRouter.post('/addOrGetSectors', authenticateToken, async (req, res)=> {
-    try{
+adminRouter.post('/addOrGetSectors', authenticateToken, async (req, res) => {
+    try {
         let body = req.body;
         let result = await adminServices.addOrGetSectors(body);
-        return webAppResponseForLarge(res, result, body,  WEBPAGES.SECTORS, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
-    } catch(error){
+        return webAppResponseForLarge(res, result, body, WEBPAGES.SECTORS, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
         return webAppResponse(res, error);
     }
 });
 
-adminRouter.post('/addOrGetsActivity', authenticateToken, async (req, res)=> {
-    try{
+adminRouter.post('/addOrGetsActivity', authenticateToken, async (req, res) => {
+    try {
         let body = req.body;
         let result = await adminServices.addOrGetsActivity(body);
-        return webAppResponseForLarge(res, result, body,  WEBPAGES.ACTIVITY, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
-    } catch(error){
+        return webAppResponseForLarge(res, result, body, WEBPAGES.ACTIVITY, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
         return webAppResponse(res, error);
     }
 });
 
-adminRouter.post('/addOrGetRoles', authenticateToken, async (req, res)=> {
-    try{
+adminRouter.post('/addOrGetRoles', authenticateToken, async (req, res) => {
+    try {
         let body = req.body;
         let result = await adminServices.addOrGetRoles(body);
-        return webAppResponseForLarge(res, result, body,  WEBPAGES.ROLES, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
-    } catch(error){
+        return webAppResponseForLarge(res, result, body, WEBPAGES.ROLES, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
         return webAppResponse(res, error);
     }
 });
 
-adminRouter.post('/addOrGetRoles', authenticateToken, async (req, res)=> {
-    try{
+adminRouter.post('/addOrGetRoleAccess', authenticateToken, async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await adminServices.addOrGetRoleAccess(body);
+        return webAppResponseForLarge(res, result, body, WEBPAGES.ROLES, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post('/addOrGetRoles', authenticateToken, async (req, res) => {
+    try {
         let body = req.body;
         let result = await adminServices.addOrGetRoles(body);
-        return webAppResponseForLarge(res, result, body,  WEBPAGES.ROLES, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
-    } catch(error){
+        return webAppResponseForLarge(res, result, body, WEBPAGES.ROLES, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
         return webAppResponse(res, error);
     }
 });
 
-adminRouter.post("/superLogin", async (req, res) =>{
-    try{
+adminRouter.post("/superLogin", async (req, res) => {
+    try {
         let body = req.body;
         let result = await adminServices.superLogin(body);
-        return webAppResponseForLarge(res, result, body,  WEBPAGES.LOGIN_PAGE, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
-    } catch(error){
+        return webAppResponseForLarge(res, result, body, WEBPAGES.LOGIN_PAGE, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post("/uploadPrivateLand", upload.single('file'), async (req, res) => {
+    try {
+        const file = req.file;
+        if (!file) {
+            return res.status(400).send('No file uploaded');
+        }
+        // Read the file
+        // Use streams for handling large files
+        const workbook = XLSX.readFile(file.path, { cellText: false });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
+
+        // Convert data to strings if needed
+        const convertedData: Partial<ExcelData>[] = jsonData.map((row: any) => {
+            const convertedRow: Partial<ExcelData> = {};
+            Object.keys(row).forEach((key) => {
+                convertedRow[key] = String(row[key]);
+            });
+            return convertedRow;
+        });
+        let result = await adminServices.uploadPrivateLand(convertedData);
+        // Clean up the uploaded file
+        fs.unlinkSync(file.path);
+        res.send(result)
+    } catch (error) {
+        console.log("error", error)
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post("/uploadCommonLand", upload.single('file'), async (req, res) => {
+    try {
+        const file = req.file;
+        if (!file) {
+            return res.status(400).send('No file uploaded');
+        }
+        // Read the file
+        // Use streams for handling large files
+        const workbook = XLSX.readFile(file.path, { cellText: false });
+        console.log("re", workbook.SheetNames)
+        const sheetName = workbook.SheetNames[1];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
+
+        // Convert data to strings if needed
+        const convertedData: Partial<ExcelData>[] = jsonData.map((row: any) => {
+            const convertedRow: Partial<ExcelData> = {};
+            Object.keys(row).forEach((key) => {
+                convertedRow[key] = String(row[key]);
+            });
+            return convertedRow;
+        });
+        let result = await adminServices.uploadCommonLand(convertedData);
+        // Clean up the uploaded file
+        fs.unlinkSync(file.path);
+        res.send(result)
+    } catch (error) {
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post("/getDprsLand", async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await adminServices.getDprsLand(body);
+        return webAppResponseForLarge(res, result, body, WEBPAGES.LOGIN_PAGE, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
         return webAppResponse(res, error);
     }
 });
