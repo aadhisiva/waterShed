@@ -12,7 +12,7 @@ import SelectField from '../formhandle/SelectField';
 import axiosInstance from '../../axiosInstance';
 import SpinnerLoader from '../spinner/spinner';
 
-interface ActivityModalProps {
+interface RolesModalProps {
   open: boolean;
   handleClose?: any;
   handleSubmitForm?: any;
@@ -23,37 +23,62 @@ type Values = {
   [key: string]: string;
 };
 
-export default function ActivityModal({
+export default function RoleAccessModal({
   open,
   handleClose,
   handleSubmitForm,
   formData,
-}: ActivityModalProps) {
-const [departmentOptions, setDepartmentOptions] = React.useState([]);
-const [activityOption, setActivityOption] = React.useState<any>([]);
-const [sectorOptions, setSectorOptions] = React.useState<any>([]);
-const [loading, setLoading] = React.useState(false);
+}: RolesModalProps) {
+  const [roleOptions, setRoleOptions] = React.useState([]);
+  const [departmentOptions, setDepartmentOptions] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
 
   const initialValues = {
-    ActivityName: formData.ActivityName,
-    ParentId: formData.ParentId,
+    RoleId: formData.RoleId,
+    District: formData.District,
+    Taluk: formData.Taluk,
+    Hobli: formData.Hobli,
+    Village: formData.Village,
     DepartmentId: formData.DepartmentId,
-    SectorId: formData.SectorId,
   };
 
   const validationSchema = {
-    ActivityName: {
+    RoleId: {
       validate: (value: string) => {
         if (!value) {
-          return 'ActivityName is required';
+          return 'RoleName is required';
         }
         return null;
       },
     },
-    ParentId: {
+    District: {
       validate: (value: string) => {
         if (!value) {
-          return 'Parent Scheme Name is required';
+          return 'District is required';
+        }
+        return null;
+      },
+    },
+    Taluk: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'Taluk is required';
+        }
+        return null;
+      },
+    },
+    Hobli: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'Hobli is required';
+        }
+        return null;
+      },
+    },
+    Village: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'Hobli is required';
         }
         return null;
       },
@@ -62,14 +87,6 @@ const [loading, setLoading] = React.useState(false);
       validate: (value: string) => {
         if (!value) {
           return 'DepartmentName is required';
-        }
-        return null;
-      },
-    },
-    SectorId: {
-      validate: (value: string) => {
-        if (!value) {
-          return 'SectorName is required';
         }
         return null;
       },
@@ -97,13 +114,11 @@ const [loading, setLoading] = React.useState(false);
 
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/departments', { ReqType: 'Dd' });
-    let response = await axiosInstance.post('/addOrGetsActivity', { ReqType: 'Dd' });
-    let sectorsRes = await axiosInstance.post('/addOrGetSectors', { ReqType: 'Dd' });
+    let { data } = await axiosInstance.post('/addOrGetRoles', { ReqType: 'Dd' });
+    let response = await axiosInstance.post('/departments', { ReqType: 'Dd' });
     if (data?.code == 200) {
-      setDepartmentOptions(data.data);
-      setSectorOptions(sectorsRes.data.data);
-      setActivityOption([...response.data.data, ...[{value: -1, name: "NoParent"}]]);
+      setRoleOptions(data.data);
+      setDepartmentOptions(response.data.data);
       setLoading(false);
     } else {
       setLoading(false);
@@ -126,24 +141,55 @@ const [loading, setLoading] = React.useState(false);
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <Box sx={{ mb: 2, mt: 2 }}>
-              <TextFieldMU
-                name="ActivityName"
-                label="Activity Name"
-                value={values.ActivityName}
+               <SelectField
+                name="RoleId"
+                label="Role Name"
+                value={values.RoleId}
                 onChange={handleChange}
+                options={roleOptions}
                 onBlur={handleBlur}
-                error={touched.ActivityName && Boolean(errors.ActivityName)}
-                helperText={touched.ActivityName && errors.ActivityName}
+                error={touched.RoleId && Boolean(errors.RoleId)}
+                helperText={touched.RoleId && errors.RoleId}
               />
               <SelectField
-                name="ParentId"
-                label="Parent Name"
-                value={values.ParentId}
+                name="District"
+                label="District"
+                value={values.District}
                 onChange={handleChange}
-                options={activityOption}
+                options={[{value: "Yes", name: "Yes"}, {value: "No", name: "No"}]}
                 onBlur={handleBlur}
-                error={touched.ParentId && Boolean(errors.ParentId)}
-                helperText={touched.ParentId && errors.ParentId}
+                error={touched.District && Boolean(errors.District)}
+                helperText={touched.District && errors.District}
+              />
+              <SelectField
+                name="Taluk"
+                label="Taluk"
+                value={values.Taluk}
+                onChange={handleChange}
+                options={[{value: "Yes", name: "Yes"}, {value: "No", name: "No"}]}
+                onBlur={handleBlur}
+                error={touched.Taluk && Boolean(errors.Taluk)}
+                helperText={touched.Taluk && errors.Taluk}
+              />
+              <SelectField
+                name="Hobli"
+                label="Hobli"
+                value={values.Hobli}
+                onChange={handleChange}
+                options={[{value: "Yes", name: "Yes"}, {value: "No", name: "No"}]}
+                onBlur={handleBlur}
+                error={touched.Hobli && Boolean(errors.Hobli)}
+                helperText={touched.Hobli && errors.Hobli}
+              />
+              <SelectField
+                name="Village"
+                label="Village"
+                value={values.Village}
+                onChange={handleChange}
+                options={[{value: "Yes", name: "Yes"}, {value: "No", name: "No"}]}
+                onBlur={handleBlur}
+                error={touched.Village && Boolean(errors.Village)}
+                helperText={touched.Village && errors.Village}
               />
               <SelectField
                 name="DepartmentId"
@@ -154,16 +200,6 @@ const [loading, setLoading] = React.useState(false);
                 onBlur={handleBlur}
                 error={touched.DepartmentId && Boolean(errors.DepartmentId)}
                 helperText={touched.DepartmentId && errors.DepartmentId}
-              />
-              <SelectField
-                name="SectorId"
-                label="Sector Name"
-                value={values.SectorId}
-                onChange={handleChange}
-                options={sectorOptions}
-                onBlur={handleBlur}
-                error={touched.SectorId && Boolean(errors.SectorId)}
-                helperText={touched.SectorId && errors.SectorId}
               />
             </Box>
             <DialogActions>

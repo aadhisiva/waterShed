@@ -10,6 +10,7 @@ import useForm from '../formhandle/customValidation';
 import TextFieldMU from '../formhandle/TextField';
 import SelectField from '../formhandle/SelectField';
 import axiosInstance from '../../axiosInstance';
+import SpinnerLoader from '../spinner/spinner';
 
 interface SchemesModalProps {
   open: boolean;
@@ -30,6 +31,7 @@ export default function SchemesModal({
 }: SchemesModalProps) {
 const [departmentOptions, setDepartmentOptions] = React.useState([]);
 const [schemeOption, setSchemeOption] = React.useState<any>([]);
+const [roleOption, setRoleOption] = React.useState<any>([]);
 const [loading, setLoading] = React.useState(false);
 
   const initialValues = {
@@ -81,6 +83,14 @@ const [loading, setLoading] = React.useState(false);
         return null;
       },
     },
+    RoleId: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'RoleName is required';
+        }
+        return null;
+      },
+    },
   };
   const onSubmit = (values: Values) => {
     // Handle form submission logic, e.g., API call
@@ -106,9 +116,12 @@ const [loading, setLoading] = React.useState(false);
     setLoading(true);
     let { data } = await axiosInstance.post('/departments', { ReqType: 'Dd' });
     let response = await axiosInstance.post('/addOrGetschemes', { ReqType: 'Dd' });
+    let rolesRes = await axiosInstance.post('/addOrGetRoles', { ReqType: 'Dd' });
     if (data?.code == 200) {
       setDepartmentOptions(data.data);
+      setRoleOption(rolesRes.data.data);
       setSchemeOption([...response.data.data, ...[{value: -1, name: "NoParent"}]]);
+      setLoading(false);
     } else {
       setLoading(false);
       alert(data.message || 'please try again');
@@ -117,6 +130,7 @@ const [loading, setLoading] = React.useState(false);
 
   return (
     <React.Fragment>
+      <SpinnerLoader isLoading={loading} />
       <Dialog
         fullWidth={true}
         maxWidth={'sm'}
@@ -175,6 +189,16 @@ const [loading, setLoading] = React.useState(false);
                 onBlur={handleBlur}
                 error={touched.DepartmentId && Boolean(errors.DepartmentId)}
                 helperText={touched.DepartmentId && errors.DepartmentId}
+              />
+              <SelectField
+                name="RoleId"
+                label="Role Name"
+                value={values.RoleId}
+                onChange={handleChange}
+                options={departmentOptions}
+                onBlur={handleBlur}
+                error={touched.RoleId && Boolean(errors.RoleId)}
+                helperText={touched.RoleId && errors.RoleId}
               />
             </Box>
             <DialogActions>

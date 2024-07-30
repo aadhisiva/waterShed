@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axiosInstance from '../../axiosInstance';
 import RolesModal from '../../components/Modals/rolesModal';
+import SpinnerLoader from '../../components/spinner/spinner';
 
 const headCells = [
   {
@@ -13,30 +14,6 @@ const headCells = [
     numeric: false,
     disablePadding: true,
     label: 'Role Name',
-  },
-  {
-    id: 'District',
-    numeric: false,
-    disablePadding: true,
-    label: 'District',
-  },
-  {
-    id: 'Taluk',
-    numeric: false,
-    disablePadding: true,
-    label: 'Taluk',
-  },
-  {
-    id: 'Hobli',
-    numeric: false,
-    disablePadding: true,
-    label: 'Hobli',
-  },
-  {
-    id: 'Village',
-    numeric: false,
-    disablePadding: true,
-    label: 'Village',
   },
   {
     id: 'DepartmentName',
@@ -78,6 +55,7 @@ export default function Roles() {
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
+      setLoading(false);
     } else {
       setLoading(false);
       alert(data.message || 'please try again');
@@ -94,6 +72,7 @@ export default function Roles() {
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);
+      setLoading(false);
     } else {
       setOpenModal(false);
       setLoading(false);
@@ -113,6 +92,7 @@ export default function Roles() {
   return (
     <Box sx={{ padding: 2 }}>
       {renderDeoartModal}
+      <SpinnerLoader isLoading={loading} />
       <Grid
         item
         md={12}

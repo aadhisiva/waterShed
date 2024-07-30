@@ -10,6 +10,7 @@ import useForm from '../formhandle/customValidation';
 import TextFieldMU from '../formhandle/TextField';
 import SelectField from '../formhandle/SelectField';
 import axiosInstance from '../../axiosInstance';
+import SpinnerLoader from '../spinner/spinner';
 
 interface SectorsModalProps {
   open: boolean;
@@ -30,6 +31,7 @@ export default function SectorsModal({
 }: SectorsModalProps) {
 const [departmentOptions, setDepartmentOptions] = React.useState([]);
 const [sectorOption, setSectorOption] = React.useState<any>([]);
+const [schemeOptions, setSchemesOption] = React.useState<any>([]);
 const [loading, setLoading] = React.useState(false);
 
   const initialValues = {
@@ -38,6 +40,7 @@ const [loading, setLoading] = React.useState(false);
     SectorLogo: formData.SectorLogo,
     ParentId: formData.ParentId,
     DepartmentId: formData.DepartmentId,
+    SchemeId: formData.SchemeId,
   };
 
   const validationSchema = {
@@ -81,6 +84,14 @@ const [loading, setLoading] = React.useState(false);
         return null;
       },
     },
+    SchemeId: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'Scheme Name is required';
+        }
+        return null;
+      },
+    },
   };
   const onSubmit = (values: Values) => {
     // Handle form submission logic, e.g., API call
@@ -106,9 +117,12 @@ const [loading, setLoading] = React.useState(false);
     setLoading(true);
     let { data } = await axiosInstance.post('/departments', { ReqType: 'Dd' });
     let response = await axiosInstance.post('/addOrGetSectors', { ReqType: 'Dd' });
+    let SchemesRes = await axiosInstance.post('/addOrGetSchemes', { ReqType: 'Dd' });
     if (data?.code == 200) {
       setDepartmentOptions(data.data);
+      setSchemesOption(SchemesRes.data.data);
       setSectorOption([...response.data.data, ...[{value: -1, name: "NoParent"}]]);
+      setLoading(false);
     } else {
       setLoading(false);
       alert(data.message || 'please try again');
@@ -117,6 +131,7 @@ const [loading, setLoading] = React.useState(false);
 
   return (
     <React.Fragment>
+      <SpinnerLoader isLoading={loading} />
       <Dialog
         fullWidth={true}
         maxWidth={'sm'}
@@ -175,6 +190,16 @@ const [loading, setLoading] = React.useState(false);
                 onBlur={handleBlur}
                 error={touched.DepartmentId && Boolean(errors.DepartmentId)}
                 helperText={touched.DepartmentId && errors.DepartmentId}
+              />
+              <SelectField
+                name="SchemeId"
+                label="Scheme Name"
+                value={values.SchemeId}
+                onChange={handleChange}
+                options={schemeOptions}
+                onBlur={handleBlur}
+                error={touched.SchemeId && Boolean(errors.SchemeId)}
+                helperText={touched.SchemeId && errors.SchemeId}
               />
             </Box>
             <DialogActions>

@@ -5,33 +5,46 @@ import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axiosInstance from '../../axiosInstance';
-import ActivityModal from '../../components/Modals/activityModal';
+import RolesModal from '../../components/Modals/rolesModal';
 import SpinnerLoader from '../../components/spinner/spinner';
+import RoleAccessModal from '../../components/Modals/rolesAccessodal';
 
 const headCells = [
   {
-    id: 'ActivityName',
+    id: 'RoleName',
     numeric: false,
     disablePadding: true,
-    label: 'Activity Name',
+    label: 'Role Name',
+  },
+  {
+    id: 'District',
+    numeric: false,
+    disablePadding: true,
+    label: 'District',
+  },
+  {
+    id: 'Taluk',
+    numeric: false,
+    disablePadding: true,
+    label: 'Taluk',
+  },
+  {
+    id: 'Hobli',
+    numeric: false,
+    disablePadding: true,
+    label: 'Hobli',
+  },
+  {
+    id: 'Village',
+    numeric: false,
+    disablePadding: true,
+    label: 'Village',
   },
   {
     id: 'DepartmentName',
     numeric: false,
     disablePadding: true,
     label: 'Department Name',
-  },
-  {
-    id: 'ParentName',
-    numeric: false,
-    disablePadding: true,
-    label: 'Parent Activity',
-  },
-  {
-    id: 'SectorName',
-    numeric: false,
-    disablePadding: true,
-    label: 'Sector Name',
   },
   {
     id: 'Action',
@@ -46,7 +59,7 @@ interface Data {
   ParentScheme: string;
 }
 
-export default function Activity() {
+export default function RolesAccess() {
   const [tableData, setTableData] = useState([]);
   const [copyTableData, setCopyTableData] = useState([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
@@ -63,7 +76,7 @@ export default function Activity() {
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/addOrGetsActivity', { ReqType: 'Get' });
+    let { data } = await axiosInstance.post('/addOrGetRoleAccess', { ReqType: 'Get' });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -80,7 +93,7 @@ export default function Activity() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ReqType'] = 'Add';
-    let { data } = await axiosInstance.post('/addOrGetsActivity', values);
+    let { data } = await axiosInstance.post('/addOrGetRoleAccess', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);
@@ -93,7 +106,7 @@ export default function Activity() {
   };
 
   const renderDeoartModal = openModal && (
-    <ActivityModal
+    <RoleAccessModal
       open={openModal}
       formData={formData}
       handleClose={() => setOpenModal(false)}
@@ -124,7 +137,7 @@ export default function Activity() {
         rows={copyTableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
-        title='Activity'
+        title='Role Access'
       />
     </Box>
   );

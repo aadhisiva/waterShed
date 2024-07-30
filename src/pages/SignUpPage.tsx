@@ -14,6 +14,8 @@ import axiosInstance from '../axiosInstance';
 import useDisptachForAction from '../components/customHooks/useDis';
 import { userLoggedIn } from '../reducers/authReducer';
 import { useNavigate } from 'react-router-dom';
+import { LoadingButton } from '@mui/lab';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 
 function Copyright() {
   return (
@@ -51,11 +53,12 @@ export default function SigninPage() {
     Username: {
       validate: (value: string) => {
         if (!value) {
-          return 'Username is required';
+          return 'Enter Email or Mobile Number';
         }
-        const regex = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})|(^[0-9]{10})+$/;
+        const regex =
+          /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})|(^[0-9]{10})+$/;
         let checked = regex.test(value);
-        if(!checked) return "Enter Email or Mobile Number";
+        if (!checked) return 'Enter Valid Email or Mobile Number';
         return null;
       },
     },
@@ -63,10 +66,12 @@ export default function SigninPage() {
       validate: (value: string) => {
         if (!value) {
           return 'Password is required';
-        };
-        const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\-+.]).{6,20}$/;
+        }
+        const regex =
+          /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\-+.]).{6,20}$/;
         let checked = regex.test(value);
-        if(!checked) return `Password must containe one lowercase character and one uppercase character and one 
+        if (!checked)
+          return `Password must contain one lowercase character and one uppercase character and one 
         special character and password should be between 6 and 20 characters length and one digit`;
         return null;
       },
@@ -75,10 +80,14 @@ export default function SigninPage() {
   const onSubmit = async (values: Values) => {
     // Handle form submission logic, e.g., API call
     setLoading(true);
-    let { data } = await axiosInstance.post('/superLogin', { ...{ReqType: 'Add'}, ...values });
+    let { data } = await axiosInstance.post('/superLogin', {
+      ...{ ReqType: 'Add' },
+      ...values,
+    });
     if (data?.code == 200) {
-        dispatch(userLoggedIn(data.data));
-        navigate('/');
+      dispatch(userLoggedIn(data.data));
+      setLoading(false);
+      navigate('/');
     } else {
       setLoading(false);
     }
@@ -146,19 +155,22 @@ export default function SigninPage() {
                 />
               </Grid>
               <Grid item md={12}>
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-              >
-                Sign Up
-              </Button>
+                <LoadingButton
+                  color="primary"
+                  type="submit"
+                  loading={loading}
+                  loadingPosition="start"
+                  fullWidth
+                  endIcon={<LockOpenIcon />}
+                  variant="contained"
+                >
+                  <span>Save</span>
+                </LoadingButton>
               </Grid>
               <Grid container>
                 <Grid item>
                   <Link href="signin" variant="body2">
-                    {'Alreadu account is there? Sign In'}
+                    {'Already account is there? Sign In'}
                   </Link>
                 </Grid>
               </Grid>
@@ -173,38 +185,69 @@ export default function SigninPage() {
         sm={4}
         md={7}
         sx={{
-          backgroundImage: `url(${require('../assets/Images/bg_water.jpeg')})`,
-          backgroundSize: '100% 100%',
-          backgroundPosition: 'contain',
-          backgroundRepeat: 'no-repeat',
-        }}
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'column',
+          // backgroundImage: `url(${require("../assets/Images/bg_water.jpeg")})`,
+          // backgroundSize: '100% 100%',
+          // backgroundPosition: 'contain',
+          // backgroundRepeat: 'no-repeat',
+          backgroundColor: '#e1ffda',
         }}
       >
-        <Box
-          component="img"
-          sx={{
-            height: 250,
-            width: 280,
-            maxHeight: { xs: 250, md: 280 },
-            maxWidth: { xs: 250, md: 280 },
+        <Grid
+          item
+          md={12}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexDirection: 'row',
           }}
-          alt="Karnataka Logo."
-          src={require('../assets/Images/karnataka.png')}
-        />
-        <Typography
-          variant="h1"
-          sx={{
-            color: 'whitesmoke',
-          }}
-          component="h2"
         >
-          WaterShed
-        </Typography>
+          <Box
+            component="img"
+            sx={{
+              height: 200,
+              width: 200,
+              maxHeight: { xs: 250, md: 280 },
+              maxWidth: { xs: 250, md: 280 },
+            }}
+            alt="watershed Logo."
+            src={require('../assets/Images/logo.png')}
+            loading="lazy"
+          />
+          <Box
+            component="img"
+            sx={{
+              height: 180,
+              width: 200,
+              maxHeight: { xs: 250, md: 280 },
+              maxWidth: { xs: 250, md: 280 },
+            }}
+            loading="lazy"
+            alt="Karnataka Logo."
+            src={require('../assets/Images/karnataka.png')}
+          />
+        </Grid>
+        <Grid
+          item
+          md={12}
+          mt={10}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'row',
+          }}
+        >
+          <Typography
+            variant="h1"
+            sx={{
+              color: 'black',
+            }}
+            component="h2"
+          >
+            WaterShed
+          </Typography>
+        </Grid>
       </Grid>
     </Grid>
   );

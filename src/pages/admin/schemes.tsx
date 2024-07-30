@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axiosInstance from '../../axiosInstance';
 import SchemesModal from '../../components/Modals/schemesModal';
+import SpinnerLoader from '../../components/spinner/spinner';
 
 const headCells = [
   {
@@ -25,6 +26,12 @@ const headCells = [
     numeric: false,
     disablePadding: true,
     label: 'Parent Scheme',
+  },
+  {
+    id: 'RoleName',
+    numeric: false,
+    disablePadding: true,
+    label: 'Role Name',
   },
   {
     id: 'Action',
@@ -60,6 +67,7 @@ export default function Schemes() {
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
+      setLoading(false);
     } else {
       setLoading(false);
       alert(data.message || 'please try again');
@@ -76,6 +84,7 @@ export default function Schemes() {
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);
+      setLoading(false);
     } else {
       setOpenModal(false);
       setLoading(false);
@@ -95,6 +104,7 @@ export default function Schemes() {
   return (
     <Box sx={{ padding: 2 }}>
       {renderDeoartModal}
+      <SpinnerLoader isLoading={loading} />
       <Grid
         item
         md={12}

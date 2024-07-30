@@ -1,7 +1,5 @@
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
@@ -16,6 +14,8 @@ import { userLoggedIn } from '../reducers/authReducer';
 import useForm from '../components/formhandle/customValidation';
 import TextFieldMU from '../components/formhandle/TextField';
 import axiosInstance from '../axiosInstance';
+import { LoadingButton } from '@mui/lab';
+import LockOpenIcon from "@mui/icons-material/LockOpen";
 
 function Copyright() {
   return (
@@ -53,12 +53,12 @@ export default function LoginPage() {
     Username: {
       validate: (value: string) => {
         if (!value) {
-          return 'Username is required';
+          return 'Enter Valid Email or Mobile Number';
         }
         const regex =
           /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})|(^[0-9]{10})+$/;
         let checked = regex.test(value);
-        if (!checked) return 'Enter Email or Mobile Number';
+        if (!checked) return 'Enter Valid Email or Mobile Number';
         return null;
       },
     },
@@ -71,7 +71,7 @@ export default function LoginPage() {
           /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\-+.]).{6,20}$/;
         let checked = regex.test(value);
         if (!checked)
-          return `Password must containe one lowercase character and one uppercase character and one 
+          return `Password must contain one lowercase character and one uppercase character and one 
         special character and password should be between 6 and 20 characters length and one digit`;
         return null;
       },
@@ -86,6 +86,7 @@ export default function LoginPage() {
     });
     if (response?.data?.code == 200) {
       dispatch(userLoggedIn(response.data.data));
+      setLoading(false);
       navigate('/');
     } else {
       setLoading(false);
@@ -109,39 +110,70 @@ export default function LoginPage() {
         xs={false}
         sm={4}
         md={7}
-        sx={{
-          backgroundImage: `url(${require('../assets/Images/bg_water.jpeg')})`,
-          backgroundSize: '100% 100%',
-          backgroundPosition: 'contain',
-          backgroundRepeat: 'no-repeat',
-        }}
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'column',
-        }}
+        // sx={
+        //   {
+        //     backgroundImage: `url(${require("../assets/Images/bg_water.jpeg")})`,
+        //     backgroundSize: '100% 100%',
+        //     backgroundPosition: 'contain',
+        //     backgroundRepeat: 'no-repeat',
+        //   }
+        // }
       >
-        <Box
-          component="img"
-          sx={{
-            height: 250,
-            width: 280,
-            maxHeight: { xs: 250, md: 280 },
-            maxWidth: { xs: 250, md: 280 },
+        <Grid
+          item
+          md={12}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexDirection: 'row',
           }}
-          alt="Karnataka Logo."
-          src={require('../assets/Images/karnataka.png')}
-        />
-        <Typography
-          variant="h1"
-          sx={{
-            color: 'whitesmoke',
-          }}
-          component="h2"
         >
-          WaterShed
-        </Typography>
+          <Box
+            component="img"
+            sx={{
+              height: 200,
+              width: 200,
+              maxHeight: { xs: 250, md: 280 },
+              maxWidth: { xs: 250, md: 280 },
+            }}
+            alt="watershed Logo."
+            src={require('../assets/Images/logo.png')}
+            loading="lazy"
+          />
+          <Box
+            component="img"
+            sx={{
+              height: 180,
+              width: 200,
+              maxHeight: { xs: 250, md: 280 },
+              maxWidth: { xs: 250, md: 280 },
+            }}
+            loading="lazy"
+            alt="Karnataka Logo."
+            src={require('../assets/Images/karnataka.png')}
+          />
+        </Grid>
+        <Grid 
+        item 
+        md={12} 
+        mt={10}
+        style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'row',
+          }}>
+          <Typography
+            variant="h1"
+            sx={{
+              color: 'black',
+            }}
+            component="h2"
+          >
+            WaterShed
+          </Typography>
+        </Grid>
       </Grid>
       <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
         <Box
@@ -201,16 +233,23 @@ export default function LoginPage() {
                 />
               </Grid>
               <Grid item md={12}>
-                <Button
+              <LoadingButton
+                  color="primary"
                   type="submit"
+                  loading={loading}
+                  loadingPosition="start"
                   fullWidth
+                  endIcon={<LockOpenIcon />}
                   variant="contained"
-                  sx={{ mt: 3, mb: 2 }}
                 >
-                  Sign In
-                </Button>
+                  <span>Save</span>
+                </LoadingButton>
               </Grid>
-              <Grid item md={12} style={{display: 'flex', flexDirection: 'row'}}>
+              <Grid
+                item
+                md={12}
+                style={{ display: 'flex', flexDirection: 'row' }}
+              >
                 <Grid item xs>
                   <Link href="#" variant="body2">
                     Forgot password?

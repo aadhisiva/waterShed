@@ -1,37 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import EnhancedTableData from '../../components/TableData';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import DeleteIcon from '@mui/icons-material/Delete';
+import UploadIcon from '@mui/icons-material/Upload';
 import axiosInstance from '../../axiosInstance';
-import ActivityModal from '../../components/Modals/activityModal';
+import SchemesModal from '../../components/Modals/schemesModal';
 import SpinnerLoader from '../../components/spinner/spinner';
 
 const headCells = [
   {
-    id: 'ActivityName',
+    id: 'MWS Code',
     numeric: false,
     disablePadding: true,
-    label: 'Activity Name',
+    label: 'MWS Code',
   },
   {
-    id: 'DepartmentName',
+    id: 'MWS Name',
     numeric: false,
     disablePadding: true,
-    label: 'Department Name',
+    label: 'MWS Name',
   },
   {
-    id: 'ParentName',
+    id: 'Village',
     numeric: false,
     disablePadding: true,
-    label: 'Parent Activity',
+    label: 'Village',
   },
   {
-    id: 'SectorName',
+    id: 'Survey No.',
     numeric: false,
     disablePadding: true,
-    label: 'Sector Name',
+    label: 'Survey No',
+  },
+  {
+    id: 'Identification / Ownership',
+    numeric: false,
+    disablePadding: true,
+    label: 'Identification/Ownership',
+  },
+  {
+    id: 'Activity type (SWC/HORTI FORT/DLT)',
+    numeric: false,
+    disablePadding: true,
+    label: 'Activity Type',
   },
   {
     id: 'Action',
@@ -46,7 +58,7 @@ interface Data {
   ParentScheme: string;
 }
 
-export default function Activity() {
+export default function DprsCommon() {
   const [tableData, setTableData] = useState([]);
   const [copyTableData, setCopyTableData] = useState([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
@@ -63,7 +75,9 @@ export default function Activity() {
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/addOrGetsActivity', { ReqType: 'Get' });
+    let { data } = await axiosInstance.post('/getDprsLand', {
+      DataType: 'Common',
+    });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -80,7 +94,7 @@ export default function Activity() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ReqType'] = 'Add';
-    let { data } = await axiosInstance.post('/addOrGetsActivity', values);
+    let { data } = await axiosInstance.post('/addOrGetschemes', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);
@@ -91,9 +105,8 @@ export default function Activity() {
       alert(data.message || 'please try again');
     }
   };
-
   const renderDeoartModal = openModal && (
-    <ActivityModal
+    <SchemesModal
       open={openModal}
       formData={formData}
       handleClose={() => setOpenModal(false)}
@@ -101,22 +114,49 @@ export default function Activity() {
     />
   );
 
+  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    setLoading(true);
+    const selectedFile = event.target.files?.[0];
+  
+    if (!selectedFile) {
+      return alert("No file selected");
+    };
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+      const {data} = await axiosInstance.post("/uploadCommonLand", formData);
+      if (data.code == 200) {
+        await fecthIntialData();
+        alert('Data uploaded successfully');
+      } else {
+        return alert(data.message);
+      }
+      setLoading(false);
+    } catch (error) {
+        setLoading(false);
+      console.error('Error:', error);
+    }
+  };
+
+
   return (
     <Box sx={{ padding: 2 }}>
+        <SpinnerLoader isLoading={loading} />
       {renderDeoartModal}
-      <SpinnerLoader isLoading={loading} />
       <Grid
         item
         md={12}
         xs={12}
         sx={{ display: 'flex', justifyContent: 'end' }}
       >
-        <Button
+       <Button
           variant="outlined"
-          onClick={handleClickAdd}
-          startIcon={<DeleteIcon />}
+          // onClick={handleClickAdd}
+          startIcon={<UploadIcon />}
         >
-          Add New
+          Uplod XLSX {" "}
+          <input type="file" accept=".xlsx" onChange={handleFileUpload} />
         </Button>
       </Grid>
       <EnhancedTableData
@@ -124,7 +164,7 @@ export default function Activity() {
         rows={copyTableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
-        title='Activity'
+        title="Dpr's Common Land"
       />
     </Box>
   );

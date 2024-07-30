@@ -1,4 +1,4 @@
-import { ACTIVITY, DASHBOARD, DEPARTMENT, ROLES, SCHEMES, SECTORS, SUB_ACTIVITY } from "./routingPath";
+import { ACTIVITY, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, ROLES, SCHEMES, SECTORS, ROLES_ACCESS } from "./routingPath";
 import CorporateFareIcon from '@mui/icons-material/CorporateFare';
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import LocalActivityIcon from '@mui/icons-material/LocalActivity';
@@ -21,6 +21,11 @@ export const RoutingObjects = [
         path: ROLES
     },
     {
+        name: "Role Access",
+        icon: AddTaskIcon,
+        path: ROLES_ACCESS
+    },
+    {
         name: "Schemes",
         icon: LocalActivityIcon,
         path: SCHEMES
@@ -34,6 +39,16 @@ export const RoutingObjects = [
         name: "Activity",
         icon: LocalActivityIcon,
         path: ACTIVITY
+    },
+    {
+        name: "DPR'S Private Land",
+        icon: LocalActivityIcon,
+        path: DPRS_PRIVATE
+    },
+    {
+        name: "DPR'S Common Land",
+        icon: LocalActivityIcon,
+        path: DPRS_COMMON
     }
 ]
 

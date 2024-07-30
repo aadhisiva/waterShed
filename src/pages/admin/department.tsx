@@ -7,6 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DepartmentModal from '../../components/Modals/departmentModal';
 import axiosInstance from '../../axiosInstance';
 import { Snackbar } from '@mui/material';
+import SpinnerLoader from '../../components/spinner/spinner';
 
 const headCells = [
   {
@@ -51,6 +52,7 @@ export default function Department() {
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
+      setLoading(false);
     } else {
       setLoading(false);
       alert(data.message || 'please try again');
@@ -67,6 +69,7 @@ export default function Department() {
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);
+      setLoading(false);
     } else {
       setOpenModal(false);
       setLoading(false);
@@ -86,6 +89,7 @@ export default function Department() {
   return (
     <Box sx={{ padding: 2 }}>
       {renderDeoartModal}
+      <SpinnerLoader isLoading={loading} />
       <Grid
         item
         md={12}
