@@ -61,4 +61,20 @@ export class MobileServices {
         data.CreatedBy = getUserData?.UserRole +' '+ getUserData?.Name;
         return await this.mobileRepo.saveActualData(data);
     };
+    
+    async getAllSchemes(data) {
+        return await this.mobileRepo.getAllSchemes(data);
+    };
+
+    async getAllRoles() {
+        return await this.mobileRepo.getAllRoles();
+    };
+
+    async getSectors(data) {
+        return await this.mobileRepo.getSectors(data);
+    };
+
+    async getActivity(data) {
+        return await this.mobileRepo.getActivity(data);
+    };
 }

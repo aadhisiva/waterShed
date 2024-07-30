@@ -61,6 +61,46 @@ mobileRouter.post('/saveActualData', authTokenAndVersion, async (req, res) => {
     }
 });
 
+
+mobileRouter.post('/getAllSchemes', authTokenAndVersion, async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await mobileServices.getAllSchemes(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'getAllSchemes'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    }
+});
+
+mobileRouter.post('/getAllRoles', authTokenAndVersion, async (req, res) => {
+    try {
+        let result = await mobileServices.getAllRoles();
+        return mobileAppResponse(res, result, "", getRoleAndUserId(req, 'getAllRoles'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    }
+});
+
+mobileRouter.post('/getSectors', authTokenAndVersion, async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await mobileServices.getSectors(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'getSectors'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    }
+});
+
+mobileRouter.post('/getActivity', authTokenAndVersion, async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await mobileServices.getActivity(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'getActivity'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    }
+});
+
 export {
     mobileRouter
 };

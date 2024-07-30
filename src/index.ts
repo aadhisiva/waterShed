@@ -15,8 +15,7 @@ import { AppDataSource } from './db/config';
 import Logger from './loggers/winstonLogger';
 
 //controllers
-import { adminRouter, sectorRouter } from "./apiController";
-import { userRouter } from './apiController/userControl';
+import { adminRouter, sectorRouter, mobileRouter, userRouter } from "./apiController";
 
 // for accessing env variables
 dotenv.config();
@@ -61,6 +60,7 @@ app.get("/wapi/run", (req, res) => {
 app.use('/wapi/sector', sectorRouter);
 app.use('/wapi/login', userRouter);
 app.use('/wapi/admin', adminRouter);
+app.use('/wapi/mobile', mobileRouter);
 
 
 AppDataSource.initialize().then(async (connection) => {

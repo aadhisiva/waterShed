@@ -25,10 +25,10 @@ import { Sectors } from "./sectors";
     SectorId: Sectors
 
     @Column({ type: "nvarchar", length: 200 })
-    ActivityName: number;
+    ActivityName: string;
   
     @Column({ type: "int" })
-    ParentId: number;
+    ParentId: string;
   
     @CreateDateColumn()
     createdDate: Date;

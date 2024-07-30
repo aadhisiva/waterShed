@@ -1,10 +1,15 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { loginData, masterData, Versions } from '../entities';
+import { Activity, loginData, masterData, Roles, RolesAccess, Schemes, Sectors, Versions } from '../entities';
 
 
 const loginDataRepo = AppDataSource.getRepository(loginData);
 const mastersRepo = AppDataSource.getRepository(masterData);
+const schemesRepo = AppDataSource.getRepository(Schemes);
+const sectorsRepo = AppDataSource.getRepository(Sectors);
+const activityRepo = AppDataSource.getRepository(Activity);
+const rolesAccessRepo = AppDataSource.getRepository(RolesAccess);
+const rolesRepo = AppDataSource.getRepository(Roles);
 @Service()
 export class MobileRepo {
 
@@ -87,5 +92,46 @@ export class MobileRepo {
         let savingData = await "waterShedRepo";
         return savingData;
     }
+
+    async getAllSchemes(data){
+        let savingData = await schemesRepo.createQueryBuilder('scheme')
+        .select(["scheme.SchemeName as SchemeName", "scheme.SchemeLogo as SchemeLogo", "scheme.id as SchemeId"])
+        .where("scheme.RoleId = :RoleId", {RoleId: data?.RoleId})
+        .getRawMany();
+        return savingData;
+    };
+
+    async getAllRoles(){
+        let savingData = await rolesRepo.createQueryBuilder('role')
+        .select(["role.RoleName as RoleName", "role.id as RoleId"])
+        .getRawMany();
+        return savingData;
+    };
+
+    async getSectors(data){
+        let savingData = await sectorsRepo.createQueryBuilder('sec')
+        .select(["sec.SectorName as SectorName", "sec.SectorLogo as SectorLogo", "sec.id as SectorId"])
+        .where("sec.SchemeId = :SchemeId", {SchemeId: data?.SchemeId})
+        .getRawMany();
+        return savingData;
+    };
+
+    async getActivity(data){
+        let newArray = [];
+        let activityData = await activityRepo.createQueryBuilder('ac')
+        .select(["ac.ActivityName as ActivityName"])
+        .where("ac.SectorId = :SectorId and ac.ParentId = :ParentId", {SectorId: data?.SectorId, ParentId: '-1'})
+        .getRawMany();
+        let activityDataLength = activityData.length;
+        for (let i = 0; i < activityDataLength; i++) {
+            let eachActitivy = activityData[i];
+            eachActitivy['SubActivity'] = await activityRepo.createQueryBuilder('ac')
+            .select(["ac.ActivityName as ActivityName"])
+            .where("ac.ParentId = :ParentId", {ParentId: eachActitivy.ParentId})
+            .getRawMany();
+            newArray.push(eachActitivy);
+        }
+        return newArray;
+    };
 
 };
