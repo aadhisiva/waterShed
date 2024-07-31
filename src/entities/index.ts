@@ -14,3 +14,4 @@ export * from "./dprsPrivate";
 export * from "./dprsCommon";
 export * from "./sectors";
 export * from "./roles";
+export * from "./uploadImgAndVideos";

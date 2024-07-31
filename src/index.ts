@@ -56,6 +56,10 @@ app.get("/wapi/run", (req, res) => {
   res.send("running")
 })
 
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads');
+}
+
 // controllers
 app.use('/wapi/sector', sectorRouter);
 app.use('/wapi/login', userRouter);

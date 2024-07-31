@@ -14,7 +14,8 @@ import {
     Sectors,
     DprsPrivateLand,
     DprsCommonLand,
-    RolesAccess
+    RolesAccess,
+    UploadImgAndVideo
 } from "../entities"
 
 
@@ -35,6 +36,7 @@ export const entities = () => {
         Sectors,
         DprsPrivateLand,
         DprsCommonLand,
-        Roles
+        Roles,
+        UploadImgAndVideo
     ]
 }

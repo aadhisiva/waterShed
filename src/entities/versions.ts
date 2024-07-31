@@ -7,7 +7,7 @@ import {
   } from "typeorm";
   
   
-  @Entity()
+  @Entity({name: "Versions"})
   export class Versions {
   
     @PrimaryGeneratedColumn()

@@ -25,7 +25,10 @@ const storage = multer.diskStorage({
         cb(null, file.originalname);
     },
 });
-const upload = multer({ storage });
+const upload = multer({storage});
+
+const memoryStorage = multer.memoryStorage();
+const uploadImage = multer({ storage: memoryStorage });
 
 
 adminRouter.post('/sendOtp', async (req, res) => {
@@ -293,7 +296,6 @@ adminRouter.post("/uploadPrivateLand", upload.single('file'), async (req, res) =
         fs.unlinkSync(file.path);
         res.send(result)
     } catch (error) {
-        console.log("error", error)
         return webAppResponse(res, error);
     }
 });
@@ -307,7 +309,6 @@ adminRouter.post("/uploadCommonLand", upload.single('file'), async (req, res) =>
         // Read the file
         // Use streams for handling large files
         const workbook = XLSX.readFile(file.path, { cellText: false });
-        console.log("re", workbook.SheetNames)
         const sheetName = workbook.SheetNames[1];
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
@@ -338,6 +339,36 @@ adminRouter.post("/getDprsLand", async (req, res) => {
         return webAppResponse(res, error);
     }
 });
+
+adminRouter.post('/uploadImage', uploadImage.single('image') ,authenticateToken, async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).send('No file uploaded');
+        }
+        let body = {
+             ImageName: req.file.originalname,
+             ImageData: req.file.buffer,
+             UserId: req.user.userid
+        } 
+        let result = await adminServices.uploadImages(body);
+        return webAppResponseForLarge(res, result, req.file, WEBPAGES.LOGIN_PAGE, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
+        return webAppResponse(res, error);
+    };
+});
+
+adminRouter.get('/getImage/:id', async (req, res) => {
+    try {
+        const imageId = req.params.id;
+        let result:any = await adminServices.getImage(imageId);
+        res.setHeader('Content-Disposition', `inline; filename="${result.ImageName}"`);
+        res.setHeader('Content-Type', 'image/png');
+        res.send(result.ImageData);
+    } catch (error) {
+        return webAppResponse(res, error);
+    };
+});
+
 
 export {
     adminRouter

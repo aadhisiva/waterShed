@@ -4,6 +4,7 @@ import { RESPONSEMSG } from "../utils/statusCodes";
 import { OtpServices } from "../sms/smsServceResusable";
 import { loginData } from "../entities";
 import { MobileRepo } from "../apiRepository/mobileRepo";
+import jsonWebToken from "jsonwebtoken";
 
 type ObjectParam = any;
 
@@ -15,20 +16,20 @@ export class MobileServices {
     ) { };
 
     async saveLogin(data) {
-        const { Mobile, UserRole } = data;
-        if (!Mobile || !UserRole) return { code: 400 };
+        const { Mobile, RoleId } = data;
+        if (!Mobile || !RoleId) return { code: 400, message: "Provide Mobile and RoleId" };
         data.UserId = 'WS' + generateUniqueId();
         return this.mobileRepo.saveLogin(data);
     };
 
     async sendOtp(data: loginData) {
-        const { Mobile, UserRole } = data;
-        if (!Mobile || !UserRole) return { code: 400 };
+        const { Mobile, RoleId } = data;
+        if (!Mobile || !RoleId) return { code: 400 };
         let version = await this.mobileRepo.getVersionOfApp();
         data.Otp = generateOTP(4);
-        data.Token = generateRandomString(40);
+        // data.Token = generateRandomString(40);
         data.Version = version[0].Version;
-        data.TokenExpirationTime = generateEOfTTime();
+        // data.TokenExpirationTime = generateEOfTTime();
         let savedRes: ObjectParam = await this.mobileRepo.sendOtp(data);
         if (!savedRes?.code) {
             let sendSingleSms = await this.otpServices.sendOtpAsSingleSms(Mobile, data?.Otp);
@@ -36,14 +37,16 @@ export class MobileServices {
             if (sendSingleSms?.code !== 200){
                 return { code: 422, message: RESPONSEMSG.OTP_FAILED };
             } 
-            return { message: RESPONSEMSG.OTP, data: { Token: savedRes?.Token, UserId: savedRes?.UserId,  Version: savedRes?.Version, UserRole: savedRes?.UserRole } };
+            const token = jsonWebToken.sign({ UserId: savedRes.UserId, Version: savedRes?.Version, RoleId: savedRes.RoleId }, 
+                process.env.SECRET_KEY, { expiresIn: '1h' });
+            return { message: RESPONSEMSG.OTP, data: { Token: token, UserId: savedRes.UserId, Version: savedRes?.Version, RoleId: savedRes.RoleId } };
         };
         return savedRes;
     };
 
     async verifyOtp(data) {
-        const { Mobile, UserRole, Otp } = data;
-        if (!Mobile || !UserRole) return { code: 400 };
+        const { Mobile, RoleId, Otp } = data;
+        if (!Mobile || !RoleId) return { code: 400 };
         let loginUser: ObjectParam = await this.mobileRepo.fetchUser(data);
         if (loginUser?.Otp !== Otp) return { code: 422, message: RESPONSEMSG.VALIDATE_FAILED }
         return { message: RESPONSEMSG.VALIDATE, data: {} };
@@ -77,4 +80,34 @@ export class MobileServices {
     async getActivity(data) {
         return await this.mobileRepo.getActivity(data);
     };
+
+    async uploadImages(name, data){
+        let savedData = await this.mobileRepo.uploadImages(name, data);
+        let insertedId = savedData.id;
+
+        // Construct video URL
+        const imageUrl =  `http://${process.env.PRO_URL}/wapi/mobile/getImage/${insertedId}`;
+        return { insertedId: insertedId, imageUrlUrl: imageUrl};
+    }
+
+    async getImage(id){
+        let fetchData = await this.mobileRepo.getImage(id);
+        if(!fetchData) return {code: 422, message: "Image not found"};
+       return fetchData;
+    }
+
+    async uploadVideos(name, data){
+        let savedData = await this.mobileRepo.uploadVideos(name, data);
+        let insertedId = savedData.id;
+
+        // Construct video URL
+        const videoUrl =  `http://${process.env.PRO_URL}/wapi/mobile/getVideo/${insertedId}`;
+        return { insertedId: insertedId, videoUrl: videoUrl};
+    }
+
+    async getVideo(id){
+        let fetchData = await this.mobileRepo.getVideo(id);
+        if(!fetchData) return {code: 422, message: "Video not found"};
+       return fetchData;
+    }
 }

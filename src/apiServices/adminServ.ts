@@ -229,5 +229,21 @@ export class AdminServices {
         } else {
             return {code: 422, message: "Sending wrong request to server."};
         }
+    };
+
+    
+    async uploadImages(data){
+        let savedData = await this.adminRepo.uploadImages(data);
+        let insertedId = savedData.id;
+
+        // Construct video URL
+        const imageUrl =  `${process.env.PRO_URL}/wapi/admin/getImage/${insertedId}`;
+        return { insertedId: insertedId, imageUrl: imageUrl};
+    }
+
+    async getImage(id){
+        let fetchData = await this.adminRepo.getImage(id);
+        if(!fetchData) return {code: 422, message: "Image not found"};
+       return fetchData;
     }
 }

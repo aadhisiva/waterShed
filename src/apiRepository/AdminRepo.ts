@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { Activity, Departments, DprsCommonLand, DprsPrivateLand, loginData, masterData, Roles, RolesAccess, Schemes, Sectors, superAdmin, UserData, Versions } from '../entities';
+import { Activity, Departments, DprsCommonLand, DprsPrivateLand, loginData, masterData, Roles, RolesAccess, Schemes, Sectors, superAdmin, UploadImgAndVideo, UserData, Versions } from '../entities';
 import { SUPER_ADMIN } from '../utils/constants';
 import { Equal } from 'typeorm';
 
@@ -18,6 +18,7 @@ let roleAccessRepo = AppDataSource.getRepository(RolesAccess);
 let userDataRepo = AppDataSource.getRepository(UserData);
 let dprsCommonLandRepo = AppDataSource.getRepository(DprsCommonLand);
 let dprsPrivateLandRepo = AppDataSource.getRepository(DprsPrivateLand);
+let uploadImgAndVideoRepo = AppDataSource.getRepository(UploadImgAndVideo);
 
 @Service()
 export class AdminRepo {
@@ -142,7 +143,6 @@ export class AdminRepo {
 
     async sectorInSchemes(data) {
         if (!data?.code) return { code: 400 };
-        console.log("data", data)
         let findData = await sectorsRepo.createQueryBuilder('master').select(['DISTINCT master.ActivityCode as value', 'master.SectorName as name'])
             .where("master.SchemeCode = :dCode", { dCode: data?.code })
             .orderBy('master.SectorName', 'ASC').getRawMany();
@@ -151,7 +151,6 @@ export class AdminRepo {
 
     async activityInSector(data) {
         if (!data?.code) return { code: 400 };
-        console.log("data?.code",data)
         let findData = await activityRepo.createQueryBuilder('master').select(['DISTINCT master.ActivityCode as value', 'master.ActivityName as name'])
             .where("master.ActivityCode = :dCode", { dCode: data?.code }).getRawMany();
         return findData ?? [];
@@ -352,5 +351,15 @@ export class AdminRepo {
 
     async getDprsCommonLand(data) {
         return await dprsCommonLandRepo.find();
-    }
+    };
+
+    
+  async uploadImages(data) {
+    const {ImageName, ImageData, UserId} = data;
+    return await uploadImgAndVideoRepo.save({ImageData, ImageName, RecordType: 'Image', UserId})
+  }
+
+  async getImage(id) {
+    return await uploadImgAndVideoRepo.findOneBy({id: Equal(id)})
+  }
 };

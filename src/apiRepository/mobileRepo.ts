@@ -1,6 +1,7 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { Activity, loginData, masterData, Roles, RolesAccess, Schemes, Sectors, Versions } from '../entities';
+import { Activity, loginData, masterData, Roles, RolesAccess, Schemes, Sectors, UploadImgAndVideo, Versions } from '../entities';
+import { Equal } from 'typeorm';
 
 
 const loginDataRepo = AppDataSource.getRepository(loginData);
@@ -10,12 +11,12 @@ const sectorsRepo = AppDataSource.getRepository(Sectors);
 const activityRepo = AppDataSource.getRepository(Activity);
 const rolesAccessRepo = AppDataSource.getRepository(RolesAccess);
 const rolesRepo = AppDataSource.getRepository(Roles);
+const uploadImgAndVideoRepo = AppDataSource.getRepository(UploadImgAndVideo);
 @Service()
 export class MobileRepo {
 
     async saveLogin(data: loginData) {
-        let loginDb = await AppDataSource.getRepository(loginData);
-        return await loginDb.save(data);
+        return await loginDataRepo.save(data);
     };
 
     async getVersionOfApp() {
@@ -23,9 +24,9 @@ export class MobileRepo {
     };
 
     async sendOtp(data: loginData) {
-        const { Mobile, UserRole } = data;
+        const { Mobile, RoleId } = data;
         let loginDb = await AppDataSource.getRepository(loginData);
-        let findData = await loginDb.findOneBy({ Mobile, UserRole });
+        let findData = await loginDb.findOneBy({ Mobile, RoleId });
         if (!findData) return { code: 404 };
         let newData = { ...findData, ...data };
         return await loginDb.save(newData);
@@ -119,19 +120,35 @@ export class MobileRepo {
     async getActivity(data){
         let newArray = [];
         let activityData = await activityRepo.createQueryBuilder('ac')
-        .select(["ac.ActivityName as ActivityName"])
+        .select(["ac.ActivityName as ActivityName", "ac.id as ActivityId"])
         .where("ac.SectorId = :SectorId and ac.ParentId = :ParentId", {SectorId: data?.SectorId, ParentId: '-1'})
         .getRawMany();
         let activityDataLength = activityData.length;
         for (let i = 0; i < activityDataLength; i++) {
             let eachActitivy = activityData[i];
             eachActitivy['SubActivity'] = await activityRepo.createQueryBuilder('ac')
-            .select(["ac.ActivityName as ActivityName"])
+            .select(["ac.ActivityName as ActivityName", "ac.id as SubActivityId"])
             .where("ac.ParentId = :ParentId", {ParentId: eachActitivy.ParentId})
             .getRawMany();
             newArray.push(eachActitivy);
         }
         return newArray;
     };
+
+  async uploadImages(name, data) {
+    return await uploadImgAndVideoRepo.save({ImageData: name, ImageName: data, RecordType: 'Image'})
+  }
+
+  async getImage(id) {
+    return await uploadImgAndVideoRepo.findOneBy({id: Equal(id)})
+  }
+
+  async uploadVideos(name, data) {
+    return await uploadImgAndVideoRepo.save({ImageData: name, ImageName: data, RecordType: 'Video'})
+  }
+
+  async getVideo(id) {
+    return await uploadImgAndVideoRepo.findOneBy({id: Equal(id)})
+  }
 
 };

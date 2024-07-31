@@ -3,8 +3,11 @@ import {
     PrimaryGeneratedColumn,
     Column,
     CreateDateColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
+    ManyToOne,
+    JoinColumn
   } from "typeorm";
+import { Roles } from "./roles";
   
   @Entity()
   export class loginData {
@@ -17,6 +20,10 @@ import {
 
     @Column({ default: '', type: 'nvarchar', length: 100 })
     UserRole: string;
+
+    @ManyToOne(() => Roles, rl => rl.loginData)
+    @JoinColumn({name: "RoleId"})
+    RoleId: Roles;
 
     @Column({ default: '', type: 'nvarchar', length: 100 })
     Name: string;

@@ -12,6 +12,7 @@ import { Departments } from "./department";
 import { UserData } from "./userData";
 import { Schemes } from "./schemes";
 import { RolesAccess } from "./roleAccess";
+import { loginData } from "./loginData";
   
   @Entity({ name: "Roles" })
   export class Roles {
@@ -34,6 +35,9 @@ import { RolesAccess } from "./roleAccess";
 
     @OneToMany(() => RolesAccess, ra => ra.RoleId, {cascade: true, onDelete: 'CASCADE'})
     RolesAccess: RolesAccess[];
+
+    @OneToMany(() => loginData, ld => ld.RoleId, {cascade: true, onDelete: 'CASCADE'})
+    loginData: loginData[];
   
     @CreateDateColumn()
     createdDate: Date;
