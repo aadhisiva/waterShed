@@ -97,9 +97,9 @@ const [loading, setLoading] = React.useState(false);
 
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/departments', { ReqType: 'Dd' });
-    let response = await axiosInstance.post('/addOrGetsActivity', { ReqType: 'Dd' });
-    let sectorsRes = await axiosInstance.post('/addOrGetSectors', { ReqType: 'Dd' });
+    let { data } = await axiosInstance.post('departments', { ReqType: 'Dd' });
+    let response = await axiosInstance.post('addOrGetsActivity', { ReqType: 'Dd' });
+    let sectorsRes = await axiosInstance.post('addOrGetSectors', { ReqType: 'Dd' });
     if (data?.code == 200) {
       setDepartmentOptions(data.data);
       setSectorOptions(sectorsRes.data.data);

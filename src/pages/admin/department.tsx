@@ -48,7 +48,7 @@ export default function Department() {
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/departments', { ReqType: 'Get' });
+    let { data } = await axiosInstance.post('departments', { ReqType: 'Get' });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -65,7 +65,7 @@ export default function Department() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ReqType'] = 'Add';
-    let { data } = await axiosInstance.post('/departments', values);
+    let { data } = await axiosInstance.post('departments', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);

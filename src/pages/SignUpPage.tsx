@@ -80,7 +80,7 @@ export default function SigninPage() {
   const onSubmit = async (values: Values) => {
     // Handle form submission logic, e.g., API call
     setLoading(true);
-    let { data } = await axiosInstance.post('/superLogin', {
+    let { data } = await axiosInstance.post('superLogin', {
       ...{ ReqType: 'Add' },
       ...values,
     });

@@ -80,7 +80,7 @@ export default function LoginPage() {
 
   const onSubmit = async (values: Values) => {
     setLoading(true);
-    let response: any = await axiosInstance.post('/superLogin', {
+    let response: any = await axiosInstance.post('superLogin', {
       ...{ ReqType: 'Get' },
       ...values,
     });

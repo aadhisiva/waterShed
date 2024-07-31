@@ -3,7 +3,7 @@ import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 
 type ValidationSchema = {
   [key: string]: {
-    validate: (value: string) => string | null;
+    validate: (value: string | File | any) => string | File | null | any;
   };
 };
 
@@ -36,10 +36,11 @@ const useForm = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
+    const { name, value, files } = event.target;
+    const newValue: any = files ? files[0] : value;
     setValues({
       ...values,
-      [name]: value,
+      [name]: newValue,
     });
     setTouched({
       ...touched,

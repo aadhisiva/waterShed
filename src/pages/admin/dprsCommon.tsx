@@ -75,7 +75,7 @@ export default function DprsCommon() {
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/getDprsLand', {
+    let { data } = await axiosInstance.post('getDprsLand', {
       DataType: 'Common',
     });
     if (data?.code == 200) {
@@ -94,7 +94,7 @@ export default function DprsCommon() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ReqType'] = 'Add';
-    let { data } = await axiosInstance.post('/addOrGetschemes', values);
+    let { data } = await axiosInstance.post('addOrGetschemes', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);

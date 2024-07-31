@@ -51,7 +51,7 @@ export default function Roles() {
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/addOrGetRoles', { ReqType: 'Get' });
+    let { data } = await axiosInstance.post('addOrGetRoles', { ReqType: 'Get' });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -68,7 +68,7 @@ export default function Roles() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ReqType'] = 'Add';
-    let { data } = await axiosInstance.post('/addOrGetRoles', values);
+    let { data } = await axiosInstance.post('addOrGetRoles', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);

@@ -11,6 +11,7 @@ import TextFieldMU from '../formhandle/TextField';
 import SelectField from '../formhandle/SelectField';
 import axiosInstance from '../../axiosInstance';
 import SpinnerLoader from '../spinner/spinner';
+import ImageUploadMU from '../formhandle/ImageUpload';
 
 interface SectorsModalProps {
   open: boolean;
@@ -61,10 +62,10 @@ const [loading, setLoading] = React.useState(false);
       },
     },
     SectorLogo: {
-      validate: (value: string) => {
-        if (!value) {
-          return 'SectorLogo is required';
-        }
+      validate: (value: File | null) => {
+        if (!value) return 'SectorLogo is required.';
+        if (value.size > 10485760) return 'File size exceeds 10 MB.';
+        if (!['image/jpeg', 'image/png', 'application/pdf'].includes(value.type)) return 'Invalid file type. Only JPEG, PNG, and PDF files are allowed.';
         return null;
       },
     },
@@ -93,9 +94,15 @@ const [loading, setLoading] = React.useState(false);
       },
     },
   };
-  const onSubmit = (values: Values) => {
+  const onSubmit = async (values: Values) => {
     // Handle form submission logic, e.g., API call
-    values.id = formData.id;
+    setLoading(true);
+    var fileFormData = new FormData()
+    fileFormData.append('image', values.SectorLogo);
+    let {data} = await axiosInstance.post('uploadImage', fileFormData);
+    setLoading(false);
+    values.id = formData?.id;
+    values.SectorLogo = data.data.imageUrl;
     handleSubmitForm(values);
   };
 
@@ -115,9 +122,9 @@ const [loading, setLoading] = React.useState(false);
 
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/departments', { ReqType: 'Dd' });
-    let response = await axiosInstance.post('/addOrGetSectors', { ReqType: 'Dd' });
-    let SchemesRes = await axiosInstance.post('/addOrGetSchemes', { ReqType: 'Dd' });
+    let { data } = await axiosInstance.post('departments', { ReqType: 'Dd' });
+    let response = await axiosInstance.post('addOrGetSectors', { ReqType: 'Dd' });
+    let SchemesRes = await axiosInstance.post('addOrGetSchemes', { ReqType: 'Dd' });
     if (data?.code == 200) {
       setDepartmentOptions(data.data);
       setSchemesOption(SchemesRes.data.data);
@@ -162,9 +169,9 @@ const [loading, setLoading] = React.useState(false);
                 error={touched.Description && Boolean(errors.Description)}
                 helperText={touched.Description && errors.Description}
               />
-              <TextFieldMU
+               <ImageUploadMU
                 name="SectorLogo"
-                label="SectorLogo"
+                label="SchemeLogo"
                 value={values.SectorLogo}
                 onChange={handleChange}
                 onBlur={handleBlur}

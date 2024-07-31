@@ -63,7 +63,7 @@ export default function Sectors() {
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/addOrGetSectors', { ReqType: 'Get' });
+    let { data } = await axiosInstance.post('addOrGetSectors', { ReqType: 'Get' });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -80,7 +80,7 @@ export default function Sectors() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ReqType'] = 'Add';
-    let { data } = await axiosInstance.post('/addOrGetSectors', values);
+    let { data } = await axiosInstance.post('addOrGetSectors', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);

@@ -114,8 +114,8 @@ export default function RoleAccessModal({
 
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/addOrGetRoles', { ReqType: 'Dd' });
-    let response = await axiosInstance.post('/departments', { ReqType: 'Dd' });
+    let { data } = await axiosInstance.post('addOrGetRoles', { ReqType: 'Dd' });
+    let response = await axiosInstance.post('departments', { ReqType: 'Dd' });
     if (data?.code == 200) {
       setRoleOptions(data.data);
       setDepartmentOptions(response.data.data);

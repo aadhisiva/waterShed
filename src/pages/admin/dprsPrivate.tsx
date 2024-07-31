@@ -81,7 +81,7 @@ export default function DprsPrivate() {
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/getDprsLand', { DataType: 'Private' });
+    let { data } = await axiosInstance.post('getDprsLand', { DataType: 'Private' });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -98,7 +98,7 @@ export default function DprsPrivate() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['DataType'] = 'Private';
-    let { data } = await axiosInstance.post('/getDprsPrivateLand', values);
+    let { data } = await axiosInstance.post('getDprsPrivateLand', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);

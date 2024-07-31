@@ -77,7 +77,7 @@ export default function RolesModal({
 
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('/departments', { ReqType: 'Dd' });
+    let { data } = await axiosInstance.post('departments', { ReqType: 'Dd' });
     if (data?.code == 200) {
       setDepartmentOptions(data.data);
       setLoading(false);
