@@ -39,7 +39,7 @@ export class MobileServices {
             } 
             const token = jsonWebToken.sign({ UserId: savedRes.UserId, Version: savedRes?.Version, RoleId: savedRes.RoleId }, 
                 process.env.SECRET_KEY, { expiresIn: '1h' });
-            return { message: RESPONSEMSG.OTP, data: { Token: token, UserId: savedRes.UserId, Version: savedRes?.Version, RoleId: savedRes.RoleId } };
+            return { message: RESPONSEMSG.OTP, data: { Token: token, UserId: savedRes.UserId, Version: savedRes?.Version, RoleId: savedRes.RoleId, Otp: data.Otp } };
         };
         return savedRes;
     };
@@ -81,12 +81,28 @@ export class MobileServices {
         return await this.mobileRepo.getActivity(data);
     };
 
-    async uploadImages(name, data){
-        let savedData = await this.mobileRepo.uploadImages(name, data);
+    async getQuestionsBasedOnActivity(data) {
+        return await this.mobileRepo.getQuestionsBasedOnActivity(data);
+    };
+
+    async getPrivateLand(data) {
+        const {FruitId, ActivityName, SurveyNo, OwnerName} = data;
+        if(!FruitId) return {code: 400, message: "Provide FruitId or ActivityName or SurveyNo or OwnerName"}
+        return await this.mobileRepo.getPrivateLand(data);
+    };
+
+    async getCommonLand(data) {
+        const {ActivityName, SurveyNo, OwnerName} = data;
+        if(!SurveyNo) return {code: 400, message: "Provide ActivityName or SurveyNo or OwnerName"}
+        return await this.mobileRepo.getCommonLand(data);
+    };
+
+    async uploadImages(body){
+        let savedData = await this.mobileRepo.uploadImages(body);
         let insertedId = savedData.id;
 
         // Construct video URL
-        const imageUrl =  `http://${process.env.PRO_URL}/wapi/mobile/getImage/${insertedId}`;
+        const imageUrl =  `${process.env.PRO_URL}/wapi/mobile/getImage/${insertedId}`;
         return { insertedId: insertedId, imageUrlUrl: imageUrl};
     }
 
@@ -96,12 +112,12 @@ export class MobileServices {
        return fetchData;
     }
 
-    async uploadVideos(name, data){
-        let savedData = await this.mobileRepo.uploadVideos(name, data);
+    async uploadVideos(body){
+        let savedData = await this.mobileRepo.uploadVideos(body);
         let insertedId = savedData.id;
 
         // Construct video URL
-        const videoUrl =  `http://${process.env.PRO_URL}/wapi/mobile/getVideo/${insertedId}`;
+        const videoUrl =  `${process.env.PRO_URL}/wapi/mobile/getVideo/${insertedId}`;
         return { insertedId: insertedId, videoUrl: videoUrl};
     }
 

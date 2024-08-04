@@ -260,6 +260,36 @@ adminRouter.post('/addOrGetRoles', authenticateToken, async (req, res) => {
     }
 });
 
+adminRouter.post('/addOrGetQuestions', authenticateToken, async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await adminServices.addOrGetQuestions(body);
+        return webAppResponseForLarge(res, result, body, WEBPAGES.ROLES, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post('/addOrGetQuestionDropDownTypes', authenticateToken, async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await adminServices.addOrGetQuestionDropDownTypes(body);
+        return webAppResponseForLarge(res, result, body, WEBPAGES.ROLES, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post('/mapQuestionOrUpdate', authenticateToken, async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await adminServices.mapQuestionOrUpdate(body);
+        return webAppResponseForLarge(res, result, body, WEBPAGES.ROLES, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
+        return webAppResponse(res, error);
+    }
+});
+
 adminRouter.post("/superLogin", async (req, res) => {
     try {
         let body = req.body;

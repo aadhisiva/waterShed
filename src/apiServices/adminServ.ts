@@ -177,6 +177,45 @@ export class AdminServices {
         }
     };
 
+    async addOrGetQuestions(data){
+        const { ReqType } = data;
+        if(ReqType == "Add") {
+            return await this.adminRepo.addQuestion(data);
+        } else if(ReqType == "Get"){
+            return await this.adminRepo.getQuestionData();
+        } else if(ReqType == "Dd"){
+            return await this.adminRepo.getDropdownQuestions();
+        } else {
+            return {code: 422, message: "Sending wrong request to server."};
+        };
+    };
+
+    async addOrGetQuestionDropDownTypes(data){
+        const { ReqType } = data;
+        if(ReqType == "Add") {
+            return await this.adminRepo.addQuestionDropDownTypes(data);
+        } else if(ReqType == "Get"){
+            return await this.adminRepo.getQuestionDataDropDownTypes();
+        } else if(ReqType == "Dd"){
+            return await this.adminRepo.getDropdownDropDownTypes();
+        } else {
+            return {code: 422, message: "Sending wrong request to server."};
+        };
+    };
+
+    async mapQuestionOrUpdate(data){
+        const { ReqType, MappedData } = data;
+        if(ReqType == "Add") {
+            return await this.adminRepo.addMapping(MappedData);
+        } else if(ReqType == "Get"){
+            return await this.adminRepo.getMappedQuestion();
+        } else if(ReqType == "Edit"){
+            return await this.adminRepo.editMappedQuestion(data);
+        } else {
+            return {code: 422, message: "Sending wrong request to server."};
+        };
+    };
+
     async addOrGetRoleAccess(data){
         const { ReqType } = data;
         if(ReqType == "Add") {

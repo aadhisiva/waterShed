@@ -1,8 +1,10 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { Activity, Departments, DprsCommonLand, DprsPrivateLand, loginData, masterData, Roles, RolesAccess, Schemes, Sectors, superAdmin, UploadImgAndVideo, UserData, Versions } from '../entities';
+import { Activity, Departments, DprsCommonLand, DprsPrivateLand, loginData, masterData, QuestionMapping, Roles, RolesAccess, Schemes, Sectors, superAdmin, UploadImgAndVideo, UserData, Versions } from '../entities';
 import { SUPER_ADMIN } from '../utils/constants';
 import { Equal } from 'typeorm';
+import { Questions } from '../entities/questions';
+import { QuestionDropdownTypes } from '../entities/questionsDropdownsTypes';
 
 
 let superAdminRepo = AppDataSource.getRepository(superAdmin);
@@ -19,6 +21,9 @@ let userDataRepo = AppDataSource.getRepository(UserData);
 let dprsCommonLandRepo = AppDataSource.getRepository(DprsCommonLand);
 let dprsPrivateLandRepo = AppDataSource.getRepository(DprsPrivateLand);
 let uploadImgAndVideoRepo = AppDataSource.getRepository(UploadImgAndVideo);
+let questionsRepo = AppDataSource.getRepository(Questions);
+let questionDropdownTypesRepo = AppDataSource.getRepository(QuestionDropdownTypes);
+let questionMappingRepo = AppDataSource.getRepository(QuestionMapping);
 
 @Service()
 export class AdminRepo {
@@ -67,7 +72,7 @@ export class AdminRepo {
             let findData = await superAdminRepo.findOneBy({ Mobile });
             if (!findData) return { code: 404 };
             let newData = { ...findData, ...data };
-            return await superAdminRepo.save(newData);  
+            return await superAdminRepo.save(newData);
         } else {
             let loginDb = await loginDataRepo;
             let findData = await loginDb.findOneBy({ Mobile, UserRole });
@@ -197,132 +202,188 @@ export class AdminRepo {
         }
     };
 
-    async addDepartment(data){
-        let existingData = await departmentsRepo.findOneBy({id: Equal(data?.id)});
-        let newData = {...existingData, ...data};
+    async addDepartment(data) {
+        let existingData = await departmentsRepo.findOneBy({ id: Equal(data?.id) });
+        let newData = { ...existingData, ...data };
         return await departmentsRepo.save(newData);
     };
 
-    async getDepartment(data){
+    async getDepartment(data) {
         return await departmentsRepo.find();
     };
 
-    async getDropdownDepart(){
+    async getDropdownDepart() {
         return await departmentsRepo.createQueryBuilder('dd')
-        .select(["dd.id as value", "dd.DepartmentName as name"])
-        .getRawMany();
+            .select(["dd.id as value", "dd.DepartmentName as name"])
+            .getRawMany();
     };
 
-    async getDropdownSchemes(){
+    async getDropdownSchemes() {
         return await schemesRepo.createQueryBuilder('sc')
-        .select(["sc.id as value", "sc.SchemeName as name"])
-        .getRawMany();
+            .select(["sc.id as value", "sc.SchemeName as name"])
+            .getRawMany();
     };
 
-    async getDropdownSectors(){
+    async getDropdownSectors() {
         return await sectorsRepo.createQueryBuilder('sc')
-        .select(["sc.id as value", "sc.SectorName as name"])
-        .getRawMany();
+            .select(["sc.id as value", "sc.SectorName as name"])
+            .getRawMany();
     };
 
-    async getDropdownActivty(){
+    async getDropdownActivty() {
         return await activityRepo.createQueryBuilder('sc')
-        .select(["sc.id as value", "sc.ActivityName as name"])
-        .getRawMany();
+            .select(["sc.id as value", "sc.ActivityName as name"])
+            .getRawMany();
     };
 
-    async addschemes(data){
-        let existingData = await schemesRepo.findOneBy({id: Equal(data?.id)});
-        let newData = {...existingData, ...data};
+    async addschemes(data) {
+        let existingData = await schemesRepo.findOneBy({ id: Equal(data?.id) });
+        let newData = { ...existingData, ...data };
         return await schemesRepo.save(newData);
     };
 
-    async getSchemesData(){
-            return await schemesRepo.createQueryBuilder('scheme')
-                .leftJoinAndSelect(Departments, 'dp', "dp.id = scheme.DepartmentId")
-                .leftJoinAndSelect(Schemes, 'sc', 'sc.id = scheme.ParentId')
-                .leftJoinAndSelect(Roles, 'rl', 'rl.id = scheme.RoleId')
-                .select(["scheme.id as id",  "scheme.Description as Description", "rl.RoleName as RoleName", "scheme.RoleId as RoleId",
-                "scheme.SchemeName as SchemeName","scheme.SchemeLogo as SchemeLogo", "scheme.ParentId as ParentId", 'sc.SchemeName as ParentName', 
+    async getSchemesData() {
+        return await schemesRepo.createQueryBuilder('scheme')
+            .leftJoinAndSelect(Departments, 'dp', "dp.id = scheme.DepartmentId")
+            .leftJoinAndSelect(Schemes, 'sc', 'sc.id = scheme.ParentId')
+            .leftJoinAndSelect(Roles, 'rl', 'rl.id = scheme.RoleId')
+            .select(["scheme.id as id", "scheme.Description as Description", "rl.RoleName as RoleName", "scheme.RoleId as RoleId",
+                "scheme.SchemeName as SchemeName", "scheme.SchemeLogo as SchemeLogo", "scheme.ParentId as ParentId", 'sc.SchemeName as ParentName',
                 "dp.DepartmentName as DepartmentName", "scheme.DepartmentId as DepartmentId"])
-                .getRawMany();
+            .getRawMany();
     };
-    
-    async addSectors(data){
-        let existingData = await sectorsRepo.findOneBy({id: Equal(data?.id)});
-        let newData = {...existingData, ...data};
+
+    async addSectors(data) {
+        let existingData = await sectorsRepo.findOneBy({ id: Equal(data?.id) });
+        let newData = { ...existingData, ...data };
         return await sectorsRepo.save(newData);
     };
 
-    async getSectorsData(){
-            return await sectorsRepo.createQueryBuilder('sec')
-                .leftJoinAndSelect(Departments, 'dp', "dp.id = sec.DepartmentId")
-                .leftJoinAndSelect(Sectors, 'sc', 'sc.id = sec.ParentId')
-                .leftJoinAndSelect(Schemes, 'se', 'se.id = sec.SchemeId')
-                .select(["sec.id as id",  "sec.Description as Description", "se.SchemeName as SchemeName", "sec.SchemeId as SchemeId",
-                "sec.SectorName as SectorName","sec.SectorLogo as SectorLogo", "sec.ParentId as ParentId", 'sc.SectorName as ParentName', 
+    async getSectorsData() {
+        return await sectorsRepo.createQueryBuilder('sec')
+            .leftJoinAndSelect(Departments, 'dp', "dp.id = sec.DepartmentId")
+            .leftJoinAndSelect(Sectors, 'sc', 'sc.id = sec.ParentId')
+            .leftJoinAndSelect(Schemes, 'se', 'se.id = sec.SchemeId')
+            .select(["sec.id as id", "sec.Description as Description", "se.SchemeName as SchemeName", "sec.SchemeId as SchemeId",
+                "sec.SectorName as SectorName", "sec.SectorLogo as SectorLogo", "sec.ParentId as ParentId", 'sc.SectorName as ParentName',
                 "dp.DepartmentName as DepartmentName", "sec.DepartmentId as DepartmentId"])
-                .getRawMany();
+            .getRawMany();
     };
 
-    async addRoleAccess(data){
-        let existingData = await roleAccessRepo.findOneBy({id: Equal(data?.id)});
-        let newData = {...existingData, ...data};
+    async addRoleAccess(data) {
+        let existingData = await roleAccessRepo.findOneBy({ id: Equal(data?.id) });
+        let newData = { ...existingData, ...data };
         return await roleAccessRepo.save(newData);
     };
-    
-    async getDropdownRoles(){
+
+    async getDropdownRoles() {
         return await rolesRepo.createQueryBuilder('sc')
-        .select(["sc.id as value", "sc.RoleName as name"])
-        .getRawMany();
+            .select(["sc.id as value", "sc.RoleName as name"])
+            .getRawMany();
     };
 
-    async addRoles(data){
-        let existingData = await rolesRepo.findOneBy({id: Equal(data?.id)});
-        let newData = {...existingData, ...data};
+    async addRoles(data) {
+        let existingData = await rolesRepo.findOneBy({ id: Equal(data?.id) });
+        let newData = { ...existingData, ...data };
         return await rolesRepo.save(newData);
     };
 
-    async getRolesDataAccess(){
-            return await roleAccessRepo.createQueryBuilder('role')
-                .leftJoinAndSelect(Departments, 'dp', "dp.id = role.DepartmentId")
-                .leftJoinAndSelect(Roles, 'rl', "rl.id = role.RoleId")
-                .select(["role.id as id",  "rl.RoleName as RoleName", "role.RoleId as RoleId", 
-                "role.District as District","role.Taluk as Taluk", "role.Hobli as Hobli", "dp.DepartmentName as DepartmentName", 
+    async addQuestion(data) {
+        let existingData = await questionsRepo.findOneBy({ id: Equal(data?.id) });
+        let newData = { ...existingData, ...data };
+        return await questionsRepo.save(newData);
+    };
+
+    async addQuestionDropDownTypes(data) {
+        let existingData = await questionDropdownTypesRepo.findOneBy({ id: Equal(data?.id) });
+        let newData = { ...existingData, ...data };
+        return await questionDropdownTypesRepo.save(newData);
+    };
+
+    async getQuestionData() {
+        return await questionsRepo.createQueryBuilder('qu')
+            .select(["qu.id as id", "qu.Question as Question", "qu.QuestionId as QuestionId", "qu.QuestionType as QuestionType",
+                "qu.DropDownValues as DropDownValues"])
+            .getRawMany();
+    };
+
+    async getQuestionDataDropDownTypes() {
+        return await questionDropdownTypesRepo.createQueryBuilder('qu')
+            .select(["qu.id as id", "qu.DropdownName as DropdownName", "qu.DropdownType as DropdownType"])
+            .getRawMany();
+    };
+
+    async getDropdownDropDownTypes() {
+        return await questionDropdownTypesRepo.createQueryBuilder('sc')
+            .select(["DISTINCT sc.DropdownType as value", "sc.DropdownType as name"])
+            .getRawMany();
+    };
+
+    async getDropdownQuestions() {
+        return await questionsRepo.createQueryBuilder('sc')
+            .select(["sc.id as value", "sc.Question as name"])
+            .getRawMany();
+    };
+
+    async getRolesDataAccess() {
+        return await roleAccessRepo.createQueryBuilder('role')
+            .leftJoinAndSelect(Departments, 'dp', "dp.id = role.DepartmentId")
+            .leftJoinAndSelect(Roles, 'rl', "rl.id = role.RoleId")
+            .select(["role.id as id", "rl.RoleName as RoleName", "role.RoleId as RoleId",
+                "role.District as District", "role.Taluk as Taluk", "role.Hobli as Hobli", "dp.DepartmentName as DepartmentName",
                 "role.Village as Village", "role.DepartmentId as DepartmentId"])
-                .getRawMany();
+            .getRawMany();
     };
 
-    async getRolesData(){
-            return await rolesRepo.createQueryBuilder('role')
-                .leftJoinAndSelect(Departments, 'dp', "dp.id = role.DepartmentId")
-                .select(["role.id as id",  "role.RoleName as RoleName", 
+    async getRolesData() {
+        return await rolesRepo.createQueryBuilder('role')
+            .leftJoinAndSelect(Departments, 'dp', "dp.id = role.DepartmentId")
+            .select(["role.id as id", "role.RoleName as RoleName",
                 "dp.DepartmentName as DepartmentName", "role.DepartmentId as DepartmentId"])
-                .getRawMany();
+            .getRawMany();
     };
 
-    async addActivity(data){
-        let existingData = await activityRepo.findOneBy({id: Equal(data?.id)});
-        let newData = {...existingData, ...data};
+    async addActivity(data) {
+        let existingData = await activityRepo.findOneBy({ id: Equal(data?.id) });
+        let newData = { ...existingData, ...data };
         return await activityRepo.save(newData);
     };
 
-    async getActivityData(){
-        return await activityRepo.createQueryBuilder('ac')
-        .leftJoinAndSelect(Departments, 'dp', "dp.id = ac.DepartmentId")
-        .leftJoinAndSelect(Activity, 'ac1', 'ac1.id = ac.ParentId')
-        .leftJoinAndSelect(Sectors, 'sec', 'sec.id = ac.SectorId')
-        .select(["ac.id as id", "ac.ActivityName as ActivityName", "ac.ParentId as ParentId", "ac.SectorId as SectorId", "sec.SectorName as SectorName",
-            'ac1.ActivityName as ParentName', "dp.DepartmentName as DepartmentName", "ac.DepartmentId as DepartmentId"])
-        .getRawMany();
+    async addMapping(data) {
+        return await questionMappingRepo.save(data);
     };
 
-    async checkUsername(user){
-        let check = await superAdminRepo.findOneBy({Username: Equal(user)})
+    async editMappedQuestion(data) {
+        let findValue = await questionMappingRepo.findOneBy({ id: Equal(data?.id) });
+        let newData = { ...findValue, ...data };
+        return await questionMappingRepo.save(newData);
+    };
+
+    async getMappedQuestion() {
+        return await questionMappingRepo.createQueryBuilder('qm')
+            .leftJoinAndSelect(Activity, 'ac', "ac.id = qm.ActivityId")
+            .leftJoinAndSelect(Questions, 'qu', "qu.id = qm.QuestionId")
+            .select(["qm.id as id", "ac.ActivityName as ActivityName", "qu.Question as Question", "ac.id as ActivityId", "qu.id as QuestionId",
+                "qu.QuestionType as QuestionType"])
+            .getRawMany();
+    };
+
+    async getActivityData() {
+        return await activityRepo.createQueryBuilder('ac')
+            .leftJoinAndSelect(Departments, 'dp', "dp.id = ac.DepartmentId")
+            .leftJoinAndSelect(Activity, 'ac1', 'ac1.id = ac.ParentId')
+            .leftJoinAndSelect(Sectors, 'sec', 'sec.id = ac.SectorId')
+            .select(["ac.id as id", "ac.ActivityName as ActivityName", "ac.ParentId as ParentId", "ac.SectorId as SectorId", "sec.SectorName as SectorName",
+                'ac1.ActivityName as ParentName', "dp.DepartmentName as DepartmentName", "ac.DepartmentId as DepartmentId"])
+            .getRawMany();
+    };
+
+    async checkUsername(user) {
+        let check = await superAdminRepo.findOneBy({ Username: Equal(user) })
         return check;
     };
 
-    async addSuperAdminData(data){
+    async addSuperAdminData(data) {
         let check = await superAdminRepo.save(data);
         return check;
     };
@@ -332,8 +393,8 @@ export class AdminRepo {
         for (let i = 0; i < data.length; i += chunkSize) {
             const chunk = data.slice(i, i + chunkSize);
             await dprsPrivateLandRepo.save(chunk);
-          }
-        return {code: 200, message: "Uploaded Successfully.", data: {}};
+        }
+        return { code: 200, message: "Uploaded Successfully.", data: {} };
     }
 
     async uploadCommonLand(data) {
@@ -341,8 +402,8 @@ export class AdminRepo {
         for (let i = 0; i < data.length; i += chunkSize) {
             const chunk = data.slice(i, i + chunkSize);
             await dprsCommonLandRepo.save(chunk);
-          }
-       return {code: 200, message: "Uploaded Successfully.", data: {}};
+        }
+        return { code: 200, message: "Uploaded Successfully.", data: {} };
     }
 
     async getDprsPrivateLand(data) {
@@ -353,13 +414,13 @@ export class AdminRepo {
         return await dprsCommonLandRepo.find();
     };
 
-    
-  async uploadImages(data) {
-    const {ImageName, ImageData, UserId} = data;
-    return await uploadImgAndVideoRepo.save({ImageData, ImageName, RecordType: 'Image', UserId})
-  }
 
-  async getImage(id) {
-    return await uploadImgAndVideoRepo.findOneBy({id: Equal(id)})
-  }
+    async uploadImages(data) {
+        const { ImageName, ImageData, UserId } = data;
+        return await uploadImgAndVideoRepo.save({ ImageData, ImageName, RecordType: 'Image', UserId });
+    }
+
+    async getImage(id) {
+        return await uploadImgAndVideoRepo.findOneBy({ id: Equal(id) })
+    }
 };

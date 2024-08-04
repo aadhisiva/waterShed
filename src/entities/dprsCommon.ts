@@ -22,7 +22,7 @@ export class DprsCommonLand {
   "Village": string;
 
   @Column({ type: "nvarchar", length: 400, default: null })
-  "Survey No.": string;
+  "Survey No": string;
 
   @Column({ type: "nvarchar", length: 400, default: null })
   "Identification / Ownership": string;

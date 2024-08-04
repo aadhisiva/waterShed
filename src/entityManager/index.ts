@@ -15,7 +15,10 @@ import {
     DprsPrivateLand,
     DprsCommonLand,
     RolesAccess,
-    UploadImgAndVideo
+    UploadImgAndVideo,
+    QuestionDropdownTypes,
+    Questions,
+    QuestionMapping
 } from "../entities"
 
 
@@ -37,6 +40,9 @@ export const entities = () => {
         DprsPrivateLand,
         DprsCommonLand,
         Roles,
-        UploadImgAndVideo
+        UploadImgAndVideo,
+        QuestionDropdownTypes,
+        Questions,
+        QuestionMapping
     ]
 }

@@ -12,8 +12,9 @@ const mobileRouter = express.Router()
 
 const mobileServices = Container.get(MobileServices);
 
-// Multer setup
-const upload = multer(); // No storage configuration means files are not saved
+
+const memoryStorage = multer.memoryStorage();
+const uploadImage = multer({ storage: memoryStorage });
 
 mobileRouter.post('/saveLogin', async (req, res) => {
     try {
@@ -77,7 +78,7 @@ mobileRouter.post('/getAllSchemes', authenticateToken, async (req, res) => {
     }
 });
 
-mobileRouter.post('/getAllRoles', authenticateToken, async (req, res) => {
+mobileRouter.post('/getAllRoles', async (req, res) => {
     try {
         let result = await mobileServices.getAllRoles();
         return mobileAppResponse(res, result, "", getRoleAndUserId(req, 'getAllRoles'));
@@ -106,21 +107,54 @@ mobileRouter.post('/getActivity', authenticateToken, async (req, res) => {
     }
 });
 
-mobileRouter.post('/uploadImage', upload.single('image') ,authenticateToken, async (req, res) => {
+mobileRouter.post('/getQuestionsBasedOnActivity', authenticateToken, async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await mobileServices.getQuestionsBasedOnActivity(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'getQuestionsBasedOnActivity'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    }
+});
+
+mobileRouter.post('/getPrivateLand', authenticateToken, async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await mobileServices.getPrivateLand(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'getPrivateLand'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    }
+});
+
+mobileRouter.post('/getCommonLand', authenticateToken, async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await mobileServices.getCommonLand(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'getCommonLand'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    }
+});
+
+mobileRouter.post('/uploadImage', uploadImage.single('image') ,authenticateToken, async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).send('No file uploaded');
         };
-        const imageName = req.file.originalname;
-        const imageData = req.file.buffer;;
-        let result = await mobileServices.uploadImages(imageName, imageData);
+        let body = {
+            ImageName: req.file.originalname,
+            ImageData: req.file.buffer,
+            UserId: req.user.userid
+       }; 
+        let result = await mobileServices.uploadImages(body);
         return mobileAppResponse(res, result, req.file, getRoleAndUserId(req, 'uploadImage'));
     } catch (error) {
         return mobileAppResponse(res, error);
     };
 });
 
-mobileRouter.post('/getImage/:id',authenticateToken, async (req, res) => {
+mobileRouter.post('/getImage/:id', async (req, res) => {
     try {
         const imageId = req.params.id;
         let result:any = await mobileServices.getImage(imageId);
@@ -132,21 +166,24 @@ mobileRouter.post('/getImage/:id',authenticateToken, async (req, res) => {
     };
 });
 
-mobileRouter.post('/uploadVideo',  upload.single('video'), authenticateToken, async (req, res) => {
+mobileRouter.post('/uploadVideo',  uploadImage.single('video'), authenticateToken, async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).send('No file uploaded');
         }
-        const imageName = req.file.originalname;
-        const imageData = req.file.buffer;;
-        let result = await mobileServices.uploadVideos(imageName, imageData);
+        let body = {
+             ImageName: req.file.originalname,
+             ImageData: req.file.buffer,
+             UserId: req.user.userid
+        }; 
+        let result = await mobileServices.uploadVideos(body);
         return mobileAppResponse(res, result, req.file, getRoleAndUserId(req, 'uploadVideo'));
     } catch (error) {
         return mobileAppResponse(res, error);
     };
 });
 
-mobileRouter.post('/getVideo/:id', authenticateToken, async (req, res) => {
+mobileRouter.post('/getVideo/:id', async (req, res) => {
     try {
         const imageId = req.params.id;
         let result:any = await mobileServices.getVideo(imageId);
