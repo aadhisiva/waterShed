@@ -1,49 +1,26 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import EnhancedTableData from '../../components/TableData';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import UploadIcon from '@mui/icons-material/Upload';
+import DeleteIcon from '@mui/icons-material/Delete';
 import axiosInstance from '../../axiosInstance';
-import SchemesModal from '../../components/Modals/schemesModal';
+import ActivityModal from '../../components/Modals/activityModal';
 import SpinnerLoader from '../../components/spinner/spinner';
+import QuestionDropdownTypeModal from '../../components/Modals/questionsDropdownModal';
 
 const headCells = [
   {
-    id: 'MWS Code',
+    id: 'DropdownName',
     numeric: false,
     disablePadding: true,
-    label: 'MWS Code',
+    label: 'Dropdown Name',
   },
   {
-    id: 'MWS Name',
+    id: 'DropdownType',
     numeric: false,
     disablePadding: true,
-    label: 'MWS Name',
-  },
-  {
-    id: 'Village',
-    numeric: false,
-    disablePadding: true,
-    label: 'Village',
-  },
-  {
-    id: 'Survey No',
-    numeric: false,
-    disablePadding: true,
-    label: 'Survey No',
-  },
-  {
-    id: 'Identification / Ownership',
-    numeric: false,
-    disablePadding: true,
-    label: 'Identification/Ownership',
-  },
-  {
-    id: 'Activity type (SWC/HORTI FORT/DLT)',
-    numeric: false,
-    disablePadding: true,
-    label: 'Activity Type',
+    label: 'Dropdown Type',
   },
   {
     id: 'Action',
@@ -58,7 +35,7 @@ interface Data {
   ParentScheme: string;
 }
 
-export default function DprsCommon() {
+export default function QuestionDropdowns() {
   const [tableData, setTableData] = useState([]);
   const [copyTableData, setCopyTableData] = useState([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
@@ -67,6 +44,7 @@ export default function DprsCommon() {
 
   const handleClickModify = (data: Data) => {
     setOpenModal(true);
+    console.log("Data", data);
     setFormData(data);
   };
 
@@ -75,9 +53,7 @@ export default function DprsCommon() {
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('getDprsLand', {
-      DataType: 'Common',
-    });
+    let { data } = await axiosInstance.post('addOrGetQuestionDropDownTypes', { ReqType: 'Get' });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -94,7 +70,7 @@ export default function DprsCommon() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ReqType'] = 'Add';
-    let { data } = await axiosInstance.post('addOrGetschemes', values);
+    let { data } = await axiosInstance.post('addOrGetQuestionDropDownTypes', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);
@@ -103,10 +79,11 @@ export default function DprsCommon() {
       setOpenModal(false);
       setLoading(false);
       alert(data.message || 'please try again');
-    }
+    };
   };
+
   const renderDeoartModal = openModal && (
-    <SchemesModal
+    <QuestionDropdownTypeModal
       open={openModal}
       formData={formData}
       handleClose={() => setOpenModal(false)}
@@ -114,49 +91,22 @@ export default function DprsCommon() {
     />
   );
 
-  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
-    setLoading(true);
-    const selectedFile = event.target.files?.[0];
-  
-    if (!selectedFile) {
-      return alert("No file selected");
-    };
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-
-    try {
-      const {data} = await axiosInstance.post("/uploadCommonLand", formData);
-      if (data.code == 200) {
-        await fecthIntialData();
-        alert('Data uploaded successfully');
-      } else {
-        return alert(data.message);
-      }
-      setLoading(false);
-    } catch (error) {
-        setLoading(false);
-      console.error('Error:', error);
-    }
-  };
-
-
   return (
     <Box sx={{ padding: 2 }}>
-        <SpinnerLoader isLoading={loading} />
       {renderDeoartModal}
+      <SpinnerLoader isLoading={loading} />
       <Grid
         item
         md={12}
         xs={12}
         sx={{ display: 'flex', justifyContent: 'end' }}
       >
-       <Button
+        <Button
           variant="outlined"
-          // onClick={handleClickAdd}
-          startIcon={<UploadIcon />}
+          onClick={handleClickAdd}
+          startIcon={<DeleteIcon />}
         >
-          Uplod XLSX {" "}
-          <input type="file" accept=".xlsx" onChange={handleFileUpload} />
+          Add New
         </Button>
       </Grid>
       <EnhancedTableData
@@ -164,7 +114,7 @@ export default function DprsCommon() {
         rows={copyTableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
-        title="Dpr's Common Land"
+        title='Question Dropdown List'
       />
     </Box>
   );

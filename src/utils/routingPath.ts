@@ -8,3 +8,6 @@ export const DASHBOARD = "/Dashboard";
 export const DPRS_PRIVATE = "/Dprs-Private-Land";
 export const DPRS_COMMON = "/Dprs-Common-Land";
 export const ROLES_ACCESS = "/Role-Access";
+export const QUESTION_MASTER = "/Question-Master";
+export const QUESTION_DROPDOWNS = "/Question-Dropdown";
+export const ACTIVITY_MAPPING = "/Activity-SubActivity-mapping";

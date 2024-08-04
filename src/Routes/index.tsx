@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom';
 import PrivateRoute from './PrivateRoutes';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { ACTIVITY, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, ROLES, ROLES_ACCESS, SCHEMES, SECTORS } from '../utils/routingPath';
+import { ACTIVITY, ACTIVITY_MAPPING, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, QUESTION_DROPDOWNS, QUESTION_MASTER, ROLES, ROLES_ACCESS, SCHEMES, SECTORS } from '../utils/routingPath';
 
 const LoginPageLazy = lazy(() => import('../pages/LoginPage'));
 const SigninPageLazy = lazy(() => import('../pages/SignUpPage'));
@@ -21,6 +21,9 @@ const SchemesLazy = lazy(() => import('../pages/admin/schemes'));
 const DprsPrivateLazy = lazy(() => import('../pages/admin/dprsPrivate'));
 const DprsCommonLazy = lazy(() => import('../pages/admin/dprsCommon'));
 const RolesAccessLazy = lazy(() => import('../pages/admin/rolesAccess'));
+const QuestionDropdownsLazy = lazy(() => import('../pages/admin/questionDropdowns'));
+const QuestionMasterLazy = lazy(() => import('../pages/admin/questionMaster'));
+const ActivityQuestionLazy = lazy(() => import('../pages/admin/activityQuestion'));
 
 const DashboardLazy = lazy(() => import('../pages/Dashboard'));
 
@@ -39,6 +42,9 @@ export default function RoutesPro() {
           <Route path={DPRS_COMMON} Component={DprsCommonLazy} />
           <Route path={DPRS_PRIVATE} Component={DprsPrivateLazy} />
           <Route path={ROLES_ACCESS} Component={RolesAccessLazy} />
+          <Route path={QUESTION_MASTER} Component={QuestionMasterLazy} />
+          <Route path={QUESTION_DROPDOWNS} Component={QuestionDropdownsLazy} />
+          <Route path={ACTIVITY_MAPPING} Component={ActivityQuestionLazy} />
         </Route>
         <Route
           path="signin"

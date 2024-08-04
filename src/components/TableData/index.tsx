@@ -178,12 +178,12 @@ export default function EnhancedTableData({
                     key={index}
                     sx={{ cursor: 'pointer' }}
                   >
-                    {headCells.map((headCell: any) => {
+                    {headCells.map((headCell: any, index: string) => {
                       if (headCell.id == "Action") {
                         return (
                         <TableCell
                           align="center"
-                          key={labelId}
+                          key={labelId+''+index}
                           onClick={() => handleClickModify(row)}
                         >
                           <Tooltip title="Edit">
@@ -197,11 +197,11 @@ export default function EnhancedTableData({
                       return (
                         <TableCell
                         component="th"
-                        id={labelId}
+                        id={labelId+''+index}
                         scope="row"
                         padding="none"
                         align="center"
-                        key={row[headCell.id]}
+                        key={row[headCell.id]+''+index}
                       >
                         {row[headCell.id]}
                       </TableCell>
