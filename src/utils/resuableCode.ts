@@ -1,5 +1,5 @@
 import { AppDataSource } from "../db/config";
-import { MobileLogs, OtpLogs, webLogs } from "../entities";
+import { DprsCommonLand, DprsPrivateLand, MobileLogs, OtpLogs, webLogs } from "../entities";
 
 // generate random string
 export const generateRandomString = (RequiredLength) => {
@@ -88,4 +88,38 @@ export const saveMobileOtps = async (Mobile, text, response, UserId='', otp) => 
     UserId
   }
   return await AppDataSource.getRepository(OtpLogs).save(newBody);
+};
+
+
+export const checkXlsxKeysExistOrNot= (data) => {
+  let entityKeys = Object.keys(
+    AppDataSource.getRepository(DprsPrivateLand).metadata.propertiesMap,
+  ).filter(item => item !== "id" && item !== "createdDate" && item !== "updatedDate");
+  let error = false;
+  let message= "";
+  entityKeys.map(key => {
+    if(!data.hasOwnProperty(key)) {
+      error = true;
+      message = `${key} is missing in xlsx.`;
+      return {error, message};
+    };
+  });
+  return {error, message};
+};
+
+
+export const checkCommonXlsxKeysExistOrNot= (data) => {
+  let entityKeys = Object.keys(
+    AppDataSource.getRepository(DprsCommonLand).metadata.propertiesMap,
+  ).filter(item => item !== "id" && item !== "createdDate" && item !== "updatedDate");
+  let error = false;
+  let message= "";
+  entityKeys.map(key => {
+    if(!data.hasOwnProperty(key)) {
+      error = true;
+      message = `${key} is missing in xlsx.`;
+      return {error, message};
+    };
+  });
+  return {error, message};
 };

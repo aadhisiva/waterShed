@@ -8,6 +8,7 @@ import * as XLSX from "xlsx";
 import multer from "multer";
 import fs from 'fs';
 import path from 'path';
+import { checkCommonXlsxKeysExistOrNot, checkXlsxKeysExistOrNot } from '../utils/resuableCode';
 
 const adminRouter = express.Router()
 
@@ -311,8 +312,11 @@ adminRouter.post("/uploadPrivateLand", upload.single('file'), async (req, res) =
         const workbook = XLSX.readFile(file.path, { cellText: false });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
-
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: ''});
+        let findError = checkXlsxKeysExistOrNot(jsonData[0]);
+        if(findError.error){
+            return res.send({code: 422, message: findError.message, data: {}});
+        };
         // Convert data to strings if needed
         const convertedData: Partial<ExcelData>[] = jsonData.map((row: any) => {
             const convertedRow: Partial<ExcelData> = {};
@@ -341,8 +345,11 @@ adminRouter.post("/uploadCommonLand", upload.single('file'), async (req, res) =>
         const workbook = XLSX.readFile(file.path, { cellText: false });
         const sheetName = workbook.SheetNames[1];
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
-
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' });
+        let findError = checkCommonXlsxKeysExistOrNot(jsonData[0]);
+        if(findError.error){
+            return res.send({code: 422, message: findError.message, data: {}});
+        };
         // Convert data to strings if needed
         const convertedData: Partial<ExcelData>[] = jsonData.map((row: any) => {
             const convertedRow: Partial<ExcelData> = {};

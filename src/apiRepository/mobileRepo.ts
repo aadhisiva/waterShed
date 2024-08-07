@@ -158,9 +158,9 @@ export class MobileRepo {
                     .select(["qdv.DropdownName as value"])
                     .where("qdv.DropdownType = :DropdownType", { DropdownType: eachQuestion.DropDownValues })
                     .getRawMany();
+
             } else {
                 eachCloneQuestion['DropdownValues'] = [];
-                newArray.push(eachCloneQuestion);
             };
             newArray.push(eachCloneQuestion);
         };

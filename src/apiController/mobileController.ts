@@ -3,10 +3,12 @@ import express from "express";
 import { mobileAppResponse, mobileAppResponseForLarge } from '../utils/errorHandling';
 import { authenticateToken, authVersion } from '../utils/middlewares';
 import { MOBILE_MESSAGES } from '../utils/constants';
-import { getRoleAndUserId } from '../utils/resuableCode';
+import { checkXlsxKeysExistOrNot, getRoleAndUserId } from '../utils/resuableCode';
 import { MobileServices } from '../apiServices/mobileServ';
 import multer from "multer";
 import { SimpleConsoleLogger } from 'typeorm';
+import { DprsPrivateLand } from '../entities';
+import { AppDataSource } from '../db/config';
 
 const mobileRouter = express.Router()
 
@@ -112,6 +114,14 @@ mobileRouter.post('/getQuestionsBasedOnActivity', authenticateToken, async (req,
         let body = req.body;
         let result = await mobileServices.getQuestionsBasedOnActivity(body);
         return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'getQuestionsBasedOnActivity'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    }
+});
+
+mobileRouter.post('/getEntityData', async (req, res) => {
+    try {
+        res.send(checkXlsxKeysExistOrNot({}))
     } catch (error) {
         return mobileAppResponse(res, error);
     }

@@ -220,19 +220,22 @@ export class AdminRepo {
 
     async getDropdownSchemes() {
         return await schemesRepo.createQueryBuilder('sc')
-            .select(["sc.id as value", "sc.SchemeName as name"])
+            .leftJoinAndSelect(Departments, 'dp', 'dp.id = sc.DepartmentId')
+            .select(["sc.id as value", "CONCAT(sc.SchemeName,'-D-',dp.DepartmentName ) as name"])
             .getRawMany();
     };
 
     async getDropdownSectors() {
         return await sectorsRepo.createQueryBuilder('sc')
-            .select(["sc.id as value", "sc.SectorName as name"])
+            .leftJoinAndSelect(Schemes, 'se', 'se.id = sc.SchemeId')
+            .select(["sc.id as value", "CONCAT(sc.SectorName,'-SE-',se.SchemeName) as name"])
             .getRawMany();
     };
 
     async getDropdownActivty() {
         return await activityRepo.createQueryBuilder('sc')
-            .select(["sc.id as value", "sc.ActivityName as name"])
+            .leftJoinAndSelect(Sectors, 'sec', 'sec.id = sc.SectorId')
+            .select(["sc.id as value", "CONCAT(sc.ActivityName,'-SEC-',sec.SectorName) as name"])
             .getRawMany();
     };
 
