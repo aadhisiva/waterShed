@@ -77,7 +77,6 @@ export default function QuestionsModal({
   const onSubmit = (values: Values) => {
     // Handle form submission logic, e.g., API call
     values.id = formData.id;
-    console.log("values",values)
     handleSubmitForm(values);
   };
   
@@ -127,8 +126,12 @@ export default function QuestionsModal({
       name: 'Photo',
     },
     {
-      value: 'Location',
-      name: 'Location',
+      value: 'Gps',
+      name: 'Gps',
+    },
+    {
+      value: 'Date',
+      name: 'Date',
     },
   ];
 
@@ -175,7 +178,7 @@ export default function QuestionsModal({
                 error={touched.QuestionType && Boolean(errors.QuestionType)}
                 helperText={touched.QuestionType && errors.QuestionType}
               />
-              {(values.QuestionType == "DropdownFromId" || values.QuestionType == "DropdownFromApi") && (
+              {(values.QuestionType == "DropdownFromId") && (
                 <SelectField
                   name="DropDownValues"
                   label="DropDownValues"

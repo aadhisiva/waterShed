@@ -81,6 +81,26 @@ export default function QuestionDropdownTypeModal({
     {
       value: 'Seeds',
       name: 'Seeds',
+    },
+    {
+      value: 'Gender',
+      name: 'Gender',
+    },
+    {
+      value: 'CategoryGeneral',
+      name: 'CategoryGeneral',
+    },
+    {
+      value: 'StatusOfWork',
+      name: 'StatusOfWork',
+    },
+    {
+      value: 'FinancialYear',
+      name: 'FinancialYear',
+    },
+    {
+      value: 'CropsForAEP',
+      name: 'CropsForAEP',
     }
   ];
   return (

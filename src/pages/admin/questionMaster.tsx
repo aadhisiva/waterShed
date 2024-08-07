@@ -55,11 +55,12 @@ export default function QuestionMasters() {
   const [formData, setFormData] = useState({});
 
   const handleClickModify = (data: Data) => {
-    setOpenModal(true);
     setFormData(data);
+    setOpenModal(true);
   };
 
   const handleClickAdd = () => {
+    setFormData({});
     setOpenModal(true);
   };
   const fecthIntialData = async () => {
