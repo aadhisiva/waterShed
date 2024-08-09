@@ -1,5 +1,7 @@
 import { AppDataSource } from "../db/config";
 import { DprsCommonLand, DprsPrivateLand, MobileLogs, OtpLogs, webLogs } from "../entities";
+import cryptoJs from "crypto";
+import Logger from "../loggers/winstonLogger";
 
 // generate random string
 export const generateRandomString = (RequiredLength) => {
@@ -106,8 +108,6 @@ export const checkXlsxKeysExistOrNot= (data) => {
   });
   return {error, message};
 };
-
-
 export const checkCommonXlsxKeysExistOrNot= (data) => {
   let entityKeys = Object.keys(
     AppDataSource.getRepository(DprsCommonLand).metadata.propertiesMap,
@@ -122,4 +122,43 @@ export const checkCommonXlsxKeysExistOrNot= (data) => {
     };
   });
   return {error, message};
+};
+
+export const generateUniqueSubmissionId = async () => {
+  let getData = await AppDataSource.query('select top 1 MAX(id) id from WatershedData');
+  return !getData[0]?.id ? "WS0" : "WS"+getData[0]?.id;
+};
+
+// hashmac means its combination of (aadhar no, client code, sec key, etc...)
+export const HashHMACHex = (hMACKey, InputValue) => {
+  let hashHMACHex = '';
+
+  const HashHMAC = (message, hmac) => {
+      return hmac.update(message).digest();
+  };
+  const HashEncode = (hash) => {
+      return Buffer.from(hash).toString('base64');
+  };
+  try {
+      const keyByte = Buffer.from(hMACKey, 'ascii');
+      const hmacsha256 = cryptoJs.createHmac('sha256', keyByte);
+      const messageBytes = Buffer.from(InputValue, 'ascii');
+
+      const hash = HashHMAC(messageBytes, hmacsha256);
+      hashHMACHex = HashEncode(hash);
+  } catch (ex) {
+      Logger.error("Error Message: [" + ex.message.toString() + "]");
+      return ex.message;
+  }
+  return hashHMACHex;
+};
+
+
+// convert kutumba decryptData readable formate
+export const DecryptStringFromEncrypt = (key, IV, cipherText) => {
+  const buffer = Buffer.from(cipherText, 'base64');
+  const aes = cryptoJs.createDecipheriv('aes-256-cbc', key, IV);
+  let decrypted = aes.update(buffer, null, 'utf8');
+  decrypted += aes.final('utf8');
+  return decrypted;
 };

@@ -25,7 +25,7 @@ export const AppDataSource = new DataSource({
   synchronize: true,
   options: {
     encrypt: true, // For Azure SQL or if encryption is needed
-    trustServerCertificate: false // Set to true if you encounter issues with certificate validation
+    trustServerCertificate: true // Set to true if you encounter issues with certificate validation
   },
   pool: {
     max: 10, // Maximum number of connections in the pool

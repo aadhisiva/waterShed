@@ -1,5 +1,5 @@
 import { Service } from "typedi";
-import { generateEOfTTime, generateOTP, generateRandomString, generateUniqueId, saveMobileLogs, saveMobileOtps } from "../utils/resuableCode";
+import { generateEOfTTime, generateOTP, generateRandomString, generateUniqueId, generateUniqueSubmissionId, saveMobileLogs, saveMobileOtps } from "../utils/resuableCode";
 import { RESPONSEMSG } from "../utils/statusCodes";
 import { OtpServices } from "../sms/smsServceResusable";
 import { loginData } from "../entities";
@@ -96,6 +96,11 @@ export class MobileServices {
         if(!SurveyNo) return {code: 400, message: "Provide ActivityName or SurveyNo or OwnerName"}
         return await this.mobileRepo.getCommonLand(data);
     };
+
+    async saveSurveyData(data){
+       data.SubmissionId = await generateUniqueSubmissionId();
+       return await this.mobileRepo.saveSurveyData(data);
+    }
 
     async uploadImages(body){
         let savedData = await this.mobileRepo.uploadImages(body);

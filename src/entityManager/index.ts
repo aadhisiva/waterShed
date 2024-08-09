@@ -18,7 +18,8 @@ import {
     UploadImgAndVideo,
     QuestionDropdownTypes,
     Questions,
-    QuestionMapping
+    QuestionMapping,
+    WaterShedData
 } from "../entities"
 
 
@@ -43,6 +44,7 @@ export const entities = () => {
         UploadImgAndVideo,
         QuestionDropdownTypes,
         Questions,
-        QuestionMapping
+        QuestionMapping,
+        WaterShedData
     ]
 }

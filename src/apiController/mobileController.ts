@@ -147,6 +147,26 @@ mobileRouter.post('/getCommonLand', authenticateToken, async (req, res) => {
     }
 });
 
+mobileRouter.post('/getKutubaData', authenticateToken, async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await mobileServices.getCommonLand(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'getCommonLand'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    }
+});
+
+mobileRouter.post('/saveSurveyData', authenticateToken, async (req, res) => {
+    try {
+        let body = {...req.body, ...{UserId: req.user.userid}};
+        let result = await mobileServices.saveSurveyData(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'saveSurveyData'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    };
+});
+
 mobileRouter.post('/uploadImage', uploadImage.single('image') ,authenticateToken, async (req, res) => {
     try {
         if (!req.file) {

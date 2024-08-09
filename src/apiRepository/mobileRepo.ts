@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { Activity, DprsCommonLand, DprsPrivateLand, loginData, masterData, QuestionDropdownTypes, QuestionMapping, Questions, Roles, RolesAccess, Schemes, Sectors, UploadImgAndVideo, Versions } from '../entities';
+import { Activity, DprsCommonLand, DprsPrivateLand, loginData, masterData, QuestionDropdownTypes, QuestionMapping, Questions, Roles, RolesAccess, Schemes, Sectors, UploadImgAndVideo, Versions, WaterShedData } from '../entities';
 import { Brackets, Equal, ILike } from 'typeorm';
 
 
@@ -16,6 +16,7 @@ const dprsPrivateLandRepo = AppDataSource.getRepository(DprsPrivateLand);
 const dprsCommonLandRepo = AppDataSource.getRepository(DprsCommonLand);
 const questionMappingRepo = AppDataSource.getRepository(QuestionMapping);
 const questionDropdownTypesRepo = AppDataSource.getRepository(QuestionDropdownTypes);
+const waterShedDataRepo = AppDataSource.getRepository(WaterShedData);
 @Service()
 export class MobileRepo {
 
@@ -214,6 +215,11 @@ export class MobileRepo {
             totalPages,
             totalData: results
         };
+    };
+
+
+    async saveSurveyData(data){
+        return await waterShedDataRepo.save(data);
     };
 
     async uploadImages(data) {
