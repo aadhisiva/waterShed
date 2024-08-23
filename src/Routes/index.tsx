@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom';
 import PrivateRoute from './PrivateRoutes';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { ACTIVITY, ACTIVITY_MAPPING, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, QUESTION_DROPDOWNS, QUESTION_MASTER, ROLES, ROLES_ACCESS, SCHEMES, SECTORS } from '../utils/routingPath';
+import { ACTIVITY, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_HOBLI, ASSIGN_TALUK, ASSIGN_VILLAGE, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, QUESTION_DROPDOWNS, QUESTION_MASTER, ROLES, ROLES_ACCESS, SCHEMES, SECTORS } from '../utils/routingPath';
 
 const LoginPageLazy = lazy(() => import('../pages/LoginPage'));
 const SigninPageLazy = lazy(() => import('../pages/SignUpPage'));
@@ -24,6 +24,11 @@ const RolesAccessLazy = lazy(() => import('../pages/admin/rolesAccess'));
 const QuestionDropdownsLazy = lazy(() => import('../pages/admin/questionDropdowns'));
 const QuestionMasterLazy = lazy(() => import('../pages/admin/questionMaster'));
 const ActivityQuestionLazy = lazy(() => import('../pages/admin/activityQuestion'));
+
+const DistrictAssignmentLazy = lazy(() => import('../pages/assign/District'));
+const TalukAssignmentLazy = lazy(() => import('../pages/assign/Taluk'));
+const HobliAssignmentLazy = lazy(() => import('../pages/assign/Hobli'));
+const VillageAssignmentLazy = lazy(() => import('../pages/assign/Village'));
 
 const DashboardLazy = lazy(() => import('../pages/Dashboard'));
 
@@ -45,6 +50,11 @@ export default function RoutesPro() {
           <Route path={QUESTION_MASTER} Component={QuestionMasterLazy} />
           <Route path={QUESTION_DROPDOWNS} Component={QuestionDropdownsLazy} />
           <Route path={ACTIVITY_MAPPING} Component={ActivityQuestionLazy} />
+
+          <Route path={ASSIGN_DISTRICT} Component={DistrictAssignmentLazy} />
+          <Route path={ASSIGN_TALUK} Component={TalukAssignmentLazy} />
+          <Route path={ASSIGN_HOBLI} Component={HobliAssignmentLazy} />
+          <Route path={ASSIGN_VILLAGE} Component={VillageAssignmentLazy} />
         </Route>
         <Route
           path="signin"

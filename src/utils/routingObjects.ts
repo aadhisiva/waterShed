@@ -1,4 +1,4 @@
-import { ACTIVITY, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, ROLES, SCHEMES, SECTORS, ROLES_ACCESS, QUESTION_MASTER, QUESTION_DROPDOWNS, ACTIVITY_MAPPING } from "./routingPath";
+import { ACTIVITY, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, ROLES, SCHEMES, SECTORS, ROLES_ACCESS, QUESTION_MASTER, QUESTION_DROPDOWNS, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_TALUK, ASSIGN_HOBLI, ASSIGN_VILLAGE } from "./routingPath";
 import CorporateFareIcon from '@mui/icons-material/CorporateFare';
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import LocalActivityIcon from '@mui/icons-material/LocalActivity';
@@ -7,12 +7,33 @@ import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import LandscapeIcon from '@mui/icons-material/Landscape';
 import MapIcon from '@mui/icons-material/Map';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 export const RoutingObjects = [
     {
         name: "Dashboard",
         icon: DashboardIcon,
         path: DASHBOARD
+    },
+    {
+        name: "Assign District",
+        icon: AssignmentIcon,
+        path: ASSIGN_DISTRICT
+    },
+    {
+        name: "Assign Taluk",
+        icon: AssignmentIcon,
+        path: ASSIGN_TALUK
+    },
+    {
+        name: "Assign Hobli",
+        icon: AssignmentIcon,
+        path: ASSIGN_HOBLI
+    },
+    {
+        name: "Assign Village",
+        icon: AssignmentIcon,
+        path: ASSIGN_VILLAGE
     },
     {
         name: "Departments",

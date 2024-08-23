@@ -9,6 +9,7 @@ interface TextFieldProps {
     onChange?: any;
     onBlur?: any;
     error?: boolean;
+    disabled?: boolean;
     helperText?: any;
 }
 
@@ -21,6 +22,7 @@ onChange,
 onBlur,
 error,
 helperText,
+disabled
 }: TextFieldProps) {
   return (
     <TextField
@@ -34,6 +36,7 @@ helperText,
       onChange={onChange}
       onBlur={onBlur}
       error={error}
+      disabled={disabled}
       helperText={helperText}
     />
   );
