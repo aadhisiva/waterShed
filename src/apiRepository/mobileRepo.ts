@@ -1,11 +1,11 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { Activity, DprsCommonLand, DprsPrivateLand, loginData, masterData, QuestionDropdownTypes, QuestionMapping, Questions, Roles, RolesAccess, Schemes, Sectors, UploadImgAndVideo, Versions, WaterShedData } from '../entities';
+import { Activity, DprsCommonLand, DprsPrivateLand, loginData, MasterData, QuestionDropdownTypes, QuestionMapping, Questions, Roles, RolesAccess, Schemes, Sectors, UploadImgAndVideo, Versions, WaterShedData } from '../entities';
 import { Brackets, Equal, ILike } from 'typeorm';
 
 
 const loginDataRepo = AppDataSource.getRepository(loginData);
-const mastersRepo = AppDataSource.getRepository(masterData);
+const mastersRepo = AppDataSource.getRepository(MasterData);
 const schemesRepo = AppDataSource.getRepository(Schemes);
 const sectorsRepo = AppDataSource.getRepository(Sectors);
 const activityRepo = AppDataSource.getRepository(Activity);

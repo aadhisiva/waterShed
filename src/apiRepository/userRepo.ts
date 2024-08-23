@@ -1,10 +1,10 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { loginData, masterData, Versions } from '../entities';
+import { loginData, MasterData, Versions } from '../entities';
 
 
 const loginDataRepo = AppDataSource.getRepository(loginData);
-const mastersRepo = AppDataSource.getRepository(masterData);
+const mastersRepo = AppDataSource.getRepository(MasterData);
 @Service()
 export class UserRepo {
 

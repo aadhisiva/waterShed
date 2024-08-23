@@ -1,17 +1,18 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { Activity, Departments, DprsCommonLand, DprsPrivateLand, loginData, masterData, QuestionMapping, Roles, RolesAccess, Schemes, Sectors, superAdmin, UploadImgAndVideo, UserData, Versions } from '../entities';
+import { Activity, Departments, DprsCommonLand, DprsPrivateLand, loginData, MasterData, QuestionMapping, Roles, RolesAccess, Schemes, Sectors, superAdmin, UploadImgAndVideo, UserData, Versions } from '../entities';
 import { SUPER_ADMIN } from '../utils/constants';
 import { Equal } from 'typeorm';
 import { Questions } from '../entities/questions';
 import { QuestionDropdownTypes } from '../entities/questionsDropdownsTypes';
+import { AssignedMasters } from '../entities/assignedMasters';
 
 
 let superAdminRepo = AppDataSource.getRepository(superAdmin);
 let loginDataRepo = AppDataSource.getRepository(loginData);
 let schemesRepo = AppDataSource.getRepository(Schemes);
 let versionRepo = AppDataSource.getRepository(Versions);
-let mastersRepo = AppDataSource.getRepository(masterData);
+let mastersRepo = AppDataSource.getRepository(MasterData);
 let sectorsRepo = AppDataSource.getRepository(Sectors);
 let activityRepo = AppDataSource.getRepository(Activity);
 let departmentsRepo = AppDataSource.getRepository(Departments);
@@ -24,6 +25,8 @@ let uploadImgAndVideoRepo = AppDataSource.getRepository(UploadImgAndVideo);
 let questionsRepo = AppDataSource.getRepository(Questions);
 let questionDropdownTypesRepo = AppDataSource.getRepository(QuestionDropdownTypes);
 let questionMappingRepo = AppDataSource.getRepository(QuestionMapping);
+let assignedMastersRepo = AppDataSource.getRepository(AssignedMasters);
+let masterDataRepo = AppDataSource.getRepository(MasterData);
 
 @Service()
 export class AdminRepo {
@@ -100,7 +103,7 @@ export class AdminRepo {
         return findData;
     };
 
-    async allDistricts(data: masterData) {
+    async allDistricts(data: MasterData) {
         let findData = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.DistrictCode as value', 'master.DistrictName as name'])
             .orderBy('master.DistrictCode', 'ASC').getRawMany();
         return findData;
@@ -389,6 +392,104 @@ export class AdminRepo {
     async addSuperAdminData(data) {
         let check = await superAdminRepo.save(data);
         return check;
+    };
+
+    async assignmentProcess(data) {
+        let check = await assignedMastersRepo.findOneBy({id: Equal(data.id)});
+        let newData = {...check, ...data};
+        return await assignedMastersRepo.save(newData);
+    };
+
+    
+  async getDistrictsDD(data){
+      let result = await masterDataRepo.createQueryBuilder('dd')
+      .select(["DISTINCT dd.DistrictCode as value", "dd.DistrictName as name"])
+      .getRawMany();
+      return result;
+  };
+
+  async getAuthDistrictDD(data){
+    const { Mobile, ListType } = data;
+    return await masterDataRepo.createQueryBuilder('dd')
+    .innerJoinAndSelect(AssignedMasters, 'am', 'am.DistrictCode=dd.DistrictCode')
+    .select(["dd.DistrictCode as value", "dd.DistrictName as role"])
+    .where("am.Mobile = :Mobile and am.ListType = :ListType", {Mobile, ListType})
+    .getRawMany();
+  };
+  async getTalukDD(code){
+    return await masterDataRepo.createQueryBuilder('tt')
+    .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
+    .where("tt.DistrictCode = :dc", {dc: code})
+    .getRawMany();
+  };
+  async getAuthTalukDD(Mobile){
+    return await masterDataRepo.createQueryBuilder('tt')
+    .innerJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=tt.TalukCode and am.DistrictCode=tt.DistrictCode')
+    .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as role"])
+    .where("am.Mobile = :Mobile and am.ListType = :ListType", {Mobile, ListType: "Taluk"})
+    .getRawMany();
+  };
+  
+  async getGpDD(UDCode, UTCode){
+    return await masterDataRepo.createQueryBuilder('gd')
+    .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as role"])
+    .where("gd.TalukCode = :tc and gd.DistrictCode = :dc", {tc: UTCode, dc: UDCode})
+    .getRawMany();
+  };
+
+  async getAuthGpDD(Mobile){
+    return await masterDataRepo.createQueryBuilder('gd')
+    .innerJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=gd.TalukCode and am.DistrictCode=gd.DistrictCode and am.HobliCode=gd.HobliCode')
+    .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as role"])
+    .where("am.Mobile = :Mobile and am.ListType = :ListType", {Mobile, ListType: "Hobli"})
+    .getRawMany();
+  }
+  async getVillagesDD(UDCode, UTCode, UGCode){
+    return await masterDataRepo.createQueryBuilder('vd')
+    .select(["DISTINCT vd.VillageCode as value", "vd.VillageName as role"])
+    .where("vd.HobliCode = :Gp and vd.DistrictCode = :dc and vd.TalukCOde = :tc", {Gp: UGCode, dc: UDCode, tc: UTCode})
+    .getRawMany();
+  };
+
+
+    async getAssignedDistricts(){
+        return await assignedMastersRepo.createQueryBuilder('ta')
+        .leftJoinAndSelect(Roles, 'rl', 'rl.id=ta.RoleId')
+        .leftJoinAndSelect(MasterData, 'md', 'md.DistrictCode=ta.DistrictCode')
+        .select(["DISTINCT md.DistrictName DistrictName", "ta.id id", "md.DistrictCode DistrictCode", "md.DistrictNameKA DistrictNameKA", "ta.Name Name", "ta.Mobile Mobile", "rl.id RoleId",
+            "rl.RoleName RoleName", "ta.Type Type"])
+        .where("ta.ListType = :ListType", {ListType: "District"})
+        .getRawMany();
+    };
+
+    async getAssignedTaluk(){
+        return await assignedMastersRepo.createQueryBuilder('ta')
+        .innerJoinAndSelect(Roles, 'rl', 'rl.id=ta.RoleId')
+        .innerJoinAndSelect(MasterData, 'md', 'md.DistrictCode=ta.DistrictCode and md.TalukCode=ta.TalukCode')
+        .select(["md.TalukName TalukName", "md.TalukNameKA TalukNameKA", "ta.Name Name", "ta.Mobile Mobile", "rl.id RoleId",
+            "rl.RoleName RoleName", "ta.Type Type"])
+        .where("ta.ListType = :ListType", {ListType: "Taluk"})
+        .getRawMany();
+    };
+
+    async getAssignedHobli(){
+        return await assignedMastersRepo.createQueryBuilder('ta')
+        .innerJoinAndSelect(Roles, 'rl', 'rl.id=ta.RoleId')
+        .innerJoinAndSelect(MasterData, 'md', 'md.DistrictCode=ta.DistrictCode and md.TalukCode=ta.TalukCode and md.HobliCode-ta.HobliCode')
+        .select(["md.HobliName HobliName", "md.HobliNameKA HobliNameKA", "ta.Name Name", "ta.Mobile Mobile", "rl.id RoleId",
+            "rl.RoleName RoleName", "ta.Type Type"])
+        .where("ta.ListType = :ListType", {ListType: "Hobli"})
+        .getRawMany();
+    };
+
+    async getAssignedVillage(){
+        return await assignedMastersRepo.createQueryBuilder('ta')
+        .innerJoinAndSelect(Roles, 'rl', 'rl.id=ta.RoleId')
+        .innerJoinAndSelect(MasterData, 'md', 'md.DistrictCode=ta.DistrictCode and md.TalukCode=ta.TalukCode and md.HobliCode-ta.HobliCode')
+        .select(["md.HobliName HobliName", "md.HobliNameKA HobliNameKA", "ta.Name Name", "ta.Mobile Mobile", "rl.id RoleId",
+            "rl.RoleName RoleName", "ta.Type Type"])
+        .where("ta.ListType = :ListType", {ListType: "Village"})
+        .getRawMany();
     };
 
     async uploadPrivateLand(data) {

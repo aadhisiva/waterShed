@@ -19,3 +19,4 @@ export * from "./questions";
 export * from "./questionsDropdownsTypes";
 export * from "./QuestionMapping";
 export * from "./watershedData";
+export * from "./assignedMasters";

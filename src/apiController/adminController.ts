@@ -301,6 +301,36 @@ adminRouter.post("/superLogin", async (req, res) => {
     }
 });
 
+adminRouter.post("/assignmentProcess", async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await adminServices.assignmentProcess(body);
+        return webAppResponseForLarge(res, result, body, WEBPAGES.LOGIN_PAGE, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post("/getMasterDropDown", async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await adminServices.getMasterDropDown(body);
+        return webAppResponseForLarge(res, result, body, WEBPAGES.LOGIN_PAGE, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post("/getAssignedMasters", async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await adminServices.getAssignedMasters(body);
+        return webAppResponseForLarge(res, result, body, WEBPAGES.LOGIN_PAGE, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
+        return webAppResponse(res, error);
+    }
+});
+
 adminRouter.post("/uploadPrivateLand", upload.single('file'), async (req, res) => {
     try {
         const file = req.file;

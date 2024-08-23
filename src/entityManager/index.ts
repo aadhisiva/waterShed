@@ -8,7 +8,7 @@ import {
     UserData,
     Versions,
     loginData, 
-    masterData,
+    MasterData,
     superAdmin, 
     webLogs,
     Sectors,
@@ -19,7 +19,8 @@ import {
     QuestionDropdownTypes,
     Questions,
     QuestionMapping,
-    WaterShedData
+    WaterShedData,
+    AssignedMasters
 } from "../entities"
 
 
@@ -27,7 +28,7 @@ export const entities = () => {
     return [
         loginData,
         Versions,
-        masterData,
+        MasterData,
         webLogs,
         superAdmin,
         OtpLogs,
@@ -45,6 +46,7 @@ export const entities = () => {
         QuestionDropdownTypes,
         Questions,
         QuestionMapping,
-        WaterShedData
+        WaterShedData,
+        AssignedMasters
     ]
 }

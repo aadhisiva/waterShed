@@ -251,6 +251,58 @@ export class AdminServices {
         }
     };
 
+    async assignmentProcess(data){
+        const {ReqType} = data;
+        return await this.adminRepo.assignmentProcess(data);
+    };
+
+    
+    async getMasterDropDown(data) {
+        const { ReqType, UDCode, UTCode, UGCode,Mobile, loginType } = data;
+        if (!ReqType) return { code: 400, message: "Provide ReqType" };
+        if (ReqType == 1) {
+            if(loginType == "District"){
+                return await this.adminRepo.getAuthDistrictDD(data);
+            };
+            return await this.adminRepo.getDistrictsDD(data);
+        } else if (ReqType == 2) {
+            // if (!UDCode) return { code: 400, message: "Provide UDCode" };
+            if(loginType == "Taluk"){
+                return await this.adminRepo.getAuthTalukDD(Mobile);
+            };
+            return await this.adminRepo.getTalukDD(UDCode);
+        } else if (ReqType == 3) {
+            // if (!UDCode) return { code: 400, message: "Provide UDCode" };
+            // if (!UTCode) return { code: 400, message: "Provide UTCode" };
+            if(loginType == "Gp"){
+                return await this.adminRepo.getAuthGpDD(Mobile);
+            };
+            return await this.adminRepo.getGpDD(UDCode, UTCode);
+        } else if (ReqType == 4) {
+            // if (!UDCode) return { code: 400, message: "Provide UDCode" };
+            // if (!UTCode) return { code: 400, message: "Provide UTCode" };
+            // if (!UGCode) return { code: 400, message: "Provide UGCode" };
+            return await this.adminRepo.getVillagesDD(UDCode, UTCode, UGCode);
+        } else {
+            return { code: 400, message: "Your request is not found", data: {} };
+        }
+    };
+
+    async getAssignedMasters(data){
+        const {ReqType} = data;
+        if(ReqType == 1){ 
+            return await this.adminRepo.getAssignedDistricts();
+        } else if(ReqType == 2){ 
+            return await this.adminRepo.getAssignedTaluk();
+        } else if(ReqType == 3){ 
+            return await this.adminRepo.getAssignedHobli();
+        } else if(ReqType == 4){ 
+            return await this.adminRepo.getAssignedVillage();
+        } else {
+            return {code: 422, message: "Send correct formate to get response form server,", data: {}};
+        }
+    }
+
     async uploadPrivateLand(data){
         return await this.adminRepo.uploadPrivateLand(data);
     }
