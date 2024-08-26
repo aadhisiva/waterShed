@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { Activity, DprsCommonLand, DprsPrivateLand, loginData, MasterData, QuestionDropdownTypes, QuestionMapping, Questions, Roles, RolesAccess, Schemes, Sectors, UploadImgAndVideo, Versions, WaterShedData } from '../entities';
+import { Activity, AssignedMasters, DprsCommonLand, DprsPrivateLand, loginData, MasterData, QuestionDropdownTypes, QuestionMapping, Questions, Roles, RolesAccess, Schemes, Sectors, UploadImgAndVideo, Versions, WaterShedData, WatershedImgAndVideo } from '../entities';
 import { Brackets, Equal, ILike } from 'typeorm';
 
 
@@ -17,6 +17,9 @@ const dprsCommonLandRepo = AppDataSource.getRepository(DprsCommonLand);
 const questionMappingRepo = AppDataSource.getRepository(QuestionMapping);
 const questionDropdownTypesRepo = AppDataSource.getRepository(QuestionDropdownTypes);
 const waterShedDataRepo = AppDataSource.getRepository(WaterShedData);
+const masterDataRepo = AppDataSource.getRepository(MasterData);
+const assignedMastersRepo = AppDataSource.getRepository(AssignedMasters);
+const watershedImgAndVideoRepo = AppDataSource.getRepository(WatershedImgAndVideo);
 @Service()
 export class MobileRepo {
 
@@ -28,13 +31,21 @@ export class MobileRepo {
         return await AppDataSource.getRepository(Versions).find();
     };
 
-    async sendOtp(data: loginData) {
+    // async sendOtp(data: loginData) {
+    //     const { Mobile, RoleId } = data;
+    //     let loginDb = await AppDataSource.getRepository(loginData);
+    //     let findData = await loginDb.findOneBy({ Mobile, RoleId });
+    //     if (!findData) return { code: 404 };
+    //     let newData = { ...findData, ...data };
+    //     return await loginDb.save(newData);
+    // };
+
+    async sendOtp(data) {
         const { Mobile, RoleId } = data;
-        let loginDb = await AppDataSource.getRepository(loginData);
-        let findData = await loginDb.findOneBy({ Mobile, RoleId });
+        let findData = await assignedMastersRepo.findOneBy({ Mobile, RoleId });
         if (!findData) return { code: 404 };
         let newData = { ...findData, ...data };
-        return await loginDb.save(newData);
+        return await assignedMastersRepo.save(newData);
     };
 
     async fetchUser(data: loginData) {
@@ -169,16 +180,22 @@ export class MobileRepo {
     };
 
     async getPrivateLand(data) {
-        const { FruitId, ActivityName, SurveyNo, OwnerName, Page = 1, PageSize = 20 } = data;
+        const { Village, Page = 1, PageSize = 20 } = data;
         const page = Page; // Example: current page number
         const pageSize = PageSize; // Example: number of records per page
+        // const [results, total] = await dprsPrivateLandRepo.createQueryBuilder('dprs')
+        //     .where('dprs."Fruit ID" = :fruitId', { fruitId: FruitId })
+        //     .where(new Brackets(qb => {
+        //         qb.where('dprs."Survey hissa" LIKE :surveyNo', { surveyNo: `%${SurveyNo}%` })
+        //             .orWhere('dprs."Owner Name" LIKE :owner', { owner: `%${OwnerName}%` })
+        //             .orWhere('dprs."SWC Farmer Requirement" = :activityName', { activityName: ActivityName });
+        //     }))
+        //     .orderBy('dprs."id"', 'ASC') // Make sure to use an appropriate column for ordering
+        //     .skip((page - 1) * pageSize)
+        //     .take(pageSize)
+        //     .getManyAndCount();
         const [results, total] = await dprsPrivateLandRepo.createQueryBuilder('dprs')
-            .where('dprs."Fruit ID" = :fruitId', { fruitId: FruitId })
-            .where(new Brackets(qb => {
-                qb.where('dprs."Survey hissa" LIKE :surveyNo', { surveyNo: `%${SurveyNo}%` })
-                    .orWhere('dprs."Owner Name" LIKE :owner', { owner: `%${OwnerName}%` })
-                    .orWhere('dprs."SWC Farmer Requirement" = :activityName', { activityName: ActivityName });
-            }))
+            .where('dprs.Village = :Village', { Village: Village })
             .orderBy('dprs."id"', 'ASC') // Make sure to use an appropriate column for ordering
             .skip((page - 1) * pageSize)
             .take(pageSize)
@@ -195,15 +212,11 @@ export class MobileRepo {
     };
 
     async getCommonLand(data) {
-        const { ActivityName, SurveyNo, OwnerName, Page = 1, PageSize = 20 } = data;
+        const { Village, Page = 1, PageSize = 20 } = data;
         const page = Page; // Example: current page number
         const pageSize = PageSize; // Example: number of records per page
         let [results, total]: any = await dprsCommonLandRepo.createQueryBuilder('dprs')
-            .where(new Brackets(qb => {
-                qb.where('dprs."Survey No" LIKE :surveyNo', { surveyNo: `%${SurveyNo}%` })
-                    .orWhere('dprs."Identification / Ownership" ILIKE :ownerName', { ownerName: `%${OwnerName}%` })
-                    .orWhere('dprs."Activity type (SWC/HORTI FORT/DLT)" = :activityName', { activityName: ActivityName });
-            }))
+            .where('dprs.Village = :Village', { Village: Village })
             .skip((page - 1) * pageSize) // Skip the results for the previous pages
             .take(pageSize) // Limit the number of results per page
             .getManyAndCount();
@@ -218,8 +231,43 @@ export class MobileRepo {
     };
 
 
-    async saveSurveyData(data){
+    async saveSurveyData(data) {
         return await waterShedDataRepo.save(data);
+    };
+
+    async saveSurveyImages(data) {
+        return await watershedImgAndVideoRepo.save(data);
+    };
+
+    async retriveDistrictWithCodes() {
+        return await masterDataRepo.createQueryBuilder('md')
+            .select("DISTINCT DistrictCode, DistrictName")
+            .getRawMany();
+    };
+
+    async retriveOnlyDistrict(code) {
+        return await masterDataRepo.createQueryBuilder('md')
+            .select("DISTINCT DistrictCode, DistrictName")
+            .where("md.DistrictCode= :id", { id: code })
+            .getRawMany();
+    };
+    async retriveOnlyTaluks(code) {
+        return await masterDataRepo.createQueryBuilder('md')
+            .select("DISTINCT TalukCode, TalukName")
+            .where("md.DistrictCode= :id", { id: code })
+            .getRawMany();
+    };
+    async retriveOnlyHobli(dcode, tcode) {
+        return await masterDataRepo.createQueryBuilder('md')
+            .select("DISTINCT HobliCode, HobliName")
+            .where("md.TalukCode= :id and md.DistrictCode = :dcode", { id: tcode, dcode })
+            .getRawMany();
+    };
+    async retriveOnlyVillages(dcode, tcode, hcode) {
+        return await masterDataRepo.createQueryBuilder('md')
+            .select("DISTINCT VillageCode, VillageName")
+            .where("md.TalukCode= :id and md.DistrictCode = :dcode and md.HobliCode= :hcode", { id: tcode, dcode, hcode })
+            .getRawMany();
     };
 
     async uploadImages(data) {

@@ -20,3 +20,4 @@ export * from "./questionsDropdownsTypes";
 export * from "./QuestionMapping";
 export * from "./watershedData";
 export * from "./assignedMasters";
+export * from "./wsImagesndVideos";

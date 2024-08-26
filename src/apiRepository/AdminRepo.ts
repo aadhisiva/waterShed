@@ -401,9 +401,10 @@ export class AdminRepo {
     };
 
     
-  async getDistrictsDD(data){
+  async getDistrictsDD(Type){
       let result = await masterDataRepo.createQueryBuilder('dd')
       .select(["DISTINCT dd.DistrictCode as value", "dd.DistrictName as name"])
+      .where("dd.Type = :Type", {Type})
       .getRawMany();
       return result;
   };
@@ -412,42 +413,42 @@ export class AdminRepo {
     const { Mobile, ListType } = data;
     return await masterDataRepo.createQueryBuilder('dd')
     .innerJoinAndSelect(AssignedMasters, 'am', 'am.DistrictCode=dd.DistrictCode')
-    .select(["dd.DistrictCode as value", "dd.DistrictName as role"])
+    .select(["dd.DistrictCode as value", "dd.DistrictName as name"])
     .where("am.Mobile = :Mobile and am.ListType = :ListType", {Mobile, ListType})
     .getRawMany();
   };
-  async getTalukDD(code){
+  async getTalukDD(code, Type){
     return await masterDataRepo.createQueryBuilder('tt')
     .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
-    .where("tt.DistrictCode = :dc", {dc: code})
+    .where("tt.DistrictCode = :dc and tt.Type = :Type", {dc: code, Type})
     .getRawMany();
   };
   async getAuthTalukDD(Mobile){
     return await masterDataRepo.createQueryBuilder('tt')
     .innerJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=tt.TalukCode and am.DistrictCode=tt.DistrictCode')
-    .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as role"])
+    .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
     .where("am.Mobile = :Mobile and am.ListType = :ListType", {Mobile, ListType: "Taluk"})
     .getRawMany();
   };
   
-  async getGpDD(UDCode, UTCode){
+  async getHobliDD(UDCode, UTCode, Type){
     return await masterDataRepo.createQueryBuilder('gd')
-    .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as role"])
-    .where("gd.TalukCode = :tc and gd.DistrictCode = :dc", {tc: UTCode, dc: UDCode})
+    .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as name"])
+    .where("gd.TalukCode = :tc and gd.DistrictCode = :dc and gd.Type = :Type", {tc: UTCode, dc: UDCode, Type})
     .getRawMany();
   };
 
   async getAuthGpDD(Mobile){
     return await masterDataRepo.createQueryBuilder('gd')
     .innerJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=gd.TalukCode and am.DistrictCode=gd.DistrictCode and am.HobliCode=gd.HobliCode')
-    .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as role"])
+    .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as name"])
     .where("am.Mobile = :Mobile and am.ListType = :ListType", {Mobile, ListType: "Hobli"})
     .getRawMany();
   }
-  async getVillagesDD(UDCode, UTCode, UGCode){
+  async getVillagesDD(UDCode, UTCode, UHCode, Type){
     return await masterDataRepo.createQueryBuilder('vd')
-    .select(["DISTINCT vd.VillageCode as value", "vd.VillageName as role"])
-    .where("vd.HobliCode = :Gp and vd.DistrictCode = :dc and vd.TalukCOde = :tc", {Gp: UGCode, dc: UDCode, tc: UTCode})
+    .select(["DISTINCT vd.VillageCode as value", "vd.VillageName as name"])
+    .where("vd.HobliCode = :hc and vd.DistrictCode = :dc and vd.TalukCOde = :tc and vd.Type = :Type", {hc: UHCode, dc: UDCode, tc: UTCode, Type})
     .getRawMany();
   };
 
@@ -466,7 +467,7 @@ export class AdminRepo {
         return await assignedMastersRepo.createQueryBuilder('ta')
         .innerJoinAndSelect(Roles, 'rl', 'rl.id=ta.RoleId')
         .innerJoinAndSelect(MasterData, 'md', 'md.DistrictCode=ta.DistrictCode and md.TalukCode=ta.TalukCode')
-        .select(["md.TalukName TalukName", "md.TalukNameKA TalukNameKA", "ta.Name Name", "ta.Mobile Mobile", "rl.id RoleId",
+        .select(["DISTINCT md.TalukName TalukName", "md.DistrictName DistrictName", "md.DistrictCode DistrictCode", "md.TalukCode TalukCode", "ta.id id", "md.TalukNameKA TalukNameKA", "ta.Name Name", "ta.Mobile Mobile", "rl.id RoleId",
             "rl.RoleName RoleName", "ta.Type Type"])
         .where("ta.ListType = :ListType", {ListType: "Taluk"})
         .getRawMany();
@@ -475,8 +476,8 @@ export class AdminRepo {
     async getAssignedHobli(){
         return await assignedMastersRepo.createQueryBuilder('ta')
         .innerJoinAndSelect(Roles, 'rl', 'rl.id=ta.RoleId')
-        .innerJoinAndSelect(MasterData, 'md', 'md.DistrictCode=ta.DistrictCode and md.TalukCode=ta.TalukCode and md.HobliCode-ta.HobliCode')
-        .select(["md.HobliName HobliName", "md.HobliNameKA HobliNameKA", "ta.Name Name", "ta.Mobile Mobile", "rl.id RoleId",
+        .innerJoinAndSelect(MasterData, 'md', 'md.DistrictCode=ta.DistrictCode and md.TalukCode=ta.TalukCode and md.HobliCode=ta.HobliCode')
+        .select(["DISTINCT md.HobliName HobliName", "md.HobliNameKA HobliNameKA", "md.TalukName TalukName", "md.DistrictName DistrictName",  "md.DistrictCode DistrictCode", "md.HobliCode HobliCode", "md.TalukCode TalukCode", "ta.id id","ta.Name Name", "ta.Mobile Mobile", "rl.id RoleId",
             "rl.RoleName RoleName", "ta.Type Type"])
         .where("ta.ListType = :ListType", {ListType: "Hobli"})
         .getRawMany();
@@ -485,8 +486,8 @@ export class AdminRepo {
     async getAssignedVillage(){
         return await assignedMastersRepo.createQueryBuilder('ta')
         .innerJoinAndSelect(Roles, 'rl', 'rl.id=ta.RoleId')
-        .innerJoinAndSelect(MasterData, 'md', 'md.DistrictCode=ta.DistrictCode and md.TalukCode=ta.TalukCode and md.HobliCode-ta.HobliCode')
-        .select(["md.HobliName HobliName", "md.HobliNameKA HobliNameKA", "ta.Name Name", "ta.Mobile Mobile", "rl.id RoleId",
+        .innerJoinAndSelect(MasterData, 'md', 'md.DistrictCode=ta.DistrictCode and md.TalukCode=ta.TalukCode and md.HobliCode=ta.HobliCode and md.VillageCode=ta.VillageCode')
+        .select(["DISTINCT md.VillageName VillageName", "md.VillageNameKA VillageNameKA", "md.TalukName TalukName", "md.DistrictName DistrictName", "md.HobliName HobliName", "md.VillageCode VillageCode","md.DistrictCode DistrictCode", "md.HobliCode HobliCode", "md.TalukCode TalukCode", "ta.id id", "ta.Name Name", "ta.Mobile Mobile", "rl.id RoleId",
             "rl.RoleName RoleName", "ta.Type Type"])
         .where("ta.ListType = :ListType", {ListType: "Village"})
         .getRawMany();

@@ -167,6 +167,16 @@ mobileRouter.post('/saveSurveyData', authenticateToken, async (req, res) => {
     };
 });
 
+mobileRouter.post('/retriveMasters', authenticateToken, async (req, res) => {
+    try {
+        let body = {...req.body, ...{UserId: req.user.userid}};
+        let result = await mobileServices.retriveMasters(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'retriveMasters'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    };
+});
+
 mobileRouter.post('/uploadImage', uploadImage.single('image') ,authenticateToken, async (req, res) => {
     try {
         if (!req.file) {

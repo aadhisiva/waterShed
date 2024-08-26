@@ -2,7 +2,7 @@ import { Service } from "typedi";
 import { generateEOfTTime, generateOTP, generateRandomString, generateUniqueId, generateUniqueSubmissionId, saveMobileLogs, saveMobileOtps } from "../utils/resuableCode";
 import { RESPONSEMSG } from "../utils/statusCodes";
 import { OtpServices } from "../sms/smsServceResusable";
-import { loginData } from "../entities";
+import { AssignedMasters, loginData } from "../entities";
 import { MobileRepo } from "../apiRepository/mobileRepo";
 import jsonWebToken from "jsonwebtoken";
 
@@ -22,7 +22,29 @@ export class MobileServices {
         return this.mobileRepo.saveLogin(data);
     };
 
-    async sendOtp(data: loginData) {
+    // async sendOtp(data) {
+    //     const { Mobile, RoleId } = data;
+    //     if (!Mobile || !RoleId) return { code: 400 };
+    //     let version = await this.mobileRepo.getVersionOfApp();
+    //     data.Otp = generateOTP(4);
+    //     // data.Token = generateRandomString(40);
+    //     data.Version = version[0].Version;
+    //     // data.TokenExpirationTime = generateEOfTTime();
+    //     let savedRes: ObjectParam = await this.mobileRepo.sendOtp(data);
+    //     if (!savedRes?.code) {
+    //         let sendSingleSms = await this.otpServices.sendOtpAsSingleSms(Mobile, data?.Otp);
+    //         await saveMobileOtps(Mobile, sendSingleSms?.otpMessage, sendSingleSms?.response, data?.UserId ,data?.Otp);
+    //         if (sendSingleSms?.code !== 200){
+    //             return { code: 422, message: RESPONSEMSG.OTP_FAILED };
+    //         } 
+    //         const token = jsonWebToken.sign({ UserId: savedRes.UserId, Version: savedRes?.Version, RoleId: savedRes.RoleId }, 
+    //             process.env.SECRET_KEY, { expiresIn: '1h' });
+    //         return { message: RESPONSEMSG.OTP, data: { Token: token, UserId: savedRes.UserId, Version: savedRes?.Version, RoleId: savedRes.RoleId, Otp: data.Otp } };
+    //     };
+    //     return savedRes;
+    // };
+
+    async sendOtp(data) {
         const { Mobile, RoleId } = data;
         if (!Mobile || !RoleId) return { code: 400 };
         let version = await this.mobileRepo.getVersionOfApp();
@@ -99,8 +121,43 @@ export class MobileServices {
 
     async saveSurveyData(data){
        data.SubmissionId = await generateUniqueSubmissionId();
-       return await this.mobileRepo.saveSurveyData(data);
-    }
+       let savedData = await this.mobileRepo.saveSurveyData(data);
+       let imagesList = data.ImagesList;
+       let error;
+       for(let i=0; i < imagesList.length; i++){
+           let eachList = imagesList[i];
+           eachList['SubmissionId'] = savedData.SubmissionId;
+           if (!eachList['SubmissionId']) return { code: 400, message: "Provide SubmissionId." };
+           eachList['UserId'] = data.UserId;
+           let saveImage = await this.mobileRepo.saveSurveyImages(eachList);
+           if(saveImage?.code == 422){
+               error = saveImage.message;
+           };
+       };
+       if(error) return {code: 422, message: error};
+       return savedData;
+    };
+
+    
+    async retriveMasters(data) {
+        const { DistrictCode } = data;
+        if (!DistrictCode) {
+            let getData = await this.mobileRepo.retriveDistrictWithCodes();
+            return getData;
+        } else {
+            let distict = await this.mobileRepo.retriveOnlyDistrict(DistrictCode);
+            distict[0]['TalukArray'] = await this.mobileRepo.retriveOnlyTaluks(distict[0]?.DistrictCode);
+            for (let i = 0; i < distict[0]['TalukArray'].length; i++) {
+                let each = distict[0]['TalukArray'][i];
+                each['HobliArray'] = await this.mobileRepo.retriveOnlyHobli(distict[0]?.DistrictCode, each.TalukCode);
+                for (let j = 0; j < each['HobliArray'].length; j++) {
+                    let eachHobliObj = each['HobliArray'][j];
+                    eachHobliObj['VillageArray'] = await this.mobileRepo.retriveOnlyVillages(distict[0]?.DistrictCode, each.TalukCode, eachHobliObj.HobliCode);
+                };
+            };
+            return distict;
+        };
+    };
 
     async uploadImages(body){
         let savedData = await this.mobileRepo.uploadImages(body);
