@@ -16,7 +16,7 @@ interface ActivityModalProps {
   handleClose?: any;
   handleSubmitForm?: any;
   formData?: any;
-};
+}
 
 export default function TalukModal({
   open,
@@ -26,6 +26,7 @@ export default function TalukModal({
 }: ActivityModalProps) {
   const [loading, setLoading] = React.useState(false);
   const [districtOptions, setDistrictOptions] = React.useState([]);
+  const [talukOptions, setTalukOptions] = React.useState([]);
   const [rolesOption, setRolesOption] = React.useState([]);
 
   React.useEffect(() => {
@@ -35,11 +36,18 @@ export default function TalukModal({
   const fecthIntialData = async () => {
     setLoading(true);
     let { data } = await axiosInstance.post('getMasterDropDown', {
-        ReqType: 1,
-      });
+      ReqType: 1,
+      Type: formData.Type
+    });
+    let tresponse = await axiosInstance.post('getMasterDropDown', {
+      ReqType: 2,
+      Type: formData.Type,
+      UDCode: formData.DistrictCode,
+    });
     let response = await axiosInstance.post('addOrGetRoles', { ReqType: 'Dd' });
     if (data?.code == 200) {
       setDistrictOptions(data.data);
+      setTalukOptions(tresponse.data.data);
       setRolesOption(response.data.data);
       setLoading(false);
     } else {
@@ -48,11 +56,13 @@ export default function TalukModal({
     }
   };
 
-  const initialValues:any = {
+  const initialValues: any = {
     DistrictCode: formData.DistrictCode,
+    TalukCode: formData.TalukCode,
     RoleId: formData.RoleId,
     Name: formData.Name,
-    Mobile: formData.Mobile
+    Mobile: formData.Mobile,
+    Type: formData.Type,
   };
 
   const validationSchema = {
@@ -60,6 +70,14 @@ export default function TalukModal({
       validate: (value: string) => {
         if (!value) {
           return 'DistricName is required';
+        }
+        return null;
+      },
+    },
+    TalukCode: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'TalukName is required';
         }
         return null;
       },
@@ -80,6 +98,14 @@ export default function TalukModal({
         return null;
       },
     },
+    Type: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'Type is required';
+        }
+        return null;
+      },
+    },
     Mobile: {
       validate: (value: string) => {
         if (!value) {
@@ -87,7 +113,7 @@ export default function TalukModal({
         }
         return null;
       },
-    }
+    },
   };
 
   const onSubmit = (values: any) => {
@@ -121,7 +147,20 @@ export default function TalukModal({
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <Box sx={{ mb: 2, mt: 2 }}>
-               <SelectField
+              <SelectField
+                name="Type"
+                label="Type"
+                value={values.Type}
+                onChange={handleChange}
+                options={[
+                  { value: 'Urban', name: 'Urban' },
+                  { value: 'Rural', name: 'Rural' },
+                ]}
+                onBlur={handleBlur}
+                error={touched.Type && Boolean(errors.Type)}
+                helperText={touched.Type && errors.Type}
+              />
+              <SelectField
                 name="DistrictCode"
                 label="District Name"
                 value={values.DistrictCode}
@@ -130,6 +169,16 @@ export default function TalukModal({
                 onBlur={handleBlur}
                 error={touched.DistrictCode && Boolean(errors.DistrictCode)}
                 helperText={touched.DistrictCode && errors.DistrictCode}
+              />
+              <SelectField
+                name="TalukCode"
+                label="Taluk Name"
+                value={values.TalukCode}
+                onChange={handleChange}
+                options={talukOptions}
+                onBlur={handleBlur}
+                error={touched.TalukCode && Boolean(errors.TalukCode)}
+                helperText={touched.TalukCode && errors.TalukCode}
               />
               <SelectField
                 name="RoleId"
@@ -141,7 +190,7 @@ export default function TalukModal({
                 error={touched.RoleId && Boolean(errors.RoleId)}
                 helperText={touched.RoleId && errors.RoleId}
               />
-               <TextFieldMU
+              <TextFieldMU
                 name="Name"
                 label="Name"
                 value={values.Name}
@@ -150,7 +199,7 @@ export default function TalukModal({
                 error={touched.Name && Boolean(errors.Name)}
                 helperText={touched.Name && errors.Name}
               />
-               <TextFieldMU
+              <TextFieldMU
                 name="Mobile"
                 label="Mobile"
                 value={values.Mobile}

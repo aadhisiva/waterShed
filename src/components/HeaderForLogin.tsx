@@ -420,7 +420,7 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
           </Box>
         </Toolbar>
       </AppBar>
-      <Drawer variant="permanent" open={open}>
+      <Drawer sx={{overflowY: 'scroll'}} variant="permanent" open={open}>
         <DrawerHeader>
           WaterShed
           <IconButton onClick={handleDrawerClose}>

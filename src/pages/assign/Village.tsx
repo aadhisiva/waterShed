@@ -1,25 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import EnhancedTableData from '../../components/TableData';
-import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import DeleteIcon from '@mui/icons-material/Delete';
 import axiosInstance from '../../axiosInstance';
-import RolesModal from '../../components/Modals/rolesModal';
 import SpinnerLoader from '../../components/spinner/spinner';
+import SelectVillage from '../../components/assignment/selectVillage';
+import VillageModal from '../../components/Modals/assignment/villageModal';
 
 const headCells = [
   {
-    id: 'RoleName',
+    id: 'DistrictName',
     numeric: false,
     disablePadding: true,
-    label: 'Role Name',
+    label: 'District Name',
   },
   {
-    id: 'DepartmentName',
+    id: 'TalukName',
     numeric: false,
     disablePadding: true,
-    label: 'Department Name',
+    label: 'Taluk Name',
+  },
+  {
+    id: 'TalukName',
+    numeric: false,
+    disablePadding: true,
+    label: 'Taluk Name',
+  },
+  {
+    id: 'VillageName',
+    numeric: false,
+    disablePadding: true,
+    label: 'Village Name',
+  },
+  {
+    id: 'VillageNameKA',
+    numeric: false,
+    disablePadding: true,
+    label: 'Village Name Ka',
+  },
+  {
+    id: 'Type',
+    numeric: false,
+    disablePadding: true,
+    label: 'Type',
+  },
+  {
+    id: 'Name',
+    numeric: false,
+    disablePadding: true,
+    label: 'Name',
+  },
+  {
+    id: 'Mobile',
+    numeric: false,
+    disablePadding: false,
+    label: 'Mobile',
   },
   {
     id: 'Action',
@@ -46,12 +80,15 @@ export default function AssignVillage() {
     setFormData(data);
   };
 
-  const handleClickAdd = () => {
+  const handleClickAdd = (values: any) => {
+    setFormData(values);
     setOpenModal(true);
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('addOrGetRoles', { ReqType: 'Get' });
+    let { data } = await axiosInstance.post('getAssignedMasters', {
+      ReqType: 4,
+    });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -67,8 +104,8 @@ export default function AssignVillage() {
 
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
-    values['ReqType'] = 'Add';
-    let { data } = await axiosInstance.post('addOrGetRoles', values);
+    values['ListType'] = 'Village';
+    let { data } = await axiosInstance.post('assignmentProcess', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);
@@ -81,7 +118,7 @@ export default function AssignVillage() {
   };
 
   const renderDeoartModal = openModal && (
-    <RolesModal
+    <VillageModal
       open={openModal}
       formData={formData}
       handleClose={() => setOpenModal(false)}
@@ -93,27 +130,16 @@ export default function AssignVillage() {
     <Box sx={{ padding: 2 }}>
       {renderDeoartModal}
       <SpinnerLoader isLoading={loading} />
-      <Grid
-        item
-        md={12}
-        xs={12}
-        sx={{ display: 'flex', justifyContent: 'end' }}
-      >
-        <Button
-          variant="outlined"
-          onClick={handleClickAdd}
-          startIcon={<DeleteIcon />}
-        >
-          Add New
-        </Button>
-      </Grid>
-      <EnhancedTableData
-        handleClickModify={handleClickModify}
-        rows={copyTableData}
-        headCells={headCells}
-        setCopyTableData={setCopyTableData}
-        title='Roles'
-      />
+      <SelectVillage handleSubmitForm={handleClickAdd} />
+      <Box sx={{ mt: 6 }}>
+        <EnhancedTableData
+          handleClickModify={handleClickModify}
+          rows={copyTableData}
+          headCells={headCells}
+          setCopyTableData={setCopyTableData}
+          title="Assign Village"
+        />
+      </Box>
     </Box>
   );
 }

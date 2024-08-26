@@ -18,7 +18,7 @@ interface ActivityModalProps {
   formData?: any;
 }
 
-export default function DistrictModal({
+export default function HobliModal({
   open,
   handleClose,
   handleSubmitForm,
@@ -26,7 +26,9 @@ export default function DistrictModal({
 }: ActivityModalProps) {
   const [loading, setLoading] = React.useState(false);
   const [districtOptions, setDistrictOptions] = React.useState([]);
+  const [talukOptions, setTalukOptions] = React.useState([]);
   const [rolesOption, setRolesOption] = React.useState([]);
+  const [hobliOptions, setHobliOptions] = React.useState([]);
 
   React.useEffect(() => {
     fecthIntialData();
@@ -35,11 +37,25 @@ export default function DistrictModal({
   const fecthIntialData = async () => {
     setLoading(true);
     let { data } = await axiosInstance.post('getMasterDropDown', {
-      ReqType: 1, Type: formData.Type
+      ReqType: 1,
+      Type: formData.Type
+    });
+    let tresponse = await axiosInstance.post('getMasterDropDown', {
+      ReqType: 2,
+      Type: formData.Type,
+      UDCode: formData.DistrictCode,
+    });
+    let hresponse = await axiosInstance.post('getMasterDropDown', {
+      ReqType: 3,
+      Type: formData.Type,
+      UDCode: formData.DistrictCode,
+      UTCode: formData.TalukCode,
     });
     let response = await axiosInstance.post('addOrGetRoles', { ReqType: 'Dd' });
     if (data?.code == 200) {
       setDistrictOptions(data.data);
+      setTalukOptions(tresponse.data.data);
+      setHobliOptions(hresponse.data.data);
       setRolesOption(response.data.data);
       setLoading(false);
     } else {
@@ -50,10 +66,12 @@ export default function DistrictModal({
 
   const initialValues: any = {
     DistrictCode: formData.DistrictCode,
+    TalukCode: formData.TalukCode,
+    HobliCode: formData.HobliCode,
     RoleId: formData.RoleId,
     Name: formData.Name,
     Mobile: formData.Mobile,
-    Type: formData.Type,
+    Type: formData.Type
   };
 
   const validationSchema = {
@@ -61,6 +79,22 @@ export default function DistrictModal({
       validate: (value: string) => {
         if (!value) {
           return 'DistricName is required';
+        }
+        return null;
+      },
+    },
+    TalukCode: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'TalukName is required';
+        }
+        return null;
+      },
+    },
+    HobliCode: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'HobliName is required';
         }
         return null;
       },
@@ -81,18 +115,18 @@ export default function DistrictModal({
         return null;
       },
     },
-    Type: {
-      validate: (value: string) => {
-        if (!value) {
-          return 'Type is required';
-        }
-        return null;
-      },
-    },
     Mobile: {
       validate: (value: string) => {
         if (!value) {
           return 'Mobile is required';
+        }
+        return null;
+      },
+    },
+    Type: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'Type is required';
         }
         return null;
       },
@@ -125,7 +159,7 @@ export default function DistrictModal({
         onClose={handleClose}
       >
         <DialogTitle id="modal-modal-title" variant="h6" component="h2">
-          Mapping Questions
+          Hobli Mapping
         </DialogTitle>
         <DialogContent>
           <form onSubmit={handleSubmit}>
@@ -152,6 +186,26 @@ export default function DistrictModal({
                 onBlur={handleBlur}
                 error={touched.DistrictCode && Boolean(errors.DistrictCode)}
                 helperText={touched.DistrictCode && errors.DistrictCode}
+              />
+              <SelectField
+                name="TalukCode"
+                label="Taluk Name"
+                value={values.TalukCode}
+                onChange={handleChange}
+                options={talukOptions}
+                onBlur={handleBlur}
+                error={touched.TalukCode && Boolean(errors.TalukCode)}
+                helperText={touched.TalukCode && errors.TalukCode}
+              />
+              <SelectField
+                name="HobliCode"
+                label="Hobli Name"
+                value={values.HobliCode}
+                onChange={handleChange}
+                options={hobliOptions}
+                onBlur={handleBlur}
+                error={touched.HobliCode && Boolean(errors.HobliCode)}
+                helperText={touched.HobliCode && errors.HobliCode}
               />
               <SelectField
                 name="RoleId"

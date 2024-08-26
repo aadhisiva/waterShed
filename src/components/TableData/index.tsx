@@ -68,7 +68,7 @@ export default function EnhancedTableData({
   rows,
   headCells,
   setCopyTableData,
-  title
+  title,
 }: EnhancedTableDataProps) {
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState('');
@@ -146,8 +146,12 @@ export default function EnhancedTableData({
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Paper sx={{ width: '100%', mb: 2  }}>
+    <Box
+      sx={{
+        width: '100%',
+      }}
+    >
+      <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar
           numSelected={selected.length}
           handleSearch={handleSearch}
@@ -156,7 +160,7 @@ export default function EnhancedTableData({
         />
         <TableContainer>
           <Table
-            sx={{ minWidth: 750}}
+            sx={{ minWidth: 750 }}
             aria-labelledby="tableTitle"
             size={'small'}
           >
@@ -179,33 +183,36 @@ export default function EnhancedTableData({
                     sx={{ cursor: 'pointer' }}
                   >
                     {headCells.map((headCell: any, index: string) => {
-                      if (headCell.id == "Action") {
+                      if (headCell.id == 'Action') {
                         return (
-                        <TableCell
-                          align="center"
-                          key={labelId+''+index}
-                          onClick={() => handleClickModify(row)}
-                        >
-                          <Tooltip title="Edit">
-                            <IconButton>
-                              <EditIcon color="primary" sx={{ fontSize: 15 }} />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                        )
+                          <TableCell
+                            align="center"
+                            key={labelId + '' + index}
+                            onClick={() => handleClickModify(row)}
+                          >
+                            <Tooltip title="Edit">
+                              <IconButton>
+                                <EditIcon
+                                  color="primary"
+                                  sx={{ fontSize: 15 }}
+                                />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        );
                       }
                       return (
                         <TableCell
-                        component="th"
-                        id={labelId+''+index}
-                        scope="row"
-                        padding="none"
-                        align="center"
-                        key={row[headCell.id]+''+index}
-                      >
-                        {row[headCell.id]}
-                      </TableCell>
-                      )
+                          component="th"
+                          id={labelId + '' + index}
+                          scope="row"
+                          padding="none"
+                          align="center"
+                          key={row[headCell.id] + '' + index}
+                        >
+                          {row[headCell.id]}
+                        </TableCell>
+                      );
                     })}
                   </TableRow>
                 );

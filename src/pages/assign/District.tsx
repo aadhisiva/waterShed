@@ -67,7 +67,6 @@ export default function AssignDistrict() {
   };
 
   const handleClickAdd = (values: any) => {
-    console.log("vaklues", values)
     setFormData(values);
     setOpenModal(true);
   };
@@ -91,7 +90,7 @@ export default function AssignDistrict() {
 
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
-    values['ListType'] = "District";
+    values['ListType'] = 'District';
     let { data } = await axiosInstance.post('assignmentProcess', values);
     if (data.code == 200) {
       await fecthIntialData();
@@ -118,13 +117,15 @@ export default function AssignDistrict() {
       {renderDeoartModal}
       <SpinnerLoader isLoading={loading} />
       <SelectDistrict handleSubmitForm={handleClickAdd} />
-      <EnhancedTableData
-        handleClickModify={handleClickModify}
-        rows={copyTableData}
-        headCells={headCells}
-        setCopyTableData={setCopyTableData}
-        title="Assign District"
-      />
+      <Box sx={{ mt: 6 }}>
+        <EnhancedTableData
+          handleClickModify={handleClickModify}
+          rows={copyTableData}
+          headCells={headCells}
+          setCopyTableData={setCopyTableData}
+          title="Assign District"
+        />
+      </Box>
     </Box>
   );
 }

@@ -7,19 +7,55 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import axiosInstance from '../../axiosInstance';
 import RolesModal from '../../components/Modals/rolesModal';
 import SpinnerLoader from '../../components/spinner/spinner';
+import SelectDistrict from '../../components/assignment/selectDistrict';
+import DistrictModal from '../../components/Modals/assignment/districtModal';
+import SelectTaluk from '../../components/assignment/selectTaluk';
+import TalukModal from '../../components/Modals/assignment/talukModal';
+import SelectHobli from '../../components/assignment/selectHobli';
+import HobliModal from '../../components/Modals/assignment/hobliModal';
 
 const headCells = [
   {
-    id: 'RoleName',
+    id: 'DistrictName',
     numeric: false,
     disablePadding: true,
-    label: 'Role Name',
+    label: 'District Name',
   },
   {
-    id: 'DepartmentName',
+    id: 'TalukName',
     numeric: false,
     disablePadding: true,
-    label: 'Department Name',
+    label: 'Taluk Name',
+  },
+  {
+    id: 'HobliName',
+    numeric: false,
+    disablePadding: true,
+    label: 'Hobli Name',
+  },
+  {
+    id: 'HobliNameKA',
+    numeric: false,
+    disablePadding: true,
+    label: 'Hobli Name Ka',
+  },
+  {
+    id: 'Type',
+    numeric: false,
+    disablePadding: true,
+    label: 'Type',
+  },
+  {
+    id: 'Name',
+    numeric: false,
+    disablePadding: true,
+    label: 'Name',
+  },
+  {
+    id: 'Mobile',
+    numeric: false,
+    disablePadding: false,
+    label: 'Mobile',
   },
   {
     id: 'Action',
@@ -46,12 +82,15 @@ export default function AssignHobli() {
     setFormData(data);
   };
 
-  const handleClickAdd = () => {
+  const handleClickAdd = (values: any) => {
+    setFormData(values);
     setOpenModal(true);
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('addOrGetRoles', { ReqType: 'Get' });
+    let { data } = await axiosInstance.post('getAssignedMasters', {
+      ReqType: 3,
+    });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -67,8 +106,8 @@ export default function AssignHobli() {
 
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
-    values['ReqType'] = 'Add';
-    let { data } = await axiosInstance.post('addOrGetRoles', values);
+    values['ListType'] = 'Hobli';
+    let { data } = await axiosInstance.post('assignmentProcess', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);
@@ -81,7 +120,7 @@ export default function AssignHobli() {
   };
 
   const renderDeoartModal = openModal && (
-    <RolesModal
+    <HobliModal
       open={openModal}
       formData={formData}
       handleClose={() => setOpenModal(false)}
@@ -93,27 +132,16 @@ export default function AssignHobli() {
     <Box sx={{ padding: 2 }}>
       {renderDeoartModal}
       <SpinnerLoader isLoading={loading} />
-      <Grid
-        item
-        md={12}
-        xs={12}
-        sx={{ display: 'flex', justifyContent: 'end' }}
-      >
-        <Button
-          variant="outlined"
-          onClick={handleClickAdd}
-          startIcon={<DeleteIcon />}
-        >
-          Add New
-        </Button>
-      </Grid>
-      <EnhancedTableData
-        handleClickModify={handleClickModify}
-        rows={copyTableData}
-        headCells={headCells}
-        setCopyTableData={setCopyTableData}
-        title='Roles'
-      />
+      <SelectHobli handleSubmitForm={handleClickAdd} />
+      <Box sx={{ mt: 6 }}>
+        <EnhancedTableData
+          handleClickModify={handleClickModify}
+          rows={copyTableData}
+          headCells={headCells}
+          setCopyTableData={setCopyTableData}
+          title="Assign Hobli"
+        />
+      </Box>
     </Box>
   );
 }

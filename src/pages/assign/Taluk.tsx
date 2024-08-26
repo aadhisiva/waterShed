@@ -10,6 +10,7 @@ import SpinnerLoader from '../../components/spinner/spinner';
 import SelectDistrict from '../../components/assignment/selectDistrict';
 import DistrictModal from '../../components/Modals/assignment/districtModal';
 import SelectTaluk from '../../components/assignment/selectTaluk';
+import TalukModal from '../../components/Modals/assignment/talukModal';
 
 const headCells = [
   {
@@ -74,7 +75,6 @@ export default function AssignTaluk() {
   };
 
   const handleClickAdd = (values: any) => {
-    console.log('vaklues', values);
     setFormData(values);
     setOpenModal(true);
   };
@@ -112,7 +112,7 @@ export default function AssignTaluk() {
   };
 
   const renderDeoartModal = openModal && (
-    <DistrictModal
+    <TalukModal
       open={openModal}
       formData={formData}
       handleClose={() => setOpenModal(false)}
@@ -125,13 +125,15 @@ export default function AssignTaluk() {
       {renderDeoartModal}
       <SpinnerLoader isLoading={loading} />
       <SelectTaluk handleSubmitForm={handleClickAdd} />
-      <EnhancedTableData
-        handleClickModify={handleClickModify}
-        rows={copyTableData}
-        headCells={headCells}
-        setCopyTableData={setCopyTableData}
-        title="Assign District"
-      />
+      <Box sx={{ mt: 6 }}>
+        <EnhancedTableData
+          handleClickModify={handleClickModify}
+          rows={copyTableData}
+          headCells={headCells}
+          setCopyTableData={setCopyTableData}
+          title="Assign Taluk"
+        />
+      </Box>
     </Box>
   );
 }

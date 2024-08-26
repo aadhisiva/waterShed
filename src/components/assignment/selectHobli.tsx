@@ -17,23 +17,7 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
     DistrictCode: '',
     TalukCode: '',
     HobliCode: '',
-  };
-
-  useEffect(() => {
-    intiateIntialRequest();
-  }, []);
-
-  const intiateIntialRequest = async () => {
-    let { data } = await axiosInstance.post('getMasterDropDown', {
-      ReqType: 1,
-    });
-    if (data?.code == 200) {
-      setDistrictDropdown(data.data);
-      setLoading(false);
-    } else {
-      setLoading(false);
-      alert(data.message || 'please try again');
-    }
+    Type: ''
   };
 
   const validationSchema = {
@@ -61,6 +45,14 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
         return null;
       },
     },
+    Type: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'Type is required';
+        }
+        return null;
+      },
+    },
   };
 
   const onSubmit = (values: any) => {
@@ -81,35 +73,75 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
   const handleClearFilter = () => {
     setValues({});
   };
+  const handleDistictDropdown = async (e: ChangeEvent<HTMLInputElement>) => {
+    setLoading(true);
+    setValues({
+      ...values,
+      Type: e.target.value, 
+      DistrictCode: "",
+      TalukCode: "",
+      HobliCode: ""
+    });
+    let { data } = await axiosInstance.post('getMasterDropDown', {
+      ReqType: 1,
+      Type: e.target.value,
+    });
+    setDistrictDropdown(data.data);
+    setLoading(false);
+  };
 
   const handleTalukDropDown = async (e: ChangeEvent<HTMLInputElement>) => {
     setLoading(true);
+    setValues({
+      ...values,
+      DistrictCode: e.target.value,
+      TalukCode: "",
+      HobliCode: ""
+    });
     let { data } = await axiosInstance.post('getMasterDropDown', {
       ReqType: 2,
+      Type: values.Type,
       UDCode: e.target.value,
     });
     setTalukDropdown(data.data);
     setLoading(true);
-    handleChange(e);
   };
 
   const handleHobliDropDown = async (e: ChangeEvent<HTMLInputElement>) => {
     setLoading(true);
+    setValues({
+      ...values,
+      TalukCode: e.target.value,
+      HobliCode: ""
+    });
     let { data } = await axiosInstance.post('getMasterDropDown', {
-      ReqType: 2,
+      ReqType: 3,
+      Type: values.Type,
       UDCode: values.DistrictCode,
       UTCode: e.target.value,
     });
     setHobliDropdown(data.data);
     setLoading(true);
-    handleChange(e);
   };
 
   return (
     <Container
-      sx={{
-        border: '1px solid',
-      }}
+    sx={{
+      position: 'relative',
+      border: '1px solid',
+      borderRadius: '10px',
+      padding: '10px', // Adjust padding as needed
+      overflow: 'visible',
+      '&::before': {
+        content: '"Assignment"', // Replace with your title text
+        position: 'absolute',
+        top: '-15px', // Adjust to place the title on the border
+        left: '20px', // Adjust to align the title horizontally
+        background: '#fff', // Background color to cover border
+        padding: '0 10px', // Adjust padding to your preference
+        fontWeight: 'bold',
+      }
+    }}
     >
       <form onSubmit={handleSubmit}>
         {/* <span>lkyjftr</span> */}
@@ -118,6 +150,21 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
           spacing={2}
           sx={{ display: 'flex', alignItems: 'center', padding: 1 }}
         >
+           <Grid item xs={6} sm={3}>
+            <SelectField
+              name="Type"
+              label="Type"
+              value={values.Type}
+              onChange={handleDistictDropdown}
+              options={[
+                { value: 'Urban', name: 'Urban' },
+                { value: 'Rural', name: 'Rural' },
+              ]}
+              onBlur={handleBlur}
+              error={touched.Type && Boolean(errors.Type)}
+              helperText={touched.Type && errors.Type}
+            />
+          </Grid>
           <Grid item xs={6} sm={3}>
             <SelectField
               name="DistrictCode"

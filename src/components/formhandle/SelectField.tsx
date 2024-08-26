@@ -4,18 +4,23 @@ import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from '@mui/
 interface SelectFieldProps {
   name?: string;
   label?: string;
-  value?: any;
+  value?: string | number;
   onChange?: any;
   onBlur?: any;
   error?: boolean;
   helperText?: any;
-  options?: any;
+  options?: SelectOption[];
+};
+
+interface SelectOption {
+  value: string | number;
+  name: string;
 }
 
 export default function SelectField({
   name,
   label,
-  value,
+  value = '',
   onChange,
   onBlur,
   error,
@@ -28,15 +33,15 @@ export default function SelectField({
       <Select
         labelId="demo-simple-select-required-label"
         id="demo-simple-select-required"
-        value={value}
+        value={value || ''}
         label={label}
         onChange={onChange}
         name={name}
         onBlur={onBlur}
       >
-        <MenuItem value="">
+        {/* <MenuItem value="">
           <em>None</em>
-        </MenuItem>
+        </MenuItem> */}
         {(options || []).map((obj: any) => (
             <MenuItem key={obj.value+""+obj.name} value={obj.value}>{obj.name}</MenuItem>
         ))}
