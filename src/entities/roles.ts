@@ -14,6 +14,7 @@ import { Schemes } from "./schemes";
 import { RolesAccess } from "./roleAccess";
 import { loginData } from "./loginData";
 import { AssignedMasters } from "./assignedMasters";
+import { ChildRoles } from "./childRoles";
   
   @Entity({ name: "Roles" })
   export class Roles {
@@ -42,6 +43,9 @@ import { AssignedMasters } from "./assignedMasters";
 
     @OneToMany(() => AssignedMasters, am => am.RoleId, {cascade: true, onDelete: 'CASCADE'})
     AssignedMasterFK: AssignedMasters[];
+
+    @OneToMany(() => ChildRoles, am => am.RoleId, {cascade: true, onDelete: 'CASCADE'})
+    ChildRolesFK: ChildRoles[];
   
     @CreateDateColumn()
     createdDate: Date;

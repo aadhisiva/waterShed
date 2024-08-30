@@ -12,10 +12,10 @@ import {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: "int" })
+    @Column({ type: "int", default: null })
     ActivityId: string;
   
-    @Column({ type: "int" })
+    @Column({ type: "int", default: null })
     QuestionId: string;
   
     @CreateDateColumn()

@@ -31,9 +31,6 @@ import { Roles } from "./roles";
     @OneToMany(() => Roles, role => role.DepartmentId, {cascade: true, onDelete: 'CASCADE'})
     Roles: Roles[];
 
-    @OneToMany(() => RolesAccess, role => role.DepartmentId, {cascade: true, onDelete: 'CASCADE'})
-    RolesAccess: RolesAccess[];
-
     @OneToMany(() => UserData, role => role.DepartmentId, {cascade: true, onDelete: 'CASCADE'})
     UserData: UserData[];
 

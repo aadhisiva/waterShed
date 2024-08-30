@@ -26,6 +26,15 @@ import { Sectors } from "./sectors";
 
     @Column({ type: "nvarchar", length: 200 })
     ActivityName: string;
+
+    @Column({ type: "nvarchar", default: null, length: 200 })
+    TypeOfWork: string;
+
+    @Column({ type: "nvarchar", default: null, length: 200 })
+    TypeOfLand: string;
+
+    @Column({ type: "nvarchar", default: null, length: 200 })
+    TypeOfStatus: string;
   
     @Column({ type: "int" })
     ParentId: string;

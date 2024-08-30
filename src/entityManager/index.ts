@@ -21,7 +21,9 @@ import {
     QuestionMapping,
     WaterShedData,
     AssignedMasters,
-    WatershedImgAndVideo
+    WatershedImgAndVideo,
+    ChildRoles,
+    AssignMastersHistory
 } from "../entities"
 
 
@@ -49,6 +51,8 @@ export const entities = () => {
         QuestionMapping,
         WaterShedData,
         AssignedMasters,
-        WatershedImgAndVideo
+        WatershedImgAndVideo,
+        ChildRoles,
+        AssignMastersHistory
     ]
 }

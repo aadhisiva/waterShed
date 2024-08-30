@@ -62,6 +62,36 @@ export class AdminServices {
         return savedRes;
     };
 
+    async checkMobileLogin(data: loginData) {
+        const { Mobile } = data;
+        if (!Mobile) return { code: 400 };
+        let version = await this.adminRepo.getVersionOfApp();
+        // data.Otp = generateOTP(4);
+        data.Otp = "1111";
+        data.WebVersion = version[0]?.WebVersion;
+        let checkRoles: ObjectParam = await this.adminRepo.checkMobileLogin(data);
+        if (checkRoles['code'] == 422) return { code: 422, message: checkRoles['message'] };
+            // let sendSingleSms = await this.otpServices.sendOtpAsSingleSms(Mobile, data?.WebOtp);
+            // await saveMobileOtps(Mobile, sendSingleSms?.otpMessage, sendSingleSms?.response, data?.UserId ,data?.WebOtp);
+            // if (sendSingleSms.code !== 200){
+            //     return { code: 422, message: RESPONSEMSG.OTP_FAILED };
+            // } 
+            let resObj = {
+                Mobile,
+                Otp: data.Otp,
+                Token: jsonWebToken.sign({ Mobile }, process.env.SECRET_KEY, { expiresIn: '24h' }),
+                UserData: checkRoles
+            }
+            return resObj;
+    };
+
+    async getAccessById(data) {
+        const { RoleId } = data;
+        if (!RoleId) return { code: 400, message: "Provide Mobile" };
+        return await this.adminRepo.checkRoleAccess(data);
+    };
+
+
     async verifyOtp(data) {
         const { Mobile, UserRole, Otp } = data;
         if (!Mobile || !UserRole) return { code: 400 };
@@ -227,6 +257,23 @@ export class AdminServices {
         }
     };
 
+    
+    async assignChildAndGet(data) {
+        const { RoleId, ReqType } = data;
+        if (ReqType == "Get") {
+            return await this.adminRepo.getChildAccess();
+        } else if (ReqType == "Add") {
+            if (!RoleId) return { code: 400, message: "Provide RoleId" };
+            return await this.adminRepo.assignChildAccess(data);
+        } else {
+            return { code: 400, message: "Your request is not found", data: {} };
+        }
+    };
+
+    async getChildBasedOnParent(data){
+        return await this.adminRepo.getChildBasedOnParent(data);
+    }
+
     async superLogin(data){
         const { Username, Password, ReqType } = data;
         if(!Username) return {code:400, message: "Provide Username"};
@@ -252,38 +299,37 @@ export class AdminServices {
     };
 
     async assignmentProcess(data){
-        data.UserId = generateUniqueId();
         return await this.adminRepo.assignmentProcess(data);
     };
 
     
     async getMasterDropDown(data) {
-        const { ReqType, UDCode, UTCode, UHCode, Mobile, loginType, Type } = data;
+        const { ReqType, UDCode, UTCode, UHCode,Mobile, loginType, Type } = data;
         if (!ReqType) return { code: 400, message: "Provide ReqType" };
         if (ReqType == 1) {
             if(loginType == "District"){
                 return await this.adminRepo.getAuthDistrictDD(data);
             };
-            return await this.adminRepo.getDistrictsDD(Type);
+            return await this.adminRepo.getDistrictsDD(data);
         } else if (ReqType == 2) {
             if(loginType == "Taluk"){
-                return await this.adminRepo.getAuthTalukDD(Mobile);
+                return await this.adminRepo.getAuthTalukDD(data);
             };
             if (!UDCode) return { code: 400, message: "Provide UDCode" };
             return await this.adminRepo.getTalukDD(UDCode, Type);
         } else if (ReqType == 3) {
-            if(loginType == "Gp"){
-                return await this.adminRepo.getAuthGpDD(Mobile);
+            if(loginType == "Hobli"){
+                return await this.adminRepo.getAuthHobliDD(data);
             };
             if (!UDCode) return { code: 400, message: "Provide UDCode" };
             if (!UTCode) return { code: 400, message: "Provide UTCode" };
             return await this.adminRepo.getHobliDD(UDCode, UTCode, Type);
         } else if (ReqType == 4) {
-            return await this.adminRepo.getVillagesDD(UDCode, UTCode, UHCode, Type);
-        } else {
             if (!UDCode) return { code: 400, message: "Provide UDCode" };
             if (!UTCode) return { code: 400, message: "Provide UTCode" };
             if (!UHCode) return { code: 400, message: "Provide UHCode" };
+            return await this.adminRepo.getVillagesDD(UDCode, UTCode, UHCode);
+        } else {
             return { code: 400, message: "Your request is not found", data: {} };
         }
     };
