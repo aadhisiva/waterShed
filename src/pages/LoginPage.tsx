@@ -26,8 +26,8 @@ function Copyright() {
       sx={{ mt: 5 }}
     >
       {'Copyright © '}
-      <Link color="inherit" href="">
-        Your Website
+      <Link color="inherit" href="https://edcs.karnataka.gov.in/">
+        Directorate of EDCS
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -72,7 +72,7 @@ export default function LoginPage() {
         let checked = regex.test(value);
         if (!checked)
           return `Password must contain one lowercase character and one uppercase character and one 
-        special character and password should be between 6 and 20 characters length and one digit`;
+        special character and password should be between 6 and 20 characters length and minimum one digit`;
         return null;
       },
     },

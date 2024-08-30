@@ -3,6 +3,7 @@ import React, { ChangeEvent, useEffect, useState } from 'react';
 import SelectField from '../formhandle/SelectField';
 import useForm from '../formhandle/customValidation';
 import axiosInstance from '../../axiosInstance';
+import useSelectorForUser from '../customHooks/useSelectForUser';
 
 interface SelectDistrictProps {
   handleSubmitForm: any;
@@ -13,6 +14,9 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
   const [districtDropdown, setDistrictDropdown] = useState([]);
   const [talukDropdown, setTalukDropdown] = useState([]);
   const [hobliDropdown, setHobliDropdown] = useState([]);
+
+  const [{Mobile}] = useSelectorForUser();
+  
   const initialValues: any = {
     DistrictCode: '',
     TalukCode: '',
@@ -82,10 +86,7 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
       TalukCode: "",
       HobliCode: ""
     });
-    let { data } = await axiosInstance.post('getMasterDropDown', {
-      ReqType: 1,
-      Type: e.target.value,
-    });
+    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, loginType: "District",ListType: "Taluk", Mobile, Type: e.target.value });
     setDistrictDropdown(data.data);
     setLoading(false);
   };
@@ -98,11 +99,7 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
       TalukCode: "",
       HobliCode: ""
     });
-    let { data } = await axiosInstance.post('getMasterDropDown', {
-      ReqType: 2,
-      Type: values.Type,
-      UDCode: e.target.value,
-    });
+    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 2, UDCode: e.target.value, loginType: "Taluk",ListType: "Taluk", Mobile, Type: values.Type });
     setTalukDropdown(data.data);
     setLoading(true);
   };

@@ -59,6 +59,7 @@ export default function Sectors() {
   };
 
   const handleClickAdd = () => {
+    setFormData({});
     setOpenModal(true);
   };
   const fecthIntialData = async () => {

@@ -12,6 +12,7 @@ import SelectField from '../formhandle/SelectField';
 import axiosInstance from '../../axiosInstance';
 import SpinnerLoader from '../spinner/spinner';
 import ImageUploadMU from '../formhandle/ImageUpload';
+import { nameValid } from '../../utils/validations';
 
 interface SectorsModalProps {
   open: boolean;
@@ -50,7 +51,7 @@ const [loading, setLoading] = React.useState(false);
         if (!value) {
           return 'DepartmentName is required';
         }
-        return null;
+        return nameValid(value);
       },
     },
     Description: {

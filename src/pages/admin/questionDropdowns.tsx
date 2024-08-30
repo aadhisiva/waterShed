@@ -44,11 +44,11 @@ export default function QuestionDropdowns() {
 
   const handleClickModify = (data: Data) => {
     setOpenModal(true);
-    console.log("Data", data);
     setFormData(data);
   };
 
   const handleClickAdd = () => {
+    setFormData({});
     setOpenModal(true);
   };
   const fecthIntialData = async () => {

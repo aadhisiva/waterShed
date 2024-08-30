@@ -5,8 +5,8 @@ import { clearSessionEndTime, userLoggedOut } from './reducers/authReducer';
 
 const axiosInstance = axios.create({
   // baseURL: 'http://10.10.140.162/api/admin', // Replace with your API base URL
-  // baseURL: 'http://localhost:8888/wapi/admin/', // Replace with your API base URL
-  baseURL: 'https://spectacles.karnataka.gov.in/wapi/admin', // Replace with your API base URL
+  baseURL: 'http://localhost:8888/wapi/admin/', // Replace with your API base URL
+  // baseURL: 'https://spectacles.karnataka.gov.in/wapi/admin', // Replace with your API base URL
 });
 
 axiosInstance.interceptors.request.use(
@@ -39,7 +39,7 @@ axiosInstance.interceptors.response.use(
         store.dispatch(userLoggedOut());
         store.dispatch(clearSessionEndTime());
         // Optionally redirect to login page
-        window.location.href = '/login';
+        window.location.href = '/watershed/login';
         break;
 
       case 403:

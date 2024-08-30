@@ -9,6 +9,7 @@ interface SelectFieldProps {
   onBlur?: any;
   error?: boolean;
   helperText?: any;
+  disabled?: boolean;
   options?: SelectOption[];
 };
 
@@ -25,10 +26,11 @@ export default function SelectField({
   onBlur,
   error,
   helperText,
-  options
+  options,
+  disabled
 }: SelectFieldProps) {
   return (
-    <FormControl style={{paddingBottom: 10}} error={error} fullWidth>
+    <FormControl disabled={disabled} style={{paddingBottom: 10}} error={error} fullWidth>
       <InputLabel id="demo-simple-select-required-label">{label}</InputLabel>
       <Select
         labelId="demo-simple-select-required-label"

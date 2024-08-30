@@ -41,10 +41,10 @@ const headCells = [
     label: 'Village',
   },
   {
-    id: 'DepartmentName',
+    id: 'Type',
     numeric: false,
     disablePadding: true,
-    label: 'Department Name',
+    label: 'Type',
   },
   {
     id: 'Action',
@@ -72,6 +72,7 @@ export default function RolesAccess() {
   };
 
   const handleClickAdd = () => {
+    setFormData({});
     setOpenModal(true);
   };
   const fecthIntialData = async () => {

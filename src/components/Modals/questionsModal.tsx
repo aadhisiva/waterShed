@@ -11,6 +11,7 @@ import TextFieldMU from '../formhandle/TextField';
 import SelectField from '../formhandle/SelectField';
 import axiosInstance from '../../axiosInstance';
 import SpinnerLoader from '../spinner/spinner';
+import { questionIdValid } from '../../utils/validations';
 
 interface ActivityModalProps {
   open: boolean;
@@ -53,7 +54,7 @@ export default function QuestionsModal({
         if (!value) {
           return 'QuestionId is required';
         }
-        return null;
+        return questionIdValid(value);
       },
     },
     QuestionType: {

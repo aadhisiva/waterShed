@@ -5,30 +5,10 @@ import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axiosInstance from '../../axiosInstance';
-import RolesModal from '../../components/Modals/rolesModal';
 import SpinnerLoader from '../../components/spinner/spinner';
-import SelectDistrict from '../../components/assignment/selectDistrict';
-import DistrictModal from '../../components/Modals/assignment/districtModal';
+import ChildRolesModal from '../../components/Modals/childRolesModal';
 
 const headCells = [
-  {
-    id: 'DistrictName',
-    numeric: false,
-    disablePadding: true,
-    label: 'District Name',
-  },
-  {
-    id: 'DistrictNameKA',
-    numeric: false,
-    disablePadding: true,
-    label: 'District Name Ka',
-  },
-  {
-    id: 'Type',
-    numeric: false,
-    disablePadding: true,
-    label: 'Type',
-  },
   {
     id: 'RoleName',
     numeric: false,
@@ -36,16 +16,10 @@ const headCells = [
     label: 'Role Name',
   },
   {
-    id: 'Name',
+    id: 'ChildName',
     numeric: false,
     disablePadding: true,
-    label: 'Name',
-  },
-  {
-    id: 'Mobile',
-    numeric: false,
-    disablePadding: false,
-    label: 'Mobile',
+    label: 'Child Role',
   },
   {
     id: 'Action',
@@ -60,7 +34,7 @@ interface Data {
   ParentScheme: string;
 }
 
-export default function AssignDistrict() {
+export default function ChildRoles() {
   const [tableData, setTableData] = useState([]);
   const [copyTableData, setCopyTableData] = useState([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
@@ -72,15 +46,13 @@ export default function AssignDistrict() {
     setFormData(data);
   };
 
-  const handleClickAdd = (values: any) => {
-    setFormData(values);
+  const handleClickAdd = () => {
+    setFormData({});
     setOpenModal(true);
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('getAssignedMasters', {
-      ReqType: 1,
-    });
+    let { data } = await axiosInstance.post('assignChildAndGet', { ReqType: 'Get' });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -96,8 +68,8 @@ export default function AssignDistrict() {
 
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
-    values['ListType'] = 'District';
-    let { data } = await axiosInstance.post('assignmentProcess', values);
+    values['ReqType'] = 'Add';
+    let { data } = await axiosInstance.post('assignChildAndGet', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);
@@ -110,7 +82,7 @@ export default function AssignDistrict() {
   };
 
   const renderDeoartModal = openModal && (
-    <DistrictModal
+    <ChildRolesModal
       open={openModal}
       formData={formData}
       handleClose={() => setOpenModal(false)}
@@ -122,16 +94,27 @@ export default function AssignDistrict() {
     <Box sx={{ padding: 2 }}>
       {renderDeoartModal}
       <SpinnerLoader isLoading={loading} />
-      <SelectDistrict handleSubmitForm={handleClickAdd} />
-      <Box sx={{ mt: 6 }}>
-        <EnhancedTableData
-          handleClickModify={handleClickModify}
-          rows={copyTableData}
-          headCells={headCells}
-          setCopyTableData={setCopyTableData}
-          title="Assign District"
-        />
-      </Box>
+      <Grid
+        item
+        md={12}
+        xs={12}
+        sx={{ display: 'flex', justifyContent: 'end' }}
+      >
+        <Button
+          variant="outlined"
+          onClick={handleClickAdd}
+          startIcon={<DeleteIcon />}
+        >
+          Add New
+        </Button>
+      </Grid>
+      <EnhancedTableData
+        handleClickModify={handleClickModify}
+        rows={copyTableData}
+        headCells={headCells}
+        setCopyTableData={setCopyTableData}
+        title='Assign Child'
+      />
     </Box>
   );
 }

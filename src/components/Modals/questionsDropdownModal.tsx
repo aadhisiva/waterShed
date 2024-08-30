@@ -9,6 +9,7 @@ import useForm from '../formhandle/customValidation';
 import TextFieldMU from '../formhandle/TextField';
 import SelectField from '../formhandle/SelectField';
 import SpinnerLoader from '../spinner/spinner';
+import { nameValid } from '../../utils/validations';
 
 interface ActivityModalProps {
   open: boolean;
@@ -40,7 +41,7 @@ export default function QuestionDropdownTypeModal({
         if (!value) {
           return 'DropdownName is required';
         }
-        return null;
+        return nameValid(value);
       },
     },
     DropdownType: {

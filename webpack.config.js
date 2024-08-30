@@ -7,8 +7,8 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].[contenthash].js',
-    publicPath: '/watershed/',
-    // publicPath: '/',
+    // publicPath: '/watershed/',
+    publicPath: '/',
   },
   devServer: {
     hot: true,

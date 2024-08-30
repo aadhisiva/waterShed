@@ -3,6 +3,7 @@ import React, { ChangeEvent, useEffect, useState } from 'react';
 import SelectField from '../formhandle/SelectField';
 import useForm from '../formhandle/customValidation';
 import axiosInstance from '../../axiosInstance';
+import useSelectorForUser from '../customHooks/useSelectForUser';
 
 interface SelectDistrictProps {
   handleSubmitForm: any;
@@ -12,6 +13,8 @@ export default function SelectTaluk({ handleSubmitForm }: SelectDistrictProps) {
   const [loading, setLoading] = useState(false);
   const [districtDropdown, setDistrictDropdown] = useState([]);
   const [talukDropdown, setTalukDropdown] = useState([]);
+  const [{Mobile}] = useSelectorForUser();
+
   const initialValues: any = {
     DistrictCode: '',
     TalukCode: '',
@@ -73,10 +76,7 @@ export default function SelectTaluk({ handleSubmitForm }: SelectDistrictProps) {
       TalukCode: ""
     });
     setLoading(true);
-    let { data } = await axiosInstance.post('getMasterDropDown', {
-      ReqType: 1,
-      Type: e.target.value,
-    });
+    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, ListType: 'District', loginType: 'District', Mobile, Type: e.target.value })
     setDistrictDropdown(data.data);
     setLoading(false);
   };

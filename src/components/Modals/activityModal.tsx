@@ -11,6 +11,7 @@ import TextFieldMU from '../formhandle/TextField';
 import SelectField from '../formhandle/SelectField';
 import axiosInstance from '../../axiosInstance';
 import SpinnerLoader from '../spinner/spinner';
+import { nameValid } from '../../utils/validations';
 
 interface ActivityModalProps {
   open: boolean;
@@ -40,6 +41,8 @@ const [loading, setLoading] = React.useState(false);
     DepartmentId: formData.DepartmentId,
     SectorId: formData.SectorId,
     TypeOfLand: formData.TypeOfLand,
+    TypeOfWork: formData.TypeOfWork,
+    TypeOfStatus: formData.TypeOfStatus,
   };
 
   const validationSchema = {
@@ -48,7 +51,7 @@ const [loading, setLoading] = React.useState(false);
         if (!value) {
           return 'ActivityName is required';
         }
-        return null;
+        return nameValid(value);
       },
     },
     TypeOfLand: {
@@ -63,6 +66,14 @@ const [loading, setLoading] = React.useState(false);
       validate: (value: string) => {
         if (!value) {
           return 'TypeOfLand is required';
+        }
+        return null;
+      },
+    },
+    TypeOfStatus: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'TypeOfStatus is required';
         }
         return null;
       },
@@ -127,7 +138,7 @@ const [loading, setLoading] = React.useState(false);
       alert(data.message || 'please try again');
     }
   };
-console.log("values.ParentId",values.ParentId)
+
   return (
     <React.Fragment>
       <SpinnerLoader isLoading={loading} />

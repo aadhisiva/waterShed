@@ -1,4 +1,4 @@
-import { ACTIVITY, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, ROLES, SCHEMES, SECTORS, ROLES_ACCESS, QUESTION_MASTER, QUESTION_DROPDOWNS, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_TALUK, ASSIGN_HOBLI, ASSIGN_VILLAGE } from "./routingPath";
+import { ACTIVITY, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, ROLES, SCHEMES, SECTORS, ROLES_ACCESS, QUESTION_MASTER, QUESTION_DROPDOWNS, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_TALUK, ASSIGN_HOBLI, ASSIGN_VILLAGE, CHILD_ROLES } from "./routingPath";
 import CorporateFareIcon from '@mui/icons-material/CorporateFare';
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import LocalActivityIcon from '@mui/icons-material/LocalActivity';
@@ -46,6 +46,11 @@ export const RoutingObjects = [
         path: ROLES
     },
     {
+        name: "Child Roles",
+        icon: AddTaskIcon,
+        path: CHILD_ROLES
+    },
+    {
         name: "Role Access",
         icon: AddTaskIcon,
         path: ROLES_ACCESS
@@ -90,5 +95,130 @@ export const RoutingObjects = [
         icon: MapIcon,
         path: ACTIVITY_MAPPING
     },
-]
+];
+
+export const routesOfSuperAdmin = [
+    {
+        name: "Dashboard",
+        icon: DashboardIcon,
+        path: DASHBOARD
+    },
+    {
+        name: "Assign District",
+        icon: AssignmentIcon,
+        path: ASSIGN_DISTRICT
+    },
+    {
+        name: "Departments",
+        icon: CorporateFareIcon,
+        path: DEPARTMENT
+    },
+    {
+        name: "Roles",
+        icon: AddTaskIcon,
+        path: ROLES
+    },
+    {
+        name: "Child Roles",
+        icon: AddTaskIcon,
+        path: CHILD_ROLES
+    },
+    {
+        name: "Role Access",
+        icon: AddTaskIcon,
+        path: ROLES_ACCESS
+    },
+    {
+        name: "Schemes",
+        icon: LocalActivityIcon,
+        path: SCHEMES
+    },
+    {
+        name: "Sectors",
+        icon: LocalActivityIcon,
+        path: SECTORS
+    },
+    {
+        name: "Activity",
+        icon: LocalActivityIcon,
+        path: ACTIVITY
+    },
+    {
+        name: "DPR'S Private Land",
+        icon: LandscapeIcon,
+        path: DPRS_PRIVATE
+    },
+    {
+        name: "DPR'S Common Land",
+        icon: LandscapeIcon,
+        path: DPRS_COMMON
+    },
+    {
+        name: "Question Master",
+        icon: QuestionMarkIcon,
+        path: QUESTION_MASTER
+    },
+    {
+        name: "Question DropDown Items",
+        icon: QuestionAnswerIcon,
+        path: QUESTION_DROPDOWNS
+    },
+    {
+        name: "Activity/Sub Mapping",
+        icon: MapIcon,
+        path: ACTIVITY_MAPPING
+    },
+];
+
+export const routesOfAdmin = [
+    {
+        name: "Dashboard",
+        icon: DashboardIcon,
+        path: DASHBOARD
+    },
+    {
+        name: "Assign District",
+        icon: AssignmentIcon,
+        path: ASSIGN_DISTRICT
+    }
+];
+
+export const routesDistrict = [
+    {
+        name: "Dashboard",
+        icon: DashboardIcon,
+        path: DASHBOARD
+    },
+    {
+        name: "Assign Taluk",
+        icon: AssignmentIcon,
+        path: ASSIGN_TALUK
+    }
+];
+
+export const routesTaluk = [
+    {
+        name: "Dashboard",
+        icon: DashboardIcon,
+        path: DASHBOARD
+    },
+    {
+        name: "Assign Hobli",
+        icon: AssignmentIcon,
+        path: ASSIGN_HOBLI
+    }
+];
+
+export const routesHobli = [
+    {
+        name: "Dashboard",
+        icon: DashboardIcon,
+        path: DASHBOARD
+    },
+    {
+        name: "Assign Village",
+        icon: AssignmentIcon,
+        path: ASSIGN_VILLAGE
+    }
+];
 

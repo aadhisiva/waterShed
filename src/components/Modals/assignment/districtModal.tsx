@@ -10,6 +10,8 @@ import SpinnerLoader from '../../spinner/spinner';
 import SelectField from '../../formhandle/SelectField';
 import useForm from '../../formhandle/customValidation';
 import TextFieldMU from '../../formhandle/TextField';
+import { mobileNoValid, nameValid } from '../../../utils/validations';
+import useSelectorForUser from '../../customHooks/useSelectForUser';
 
 interface ActivityModalProps {
   open: boolean;
@@ -28,6 +30,8 @@ export default function DistrictModal({
   const [districtOptions, setDistrictOptions] = React.useState([]);
   const [rolesOption, setRolesOption] = React.useState([]);
 
+  const [{RoleId}] = useSelectorForUser();
+  
   React.useEffect(() => {
     fecthIntialData();
   }, []);
@@ -37,7 +41,7 @@ export default function DistrictModal({
     let { data } = await axiosInstance.post('getMasterDropDown', {
       ReqType: 1, Type: formData.Type
     });
-    let response = await axiosInstance.post('addOrGetRoles', { ReqType: 'Dd' });
+    let response = await axiosInstance.post('getChildBasedOnParent', { RoleId });
     if (data?.code == 200) {
       setDistrictOptions(data.data);
       setRolesOption(response.data.data);
@@ -78,7 +82,7 @@ export default function DistrictModal({
         if (!value) {
           return 'Name is required';
         }
-        return null;
+        return nameValid(value);
       },
     },
     Type: {
@@ -94,7 +98,7 @@ export default function DistrictModal({
         if (!value) {
           return 'Mobile is required';
         }
-        return null;
+        return mobileNoValid(value);
       },
     },
   };
@@ -140,6 +144,7 @@ export default function DistrictModal({
                   { value: 'Rural', name: 'Rural' },
                 ]}
                 onBlur={handleBlur}
+                disabled={true}
                 error={touched.Type && Boolean(errors.Type)}
                 helperText={touched.Type && errors.Type}
               />
@@ -150,6 +155,7 @@ export default function DistrictModal({
                 onChange={handleChange}
                 options={districtOptions}
                 onBlur={handleBlur}
+                disabled={true}
                 error={touched.DistrictCode && Boolean(errors.DistrictCode)}
                 helperText={touched.DistrictCode && errors.DistrictCode}
               />

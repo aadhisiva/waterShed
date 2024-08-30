@@ -3,6 +3,7 @@ import React, { ChangeEvent, useEffect, useState } from 'react';
 import SelectField from '../formhandle/SelectField';
 import useForm from '../formhandle/customValidation';
 import axiosInstance from '../../axiosInstance';
+import useSelectorForUser from '../customHooks/useSelectForUser';
 
 interface SelectDistrictProps {
   handleSubmitForm: any;
@@ -16,6 +17,9 @@ export default function SelectVillage({
   const [talukDropdown, setTalukDropdown] = useState([]);
   const [hobliDropdown, setHobliDropdown] = useState([]);
   const [villageDropdown, setVillageDropdown] = useState([]);
+
+  const [{Mobile}] = useSelectorForUser();
+
   const initialValues: any = {
     DistrictCode: '',
     TalukCode: '',
@@ -96,10 +100,7 @@ export default function SelectVillage({
       HobliCode: "",
       VillageCode: ""
     });
-    let { data } = await axiosInstance.post('getMasterDropDown', {
-      ReqType: 1,
-      Type: e.target.value,
-    });
+    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, loginType: "District",ListType: "Hobli", Mobile, Type: e.target.value });
     setDistrictDropdown(data.data);
     setLoading(false);
   };
@@ -114,11 +115,7 @@ export default function SelectVillage({
       HobliCode: "",
       VillageCode: ""
     });
-    let { data } = await axiosInstance.post('getMasterDropDown', {
-      ReqType: 2,
-      Type: values.Type,
-      UDCode: e.target.value,
-    });
+    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 2, UDCode: e.target.value, loginType: "Taluk",ListType: "Hobli", Mobile, Type: values.Type });
     setTalukDropdown(data.data);
     setLoading(true);
   };
@@ -131,12 +128,7 @@ export default function SelectVillage({
       HobliCode: "",
       VillageCode: ""
     });
-    let { data } = await axiosInstance.post('getMasterDropDown', {
-      ReqType: 3,
-      Type: values.Type,
-      UDCode: values.DistrictCode,
-      UTCode: e.target.value,
-    });
+    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 3, UTCode: e.target.value, UDCode: values.DistrictId, loginType: "Hobli", ListType: "Hobli", Mobile, Type: values.Type })
     setHobliDropdown(data.data);
     setLoading(true);
   };

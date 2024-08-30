@@ -103,7 +103,7 @@ const PrivateRoute: FC<PrivateRouteProps> = ({ timeoutInMinutes }) => {
   return isLoggedIn ? 
   <HeaderWithSidebar logoutTime={logoutTime} setModalOpen={() => setModalOpen(false)} modalOpen={modalOpen}>
   <Outlet />
-  </HeaderWithSidebar> : <Navigate to={'/signin'} replace />; // SessionTimer component doesn't render anything
+  </HeaderWithSidebar> : <Navigate to={'/login'} replace />; // SessionTimer component doesn't render anything
 };
 
 export default PrivateRoute;

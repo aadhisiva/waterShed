@@ -44,6 +44,7 @@ export default function Department() {
   };
 
   const handleClickAdd = () => {
+    setFormData({});
     setOpenModal(true);
   };
   const fecthIntialData = async () => {

@@ -6,14 +6,11 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import InputBase from '@mui/material/InputBase';
-import Badge from '@mui/material/Badge';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import MailIcon from '@mui/icons-material/Mail';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import MuiDrawer from '@mui/material/Drawer';
 import {
@@ -34,13 +31,13 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
 import { CSSObject } from '@emotion/react';
-import { RoutingObjects } from '../utils/routingObjects';
+import { routesDistrict, routesHobli, routesOfAdmin, routesOfSuperAdmin, routesTaluk, RoutingObjects } from '../utils/routingObjects';
 import { useNavigate } from 'react-router-dom';
 import LogoutModal from './Modals/LogoutModal';
 import { clearSessionEndTime, userLoggedOut } from '../reducers/authReducer';
 import useDisptachForAction from './customHooks/useDis';
+import useSelectorForUser from './customHooks/useSelectForUser';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -158,7 +155,8 @@ interface HeaderForLoginProps {
   logoutTime: string | number | NodeJS.Timeout | undefined;
   modalOpen?: boolean;
   setModalOpen?: any;
-}
+};
+
 export default function HeaderWithSidebar({children, logoutTime, modalOpen, setModalOpen}: HeaderForLoginProps) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
@@ -173,6 +171,7 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
   const muiUtils = React.useContext(MUIWrapperContext);
   const navigate = useNavigate();
   const [dispatch] = useDisptachForAction();
+  const [{ RoleAccess }] = useSelectorForUser();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -198,7 +197,7 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
   const handleLogout = () => {
     dispatch(userLoggedOut());
     dispatch(clearSessionEndTime());
-    navigate('/signin', { replace: true });
+    navigate('/login', { replace: true });
   }
 
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -280,6 +279,13 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
       </MenuItem>
     </Menu>
   );
+
+  let pageRoutes = (RoleAccess?.District == "Yes" && RoleAccess?.Type == "Admin") ?
+  routesOfSuperAdmin : (RoleAccess?.District == "Yes" && RoleAccess?.Type == "Both") ?
+  routesOfAdmin :  RoleAccess?.Taluk == "Yes" ?
+  routesDistrict :  RoleAccess?.Hobli == "Yes" ?
+  routesTaluk :  RoleAccess?.Village == "Yes" ?
+  routesHobli : [];
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -429,7 +435,7 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
         </DrawerHeader>
         <Divider />
         <List>
-          {(RoutingObjects || []).map((route, index) => (
+          {(pageRoutes || []).map((route, index) => (
             <ListItem onClick={() => navigate(route.path)} key={index} disablePadding sx={{ display: 'block' }}>
               <ListItemButton
                 sx={{

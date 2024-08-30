@@ -7,14 +7,17 @@ import {
 } from 'react-router-dom';
 import PrivateRoute from './PrivateRoutes';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { ACTIVITY, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_HOBLI, ASSIGN_TALUK, ASSIGN_VILLAGE, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, QUESTION_DROPDOWNS, QUESTION_MASTER, ROLES, ROLES_ACCESS, SCHEMES, SECTORS } from '../utils/routingPath';
+import { ACTIVITY, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_HOBLI, ASSIGN_TALUK, ASSIGN_VILLAGE, CHILD_ROLES, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, QUESTION_DROPDOWNS, QUESTION_MASTER, ROLES, ROLES_ACCESS, SCHEMES, SECTORS } from '../utils/routingPath';
 
 const LoginPageLazy = lazy(() => import('../pages/LoginPage'));
+const RoleWiseLoginLazy = lazy(() => import('../pages/roleWiseLogin'));
 const SigninPageLazy = lazy(() => import('../pages/SignUpPage'));
 
 const HomeLazy = lazy(() => import('../pages/Dashboard'));
 const DepartmentLazy = lazy(() => import('../pages/admin/department'));
 const RolesLazy = lazy(() => import('../pages/admin/roles'));
+const ChildRolesLazy = lazy(() => import('../pages/admin/childRoles'));
+
 const ActivityLazy = lazy(() => import('../pages/admin/activity'));
 const SectorsLazy = lazy(() => import('../pages/admin/sectors'));
 const SchemesLazy = lazy(() => import('../pages/admin/schemes'));
@@ -42,6 +45,8 @@ export default function RoutesPro() {
           <Route path={SCHEMES} Component={SchemesLazy} />
           <Route path={DASHBOARD} Component={DashboardLazy} />
           <Route path={ROLES} Component={RolesLazy} />
+          <Route path={CHILD_ROLES} Component={ChildRolesLazy} />
+
           <Route path={ACTIVITY} Component={ActivityLazy} />
           <Route path={SECTORS} Component={SectorsLazy} />
           <Route path={DPRS_COMMON} Component={DprsCommonLazy} />
@@ -57,12 +62,17 @@ export default function RoutesPro() {
           <Route path={ASSIGN_VILLAGE} Component={VillageAssignmentLazy} />
         </Route>
         <Route
-          path="signin"
+          path="/login"
+          Component={RoleWiseLoginLazy}
+          // loader={async () => isAuthenticated()}
+        />
+        <Route
+          path="/signin"
           Component={LoginPageLazy}
           // loader={async () => isAuthenticated()}
         />
         <Route
-          path="signup"
+          path="/signup"
           Component={SigninPageLazy}
           // loader={async () => isAuthenticated()}
         />

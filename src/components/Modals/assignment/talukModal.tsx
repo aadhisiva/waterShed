@@ -10,6 +10,8 @@ import SpinnerLoader from '../../spinner/spinner';
 import SelectField from '../../formhandle/SelectField';
 import useForm from '../../formhandle/customValidation';
 import TextFieldMU from '../../formhandle/TextField';
+import { mobileNoValid, nameValid } from '../../../utils/validations';
+import useSelectorForUser from '../../customHooks/useSelectForUser';
 
 interface ActivityModalProps {
   open: boolean;
@@ -29,22 +31,21 @@ export default function TalukModal({
   const [talukOptions, setTalukOptions] = React.useState([]);
   const [rolesOption, setRolesOption] = React.useState([]);
 
+  const [{RoleId, Mobile}] = useSelectorForUser();
+
   React.useEffect(() => {
     fecthIntialData();
   }, []);
 
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('getMasterDropDown', {
-      ReqType: 1,
-      Type: formData.Type
-    });
+    let { data } = await axiosInstance.post('getMasterDropDown', { ReqType: 1, ListType: 'District', loginType: 'District', Mobile, Type: formData.Type });
     let tresponse = await axiosInstance.post('getMasterDropDown', {
       ReqType: 2,
       Type: formData.Type,
       UDCode: formData.DistrictCode,
     });
-    let response = await axiosInstance.post('addOrGetRoles', { ReqType: 'Dd' });
+    let response = await axiosInstance.post('getChildBasedOnParent', { RoleId });
     if (data?.code == 200) {
       setDistrictOptions(data.data);
       setTalukOptions(tresponse.data.data);
@@ -95,7 +96,7 @@ export default function TalukModal({
         if (!value) {
           return 'Name is required';
         }
-        return null;
+        return nameValid(value);
       },
     },
     Type: {
@@ -111,7 +112,7 @@ export default function TalukModal({
         if (!value) {
           return 'Mobile is required';
         }
-        return null;
+        return mobileNoValid(value);
       },
     },
   };
@@ -157,6 +158,7 @@ export default function TalukModal({
                   { value: 'Rural', name: 'Rural' },
                 ]}
                 onBlur={handleBlur}
+                disabled={true}
                 error={touched.Type && Boolean(errors.Type)}
                 helperText={touched.Type && errors.Type}
               />
@@ -167,6 +169,7 @@ export default function TalukModal({
                 onChange={handleChange}
                 options={districtOptions}
                 onBlur={handleBlur}
+                disabled={true}
                 error={touched.DistrictCode && Boolean(errors.DistrictCode)}
                 helperText={touched.DistrictCode && errors.DistrictCode}
               />
@@ -177,6 +180,7 @@ export default function TalukModal({
                 onChange={handleChange}
                 options={talukOptions}
                 onBlur={handleBlur}
+                disabled={true}
                 error={touched.TalukCode && Boolean(errors.TalukCode)}
                 helperText={touched.TalukCode && errors.TalukCode}
               />

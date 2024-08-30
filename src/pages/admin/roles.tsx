@@ -47,6 +47,7 @@ export default function Roles() {
   };
 
   const handleClickAdd = () => {
+    setFormData({});
     setOpenModal(true);
   };
   const fecthIntialData = async () => {

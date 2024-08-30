@@ -9,6 +9,10 @@ interface ExampleState {
   Mobile?: string;
   Name?: string;
   Username?:string;
+  RoleName?:string;
+  RoleAccess?:string | any;
+  Otp?:string | number;
+  RoleId?:string | number;
 }
 
 const initialState: ExampleState = {
@@ -18,7 +22,11 @@ const initialState: ExampleState = {
   token: '',
   Mobile: '',
   Name: '',
-  Username: ''
+  Username: '',
+  RoleName: "",
+  RoleAccess: {},
+  Otp: '',
+  RoleId: ''
 };
 
 const authSlice = createSlice({
@@ -26,12 +34,15 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     userLoggedIn(state, action: PayloadAction<any>) {
-      console.log("action",action)
+      const { RoleAccess, Mobile, Otp, Token, RoleName, RoleId, Username} = action.payload;
       state.isLoggedIn = true;
-      state.Name = action.payload.Name;
-      state.Mobile = action.payload.Mobile;
-      state.token = action.payload.token;
-      state.Username = action.payload.Usernaem
+      state.Mobile = Mobile;
+      state.token = Token;
+      state.Username = Username,
+      state.RoleName = RoleName,
+      state.RoleAccess = RoleAccess,
+      state.RoleId = RoleId,
+      state.Otp = Otp
     },
     userLoggedOut(state) {
       state.isLoggedIn = false;

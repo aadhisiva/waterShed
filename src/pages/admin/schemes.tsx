@@ -59,6 +59,7 @@ export default function Schemes() {
   };
 
   const handleClickAdd = () => {
+    setFormData({});
     setOpenModal(true);
   };
   const fecthIntialData = async () => {

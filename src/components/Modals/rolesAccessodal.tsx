@@ -39,7 +39,7 @@ export default function RoleAccessModal({
     Taluk: formData.Taluk,
     Hobli: formData.Hobli,
     Village: formData.Village,
-    DepartmentId: formData.DepartmentId,
+    Type: formData.Type,
   };
 
   const validationSchema = {
@@ -83,10 +83,10 @@ export default function RoleAccessModal({
         return null;
       },
     },
-    DepartmentId: {
+    Type: {
       validate: (value: string) => {
         if (!value) {
-          return 'DepartmentName is required';
+          return 'Type is required';
         }
         return null;
       },
@@ -125,7 +125,7 @@ export default function RoleAccessModal({
       alert(data.message || 'please try again');
     }
   };
-
+const typeOptions = [{value: "Urban", name: "Urban"},{value: "Rural", name: "Rural"},{value: "Both", name: "Both"},{value: "Admin", name: "Admin"}]
   return (
     <React.Fragment>
       <SpinnerLoader isLoading={loading} />
@@ -192,14 +192,14 @@ export default function RoleAccessModal({
                 helperText={touched.Village && errors.Village}
               />
               <SelectField
-                name="DepartmentId"
-                label="Department Name"
-                value={values.DepartmentId}
+                name="Type"
+                label="Type"
+                value={values.Type}
                 onChange={handleChange}
-                options={departmentOptions}
+                options={typeOptions}
                 onBlur={handleBlur}
-                error={touched.DepartmentId && Boolean(errors.DepartmentId)}
-                helperText={touched.DepartmentId && errors.DepartmentId}
+                error={touched.Type && Boolean(errors.Type)}
+                helperText={touched.Type && errors.Type}
               />
             </Box>
             <DialogActions>

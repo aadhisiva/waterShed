@@ -13,7 +13,7 @@ import axiosInstance from '../../axiosInstance';
 import SpinnerLoader from '../spinner/spinner';
 import { nameValid } from '../../utils/validations';
 
-interface RolesModalProps {
+interface ChildRolesModalProps {
   open: boolean;
   handleClose?: any;
   handleSubmitForm?: any;
@@ -24,33 +24,34 @@ type Values = {
   [key: string]: string;
 };
 
-export default function RolesModal({
+export default function ChildRolesModal({
   open,
   handleClose,
   handleSubmitForm,
   formData,
-}: RolesModalProps) {
+}: ChildRolesModalProps) {
   const [departmentOptions, setDepartmentOptions] = React.useState([]);
+  const [roleOptions, setRoleOptions] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
 
   const initialValues = {
-    RoleName: formData.RoleName,
-    DepartmentId: formData.DepartmentId,
+    RoleId: formData.RoleId,
+    ChildId: formData.ChildId,
   };
 
   const validationSchema = {
-    RoleName: {
+    RoleId: {
       validate: (value: string) => {
         if (!value) {
           return 'RoleName is required';
         }
-        return nameValid(value);
+        return null;
       },
     },
-    DepartmentId: {
+    ChildId: {
       validate: (value: string) => {
         if (!value) {
-          return 'DepartmentName is required';
+          return 'Child Name is required';
         }
         return null;
       },
@@ -78,9 +79,9 @@ export default function RolesModal({
 
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('departments', { ReqType: 'Dd' });
+    let { data } = await axiosInstance.post('addOrGetRoles', { ReqType: 'Dd' });
     if (data?.code == 200) {
-      setDepartmentOptions(data.data);
+      setRoleOptions(data.data);
       setLoading(false);
     } else {
       setLoading(false);
@@ -103,24 +104,25 @@ export default function RolesModal({
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <Box sx={{ mb: 2, mt: 2 }}>
-              <TextFieldMU
-                name="RoleName"
+              <SelectField
+                name="RoleId"
                 label="Role Name"
-                value={values.RoleName}
+                value={values.RoleId}
                 onChange={handleChange}
+                options={roleOptions}
                 onBlur={handleBlur}
-                error={touched.RoleName && Boolean(errors.RoleName)}
-                helperText={touched.RoleName && errors.RoleName}
+                error={touched.RoleId && Boolean(errors.RoleId)}
+                helperText={touched.RoleId && errors.RoleId}
               />
               <SelectField
-                name="DepartmentId"
-                label="Department Name"
-                value={values.DepartmentId}
+                name="ChildId"
+                label="Child Name"
+                value={values.ChildId}
                 onChange={handleChange}
-                options={departmentOptions}
+                options={roleOptions}
                 onBlur={handleBlur}
-                error={touched.DepartmentId && Boolean(errors.DepartmentId)}
-                helperText={touched.DepartmentId && errors.DepartmentId}
+                error={touched.ChildId && Boolean(errors.ChildId)}
+                helperText={touched.ChildId && errors.ChildId}
               />
             </Box>
             <DialogActions>

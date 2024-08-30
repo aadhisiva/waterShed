@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import EnhancedTableData from '../../components/TableData';
-import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import DeleteIcon from '@mui/icons-material/Delete';
 import axiosInstance from '../../axiosInstance';
-import RolesModal from '../../components/Modals/rolesModal';
 import SpinnerLoader from '../../components/spinner/spinner';
-import SelectDistrict from '../../components/assignment/selectDistrict';
-import DistrictModal from '../../components/Modals/assignment/districtModal';
 import SelectTaluk from '../../components/assignment/selectTaluk';
 import TalukModal from '../../components/Modals/assignment/talukModal';
 
@@ -36,6 +30,12 @@ const headCells = [
     numeric: false,
     disablePadding: true,
     label: 'Type',
+  },
+  {
+    id: 'RoleName',
+    numeric: false,
+    disablePadding: true,
+    label: 'Role Name',
   },
   {
     id: 'Name',

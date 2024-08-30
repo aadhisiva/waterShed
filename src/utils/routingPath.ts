@@ -1,5 +1,6 @@
 export const DEPARTMENT = "/Department";
 export const ROLES = "/Roles";
+export const CHILD_ROLES = "/Child-Roles";
 export const SCHEMES = "/Schemes";
 export const SECTORS = "/Sectors";
 export const ACTIVITY = "/Activity";
