@@ -9,6 +9,7 @@ import RolesModal from '../../components/Modals/rolesModal';
 import SpinnerLoader from '../../components/spinner/spinner';
 import SelectDistrict from '../../components/assignment/selectDistrict';
 import DistrictModal from '../../components/Modals/assignment/districtModal';
+import useSelectorForUser from '../../components/customHooks/useSelectForUser';
 
 const headCells = [
   {
@@ -22,12 +23,6 @@ const headCells = [
     numeric: false,
     disablePadding: true,
     label: 'District Name Ka',
-  },
-  {
-    id: 'Type',
-    numeric: false,
-    disablePadding: true,
-    label: 'Type',
   },
   {
     id: 'RoleName',
@@ -67,6 +62,8 @@ export default function AssignDistrict() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({});
 
+  const [{Mobile}] = useSelectorForUser();
+
   const handleClickModify = (data: Data) => {
     setOpenModal(true);
     setFormData(data);
@@ -79,7 +76,9 @@ export default function AssignDistrict() {
   const fecthIntialData = async () => {
     setLoading(true);
     let { data } = await axiosInstance.post('getAssignedMasters', {
-      ReqType: 1,
+      ReqType: "District",
+      DataType: "",
+      Mobile
     });
     if (data?.code == 200) {
       setTableData(data.data);
@@ -97,6 +96,7 @@ export default function AssignDistrict() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ListType'] = 'District';
+    values['ReqType'] = 1;
     let { data } = await axiosInstance.post('assignmentProcess', values);
     if (data.code == 200) {
       await fecthIntialData();

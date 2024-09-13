@@ -48,15 +48,7 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
         }
         return null;
       },
-    },
-    Type: {
-      validate: (value: string) => {
-        if (!value) {
-          return 'Type is required';
-        }
-        return null;
-      },
-    },
+    }
   };
 
   const onSubmit = (values: any) => {
@@ -77,16 +69,19 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
   const handleClearFilter = () => {
     setValues({});
   };
-  const handleDistictDropdown = async (e: ChangeEvent<HTMLInputElement>) => {
+
+  useEffect(() => {
+    handleDistictDropdown();
+  },[]);
+  const handleDistictDropdown = async () => {
     setLoading(true);
     setValues({
       ...values,
-      Type: e.target.value, 
       DistrictCode: "",
       TalukCode: "",
       HobliCode: ""
     });
-    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, loginType: "District",ListType: "Taluk", Mobile, Type: e.target.value });
+    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, loginType: "District",ListType: "Taluk", Mobile });
     setDistrictDropdown(data.data);
     setLoading(false);
   };
@@ -99,7 +94,7 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
       TalukCode: "",
       HobliCode: ""
     });
-    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 2, UDCode: e.target.value, loginType: "Taluk",ListType: "Taluk", Mobile, Type: values.Type });
+    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 2, UDCode: e.target.value, loginType: "Taluk",ListType: "Taluk", Mobile });
     setTalukDropdown(data.data);
     setLoading(true);
   };
@@ -113,7 +108,6 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
     });
     let { data } = await axiosInstance.post('getMasterDropDown', {
       ReqType: 3,
-      Type: values.Type,
       UDCode: values.DistrictCode,
       UTCode: e.target.value,
     });
@@ -147,21 +141,6 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
           spacing={2}
           sx={{ display: 'flex', alignItems: 'center', padding: 1 }}
         >
-           <Grid item xs={6} sm={3}>
-            <SelectField
-              name="Type"
-              label="Type"
-              value={values.Type}
-              onChange={handleDistictDropdown}
-              options={[
-                { value: 'Urban', name: 'Urban' },
-                { value: 'Rural', name: 'Rural' },
-              ]}
-              onBlur={handleBlur}
-              error={touched.Type && Boolean(errors.Type)}
-              helperText={touched.Type && errors.Type}
-            />
-          </Grid>
           <Grid item xs={6} sm={3}>
             <SelectField
               name="DistrictCode"

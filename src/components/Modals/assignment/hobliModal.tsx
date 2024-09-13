@@ -32,7 +32,7 @@ export default function HobliModal({
   const [rolesOption, setRolesOption] = React.useState([]);
   const [hobliOptions, setHobliOptions] = React.useState([]);
 
-  const [{RoleId, Mobile}] = useSelectorForUser();
+  const [{RoleId, Mobile, Name, RoleName}] = useSelectorForUser();
 
   React.useEffect(() => {
     fecthIntialData();
@@ -40,11 +40,10 @@ export default function HobliModal({
 
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, loginType: "District",ListType: "Taluk", Mobile, Type: formData.Type });
-    let tresponse = await axiosInstance.post("getMasterDropdown", { ReqType: 2, UDCode: formData.DistrictCode, loginType: "Taluk",ListType: "Taluk", Mobile, Type: formData.Type });;
+    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, loginType: "District",ListType: "Taluk", Mobile });
+    let tresponse = await axiosInstance.post("getMasterDropdown", { ReqType: 2, UDCode: formData.DistrictCode, loginType: "Taluk",ListType: "Taluk", Mobile });;
     let hresponse = await axiosInstance.post('getMasterDropDown', {
       ReqType: 3,
-      Type: formData.Type,
       UDCode: formData.DistrictCode,
       UTCode: formData.TalukCode,
     });
@@ -67,8 +66,7 @@ export default function HobliModal({
     HobliCode: formData.HobliCode,
     RoleId: formData.RoleId,
     Name: formData.Name,
-    Mobile: formData.Mobile,
-    Type: formData.Type
+    Mobile: formData.Mobile
   };
 
   const validationSchema = {
@@ -119,20 +117,15 @@ export default function HobliModal({
         }
         return mobileNoValid(value);
       },
-    },
-    Type: {
-      validate: (value: string) => {
-        if (!value) {
-          return 'Type is required';
-        }
-        return null;
-      },
-    },
+    }
   };
 
   const onSubmit = (values: any) => {
     // Handle form submission logic, e.g., API call
     values.id = formData.id;
+    values.CreatedMobile = Mobile;
+    values.CreatedRole = RoleName;
+    values.CreatedName = Name;
     handleSubmitForm(values);
   };
 
@@ -161,20 +154,6 @@ export default function HobliModal({
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <Box sx={{ mb: 2, mt: 2 }}>
-              <SelectField
-                name="Type"
-                label="Type"
-                value={values.Type}
-                onChange={handleChange}
-                options={[
-                  { value: 'Urban', name: 'Urban' },
-                  { value: 'Rural', name: 'Rural' },
-                ]}
-                onBlur={handleBlur}
-                disabled={true}
-                error={touched.Type && Boolean(errors.Type)}
-                helperText={touched.Type && errors.Type}
-              />
               <SelectField
                 name="DistrictCode"
                 label="District Name"

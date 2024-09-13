@@ -5,6 +5,7 @@ import axiosInstance from '../../axiosInstance';
 import SpinnerLoader from '../../components/spinner/spinner';
 import SelectTaluk from '../../components/assignment/selectTaluk';
 import TalukModal from '../../components/Modals/assignment/talukModal';
+import useSelectorForUser from '../../components/customHooks/useSelectForUser';
 
 const headCells = [
   {
@@ -24,12 +25,6 @@ const headCells = [
     numeric: false,
     disablePadding: true,
     label: 'Taluk Name Ka',
-  },
-  {
-    id: 'Type',
-    numeric: false,
-    disablePadding: true,
-    label: 'Type',
   },
   {
     id: 'RoleName',
@@ -69,6 +64,8 @@ export default function AssignTaluk() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({});
 
+  const [{Mobile}] = useSelectorForUser();
+  
   const handleClickModify = (data: Data) => {
     setOpenModal(true);
     setFormData(data);
@@ -81,7 +78,9 @@ export default function AssignTaluk() {
   const fecthIntialData = async () => {
     setLoading(true);
     let { data } = await axiosInstance.post('getAssignedMasters', {
-      ReqType: 2,
+      ReqType: "Taluk",
+      DataType: "All",
+      Mobile
     });
     if (data?.code == 200) {
       setTableData(data.data);
@@ -99,6 +98,7 @@ export default function AssignTaluk() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ListType'] = 'Taluk';
+    values['ReqType'] = 1;
     let { data } = await axiosInstance.post('assignmentProcess', values);
     if (data.code == 200) {
       await fecthIntialData();

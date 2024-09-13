@@ -14,8 +14,7 @@ export default function SelectDistrict({
   const [loading, setLoading] = useState(false);
   const [districtDropdown, setDistrictDropdown] = useState([]);
   const initialValues: any = {
-    DistrictCode: '',
-    Type: '',
+    DistrictCode: ''
   };
 
   const validationSchema = {
@@ -26,15 +25,7 @@ export default function SelectDistrict({
         }
         return null;
       },
-    },
-    Type: {
-      validate: (value: string) => {
-        if (!value) {
-          return 'Type is required';
-        }
-        return null;
-      },
-    },
+    }
   };
 
   const onSubmit = (values: any) => {
@@ -56,16 +47,14 @@ export default function SelectDistrict({
     setValues({});
   };
 
-  const handleDistictDropdown = async (e: ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    handleDistictDropdown();
+  }, [])
+
+  const handleDistictDropdown = async () => {
     setLoading(true);
-    setValues({
-      ...values,
-      Type: e.target.value, 
-      DistrictCode: "",
-    });
     let { data } = await axiosInstance.post('getMasterDropDown', {
-      ReqType: 1,
-      Type: e.target.value,
+      ReqType: 1
     });
       setLoading(false);
       setDistrictDropdown(data.data);
@@ -97,21 +86,6 @@ export default function SelectDistrict({
           spacing={2}
           sx={{ display: 'flex', alignItems: 'center', padding: 1 }}
         >
-          <Grid item xs={6} sm={3}>
-            <SelectField
-              name="Type"
-              label="Type"
-              value={values.Type}
-              onChange={handleDistictDropdown}
-              options={[
-                { value: 'Urban', name: 'Urban' },
-                { value: 'Rural', name: 'Rural' },
-              ]}
-              onBlur={handleBlur}
-              error={touched.Type && Boolean(errors.Type)}
-              helperText={touched.Type && errors.Type}
-            />
-          </Grid>
           <Grid item xs={6} sm={3}>
             <SelectField
               name="DistrictCode"

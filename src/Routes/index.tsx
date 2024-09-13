@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom';
 import PrivateRoute from './PrivateRoutes';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { ACTIVITY, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_HOBLI, ASSIGN_TALUK, ASSIGN_VILLAGE, CHILD_ROLES, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, QUESTION_DROPDOWNS, QUESTION_MASTER, ROLES, ROLES_ACCESS, SCHEMES, SECTORS } from '../utils/routingPath';
+import { ACTIVITY, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_HOBLI, ASSIGN_TALUK, ASSIGN_VILLAGE, CHILD_ROLES, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, MASTER_UPLOAD, QUESTION_DROPDOWNS, QUESTION_MASTER, ROLES, ROLES_ACCESS, SCHEMES, SECTORS } from '../utils/routingPath';
 
 const LoginPageLazy = lazy(() => import('../pages/LoginPage'));
 const RoleWiseLoginLazy = lazy(() => import('../pages/roleWiseLogin'));
@@ -32,6 +32,8 @@ const DistrictAssignmentLazy = lazy(() => import('../pages/assign/District'));
 const TalukAssignmentLazy = lazy(() => import('../pages/assign/Taluk'));
 const HobliAssignmentLazy = lazy(() => import('../pages/assign/Hobli'));
 const VillageAssignmentLazy = lazy(() => import('../pages/assign/Village'));
+
+const MastersUploadLazy = lazy(() => import('../pages/admin/masters'));
 
 const DashboardLazy = lazy(() => import('../pages/Dashboard'));
 
@@ -60,6 +62,7 @@ export default function RoutesPro() {
           <Route path={ASSIGN_TALUK} Component={TalukAssignmentLazy} />
           <Route path={ASSIGN_HOBLI} Component={HobliAssignmentLazy} />
           <Route path={ASSIGN_VILLAGE} Component={VillageAssignmentLazy} />
+          <Route path={MASTER_UPLOAD} Component={MastersUploadLazy} />
         </Route>
         <Route
           path="/login"

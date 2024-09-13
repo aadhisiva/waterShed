@@ -1,4 +1,4 @@
-import { ACTIVITY, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, ROLES, SCHEMES, SECTORS, ROLES_ACCESS, QUESTION_MASTER, QUESTION_DROPDOWNS, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_TALUK, ASSIGN_HOBLI, ASSIGN_VILLAGE, CHILD_ROLES } from "./routingPath";
+import { ACTIVITY, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, ROLES, SCHEMES, SECTORS, ROLES_ACCESS, QUESTION_MASTER, QUESTION_DROPDOWNS, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_TALUK, ASSIGN_HOBLI, ASSIGN_VILLAGE, CHILD_ROLES, MASTER_UPLOAD } from "./routingPath";
 import CorporateFareIcon from '@mui/icons-material/CorporateFare';
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import LocalActivityIcon from '@mui/icons-material/LocalActivity';
@@ -95,6 +95,11 @@ export const RoutingObjects = [
         icon: MapIcon,
         path: ACTIVITY_MAPPING
     },
+    {
+        name: "Master Upload",
+        icon: LandscapeIcon,
+        path: MASTER_UPLOAD
+    },
 ];
 
 export const routesOfSuperAdmin = [
@@ -167,6 +172,11 @@ export const routesOfSuperAdmin = [
         name: "Activity/Sub Mapping",
         icon: MapIcon,
         path: ACTIVITY_MAPPING
+    },
+    {
+        name: "Master Upload",
+        icon: LandscapeIcon,
+        path: MASTER_UPLOAD
     },
 ];
 

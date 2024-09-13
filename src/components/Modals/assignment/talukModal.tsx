@@ -31,7 +31,7 @@ export default function TalukModal({
   const [talukOptions, setTalukOptions] = React.useState([]);
   const [rolesOption, setRolesOption] = React.useState([]);
 
-  const [{RoleId, Mobile}] = useSelectorForUser();
+  const [{RoleId, Mobile, Name, RoleName}] = useSelectorForUser();
 
   React.useEffect(() => {
     fecthIntialData();
@@ -39,10 +39,9 @@ export default function TalukModal({
 
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('getMasterDropDown', { ReqType: 1, ListType: 'District', loginType: 'District', Mobile, Type: formData.Type });
+    let { data } = await axiosInstance.post('getMasterDropDown', { ReqType: 1, ListType: 'District', loginType: 'District', Mobile });
     let tresponse = await axiosInstance.post('getMasterDropDown', {
       ReqType: 2,
-      Type: formData.Type,
       UDCode: formData.DistrictCode,
     });
     let response = await axiosInstance.post('getChildBasedOnParent', { RoleId });
@@ -63,7 +62,6 @@ export default function TalukModal({
     RoleId: formData.RoleId,
     Name: formData.Name,
     Mobile: formData.Mobile,
-    Type: formData.Type,
   };
 
   const validationSchema = {
@@ -99,14 +97,6 @@ export default function TalukModal({
         return nameValid(value);
       },
     },
-    Type: {
-      validate: (value: string) => {
-        if (!value) {
-          return 'Type is required';
-        }
-        return null;
-      },
-    },
     Mobile: {
       validate: (value: string) => {
         if (!value) {
@@ -120,6 +110,9 @@ export default function TalukModal({
   const onSubmit = (values: any) => {
     // Handle form submission logic, e.g., API call
     values.id = formData.id;
+    values.CreatedMobile = Mobile;
+    values.CreatedRole = RoleName;
+    values.CreatedName = Name;
     handleSubmitForm(values);
   };
 
@@ -148,20 +141,6 @@ export default function TalukModal({
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <Box sx={{ mb: 2, mt: 2 }}>
-              <SelectField
-                name="Type"
-                label="Type"
-                value={values.Type}
-                onChange={handleChange}
-                options={[
-                  { value: 'Urban', name: 'Urban' },
-                  { value: 'Rural', name: 'Rural' },
-                ]}
-                onBlur={handleBlur}
-                disabled={true}
-                error={touched.Type && Boolean(errors.Type)}
-                helperText={touched.Type && errors.Type}
-              />
               <SelectField
                 name="DistrictCode"
                 label="District Name"

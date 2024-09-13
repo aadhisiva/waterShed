@@ -18,7 +18,6 @@ export default function SelectTaluk({ handleSubmitForm }: SelectDistrictProps) {
   const initialValues: any = {
     DistrictCode: '',
     TalukCode: '',
-    Type: ''
   };
 
   const validationSchema = {
@@ -37,15 +36,7 @@ export default function SelectTaluk({ handleSubmitForm }: SelectDistrictProps) {
         }
         return null;
       },
-    },
-    Type: {
-      validate: (value: string) => {
-        if (!value) {
-          return 'Type is required';
-        }
-        return null;
-      },
-    },
+    }
   };
 
   const onSubmit = (values: any) => {
@@ -67,16 +58,13 @@ export default function SelectTaluk({ handleSubmitForm }: SelectDistrictProps) {
     setValues({});
   };
 
-  const handleDistictDropdown = async (e: ChangeEvent<HTMLInputElement>) => {
-    setDistrictDropdown([]);
-    setValues({
-      ...values,
-      Type: e.target.value, 
-      DistrictCode: "",
-      TalukCode: ""
-    });
+  useEffect(() => {
+    handleDistictDropdown();
+  }, [])
+
+  const handleDistictDropdown = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, ListType: 'District', loginType: 'District', Mobile, Type: e.target.value })
+    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, ListType: 'District', loginType: 'District', Mobile })
     setDistrictDropdown(data.data);
     setLoading(false);
   };
@@ -90,7 +78,6 @@ export default function SelectTaluk({ handleSubmitForm }: SelectDistrictProps) {
     });
     let { data } = await axiosInstance.post('getMasterDropDown', {
       ReqType: 2,
-      Type: values.Type,
       UDCode: e.target.value,
     });
     setTalukDropdown(data.data);
@@ -123,21 +110,6 @@ export default function SelectTaluk({ handleSubmitForm }: SelectDistrictProps) {
           spacing={2}
           sx={{ display: 'flex', alignItems: 'center', padding: 1 }}
         >
-            <Grid item xs={6} sm={3}>
-            <SelectField
-              name="Type"
-              label="Type"
-              value={values.Type}
-              onChange={handleDistictDropdown}
-              options={[
-                { value: 'Urban', name: 'Urban' },
-                { value: 'Rural', name: 'Rural' },
-              ]}
-              onBlur={handleBlur}
-              error={touched.Type && Boolean(errors.Type)}
-              helperText={touched.Type && errors.Type}
-            />
-          </Grid>
           <Grid item xs={6} sm={3}>
             <SelectField
               name="DistrictCode"

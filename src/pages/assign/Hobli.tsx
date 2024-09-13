@@ -13,6 +13,7 @@ import SelectTaluk from '../../components/assignment/selectTaluk';
 import TalukModal from '../../components/Modals/assignment/talukModal';
 import SelectHobli from '../../components/assignment/selectHobli';
 import HobliModal from '../../components/Modals/assignment/hobliModal';
+import useSelectorForUser from '../../components/customHooks/useSelectForUser';
 
 const headCells = [
   {
@@ -38,12 +39,6 @@ const headCells = [
     numeric: false,
     disablePadding: true,
     label: 'Hobli Name Ka',
-  },
-  {
-    id: 'Type',
-    numeric: false,
-    disablePadding: true,
-    label: 'Type',
   },
   {
     id: 'RoleName',
@@ -83,6 +78,8 @@ export default function AssignHobli() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({});
 
+  const [{Mobile}] = useSelectorForUser();
+
   const handleClickModify = (data: Data) => {
     setOpenModal(true);
     setFormData(data);
@@ -92,10 +89,13 @@ export default function AssignHobli() {
     setFormData(values);
     setOpenModal(true);
   };
+
   const fecthIntialData = async () => {
     setLoading(true);
     let { data } = await axiosInstance.post('getAssignedMasters', {
-      ReqType: 3,
+      ReqType: "Surveyer",
+      DataType: "",
+      Mobile
     });
     if (data?.code == 200) {
       setTableData(data.data);
@@ -113,6 +113,7 @@ export default function AssignHobli() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ListType'] = 'Hobli';
+    values['ReqType'] = 2;
     let { data } = await axiosInstance.post('assignmentProcess', values);
     if (data.code == 200) {
       await fecthIntialData();

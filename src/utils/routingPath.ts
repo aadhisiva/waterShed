@@ -18,3 +18,4 @@ export const ASSIGN_DISTRICT = "/District-Assignment";
 export const ASSIGN_TALUK = "/Taluk-Assignment";
 export const ASSIGN_HOBLI = "/Hobli-Assignment";
 export const ASSIGN_VILLAGE = "/Village-Assignment";
+export const MASTER_UPLOAD = "/Master-Upload";
