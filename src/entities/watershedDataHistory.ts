@@ -4,13 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne,
-  JoinColumn
 } from "typeorm";
-import { UserData } from "./userData";
 
-@Entity({ name: "WaterShedData" })
-export class WaterShedData {
+@Entity({ name: "WaterShedDataHistory" })
+export class WaterShedDataHistory {
 
   @PrimaryGeneratedColumn()
   id: number;
@@ -47,9 +44,6 @@ export class WaterShedData {
   
   @Column({ type: 'nvarchar', default: null, length: 250 })
   ProjectNameSubWatershed: string;
-  
-  @Column({ type: 'nvarchar', default: null, length: 200 })
-  GramPanchayat: string;
 
   @Column({ type: 'nvarchar', default: null, length: 200 })
   Hobli: string;
@@ -123,6 +117,11 @@ export class WaterShedData {
   @Column({ type: 'nvarchar', default: null, length: 200 })
   Seeds: string;
 
+  @Column({ type: 'nvarchar', default: null, length: 100 })
+  SubWatershedCode: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 100 })
+
   @Column({ type: 'nvarchar', default: null, length: 15 })
   CreatedMobile: string;
 
@@ -132,14 +131,8 @@ export class WaterShedData {
   @Column({ type: 'nvarchar', default: null, length: 50 })
   CreatedName: string;
 
-  @Column({ type: 'nvarchar', default: null, length: 100 })
-  VillageName: string;
-
-  @Column({ type: 'nvarchar', default: null, length: 100 })
-  SubWatershedCode: string;
-
-  @Column({ type: 'nvarchar', default: null, length: 100 })
-  MicroWatershedCode: string;
+  @Column({ type: 'nvarchar', default: null, length: 50 })
+  Status: string;
 
   @CreateDateColumn()
   createdDate: Date;

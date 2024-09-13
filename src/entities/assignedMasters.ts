@@ -57,6 +57,15 @@ import { Roles } from "./roles";
     @Column({ type: "nvarchar", length: 30, default: null })
     UserId: string;
   
+    @Column({ type: "nvarchar", length: 30, default: null })
+    CreatedMobile: string;
+  
+    @Column({ type: "nvarchar", length: 30, default: null })
+    CreatedRole: string;
+  
+    @Column({ type: "nvarchar", length: 30, default: null })
+    CreatedName: string;
+  
     @CreateDateColumn()
     createdDate: Date;
   

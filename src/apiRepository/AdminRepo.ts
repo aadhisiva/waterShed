@@ -446,7 +446,6 @@ export class AdminRepo {
 
     async assignmentProcess(data){
     if(!data?.id){
-        data.UserId = generateUniqueId();
         await assignMastersHositoryRepo.save({...data, ...{Status: "Added"}})
         return await assignedMastersRepo.save(data);
       } else {
@@ -455,51 +454,64 @@ export class AdminRepo {
         await assignMastersHositoryRepo.save({...data, ...{Status: "Updated"}})
         return await assignedMastersRepo.save(newData);
       }
-    }
+    };
 
+    async assignToSurvey(data) {
+        if (!data?.id) {
+          data.UserId = generateUniqueId();
+          await assignMastersHositoryRepo.save({ ...data, ...{ Status: "Added In Survey" } })
+          return await userDataRepo.save(data);
+        } else {
+          let findData = await userDataRepo.findOneBy({ id: Equal(data?.id) });
+          let newData = { ...findData, ...data };
+          await assignMastersHositoryRepo.save({ ...data, ...{ Status: "Updated In Survey" } })
+          return await userDataRepo.save(newData);
+        }
+      };
 
     async getDistrictsDD(data){
         return await masterDataRepo.createQueryBuilder('dd')
         .select(["DISTINCT dd.DistrictCode as value", "dd.DistrictName as name"])
+        .orderBy("DistrictName", "DESC")
         .getRawMany();
       };
     
       async getAuthDistrictDD(data){
-        const { Mobile, ListType, Type } = data;
+        const { Mobile, ListType } = data;
         return await masterDataRepo.createQueryBuilder('dd')
         .innerJoinAndSelect(AssignedMasters, 'am', 'am.DistrictCode=dd.DistrictCode')
         .select(["DISTINCT dd.DistrictCode as value", "dd.DistrictName as name"])
-        .where("am.Mobile = :Mobile and am.ListType = :ListType and am.Type = :Type", {Mobile, ListType, Type})
+        .where("am.Mobile = :Mobile and am.ListType = :ListType", {Mobile, ListType})
         .getRawMany();
       };
-      async getTalukDD(code, type){
+      async getTalukDD(code){
         return await masterDataRepo.createQueryBuilder('tt')
         .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
-        .where("tt.DistrictCode = :dc and tt.Type = :type", {dc: code, type})
+        .where("tt.DistrictCode = :dc", {dc: code})
         .getRawMany();
       };
       async getAuthTalukDD(data){
-        const { Mobile, Type, ListType} = data;
+        const { Mobile, ListType} = data;
         return await masterDataRepo.createQueryBuilder('tt')
-        .leftJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=tt.TalukCode and am.DistrictCode=tt.DistrictCode and am.Type=tt.Type')
+        .leftJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=tt.TalukCode and am.DistrictCode=tt.DistrictCode')
         .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
-        .where("am.Mobile = :Mobile and am.ListType = :ListType and am.Type = :Type", {Mobile, ListType, Type})
+        .where("am.Mobile = :Mobile and am.ListType = :ListType", {Mobile, ListType})
         .getRawMany();
       };
       
-      async getHobliDD(UDCode, UTCode, type){
+      async getHobliDD(UDCode, UTCode){
         return await masterDataRepo.createQueryBuilder('gd')
         .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as name"])
-        .where("gd.TalukCode = :tc and gd.DistrictCode = :dc and gd.Type = :type", {tc: UTCode, dc: UDCode, type})
+        .where("gd.TalukCode = :tc and gd.DistrictCode = :dc", {tc: UTCode, dc: UDCode})
         .getRawMany();
       };
     
       async getAuthHobliDD(data){
-        const { Mobile, Type, ListType} = data;
+        const { Mobile, ListType} = data;
         return await masterDataRepo.createQueryBuilder('gd')
-        .innerJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=gd.TalukCode and am.DistrictCode=gd.DistrictCode and am.HobliCode=gd.HobliCode and am.Type=gd.Type')
+        .innerJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=gd.TalukCode and am.DistrictCode=gd.DistrictCode and am.HobliCode=gd.HobliCode')
         .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as name"])
-        .where("am.Mobile = :Mobile and am.ListType = :ListType and gd.Type = :Type", {Mobile, ListType, Type})
+        .where("am.Mobile = :Mobile and am.ListType = :ListType", {Mobile, ListType})
         .getRawMany();
       }
       async getVillagesDD(UDCode, UTCode, UHCode){
@@ -509,6 +521,11 @@ export class AdminRepo {
         .getRawMany();
       };
 
+      async getAssignedData(data) {
+        const { Mobile, ReqType, DataType } = data;
+      let query = `execute assignedOfficersOrSurveyers @0,@1,@2`;
+      return await AppDataSource.query(query, [ReqType, Mobile, DataType]);
+    };
 
     async getAssignedDistricts() {
         return await assignedMastersRepo.createQueryBuilder('ta')
@@ -584,5 +601,10 @@ export class AdminRepo {
 
     async getImage(id) {
         return await uploadImgAndVideoRepo.findOneBy({ id: Equal(id) })
-    }
+    };
+
+    
+  async uploadDistrictMasters(data) {
+    return await masterDataRepo.save(data);
+  }
 };

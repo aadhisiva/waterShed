@@ -23,3 +23,4 @@ export * from "./assignedMasters";
 export * from "./wsImagesndVideos";
 export * from "./childRoles";
 export * from "./assignMastersHistory";
+export * from "./watershedDataHistory";

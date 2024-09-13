@@ -299,9 +299,13 @@ export class AdminServices {
     };
 
     async assignmentProcess(data){
-        return await this.adminRepo.assignmentProcess(data);
+        const { ReqType } = data;
+        if(ReqType == 1){
+            return await this.adminRepo.assignmentProcess(data);
+        } else if(ReqType == 2) {
+            return await this.adminRepo.assignToSurvey(data);
+        }
     };
-
     
     async getMasterDropDown(data) {
         const { ReqType, UDCode, UTCode, UHCode,Mobile, loginType, Type } = data;
@@ -316,14 +320,14 @@ export class AdminServices {
                 return await this.adminRepo.getAuthTalukDD(data);
             };
             if (!UDCode) return { code: 400, message: "Provide UDCode" };
-            return await this.adminRepo.getTalukDD(UDCode, Type);
+            return await this.adminRepo.getTalukDD(UDCode);
         } else if (ReqType == 3) {
             if(loginType == "Hobli"){
                 return await this.adminRepo.getAuthHobliDD(data);
             };
             if (!UDCode) return { code: 400, message: "Provide UDCode" };
             if (!UTCode) return { code: 400, message: "Provide UTCode" };
-            return await this.adminRepo.getHobliDD(UDCode, UTCode, Type);
+            return await this.adminRepo.getHobliDD(UDCode, UTCode);
         } else if (ReqType == 4) {
             if (!UDCode) return { code: 400, message: "Provide UDCode" };
             if (!UTCode) return { code: 400, message: "Provide UTCode" };
@@ -334,20 +338,12 @@ export class AdminServices {
         }
     };
 
-    async getAssignedMasters(data){
-        const {ReqType} = data;
-        if(ReqType == 1){ 
-            return await this.adminRepo.getAssignedDistricts();
-        } else if(ReqType == 2){ 
-            return await this.adminRepo.getAssignedTaluk();
-        } else if(ReqType == 3){ 
-            return await this.adminRepo.getAssignedHobli();
-        } else if(ReqType == 4){ 
-            return await this.adminRepo.getAssignedVillage();
-        } else {
-            return {code: 422, message: "Send correct formate to get response form server,", data: {}};
-        }
-    }
+    async getAssignedMasters(data) {
+        const { ReqType, Mobile } = data;
+        if (!ReqType) return { code: 400, message: "Provide ReqType" };
+        if (!Mobile) return { code: 400, message: "Provide Mobile" };
+        return await this.adminRepo.getAssignedData(data);
+    };
 
     async uploadPrivateLand(data){
         return await this.adminRepo.uploadPrivateLand(data);
@@ -382,5 +378,14 @@ export class AdminServices {
         let fetchData = await this.adminRepo.getImage(id);
         if(!fetchData) return {code: 422, message: "Image not found"};
        return fetchData;
-    }
+    };
+   
+    async uploadDistrictMasters(data) {
+        let chunkSize = 50;
+        for (let i = 0; i < data.length; i += chunkSize) {
+            const chunk = data.slice(i, i + chunkSize);
+            await this.adminRepo.uploadDistrictMasters(chunk);
+        }
+        return { code: 200, message: "Uploaded Successfully.", data: {} }
+    };
 }

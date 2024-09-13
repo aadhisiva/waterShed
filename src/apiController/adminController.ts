@@ -340,7 +340,7 @@ adminRouter.post("/superLogin", async (req, res) => {
     }
 });
 
-adminRouter.post("/assignmentProcess", async (req, res) => {
+adminRouter.post("/assignmentProcess", authenticateToken, async (req, res) => {
     try {
         let body = req.body;
         let result = await adminServices.assignmentProcess(body);
@@ -350,7 +350,7 @@ adminRouter.post("/assignmentProcess", async (req, res) => {
     }
 });
 
-adminRouter.post("/getMasterDropDown", async (req, res) => {
+adminRouter.post("/getMasterDropDown", authenticateToken, async (req, res) => {
     try {
         let body = req.body;
         let result = await adminServices.getMasterDropDown(body);
@@ -360,7 +360,7 @@ adminRouter.post("/getMasterDropDown", async (req, res) => {
     }
 });
 
-adminRouter.post("/getAssignedMasters", async (req, res) => {
+adminRouter.post("/getAssignedMasters", authenticateToken, async (req, res) => {
     try {
         let body = req.body;
         let result = await adminServices.getAssignedMasters(body);
@@ -436,7 +436,7 @@ adminRouter.post("/uploadCommonLand", upload.single('file'), async (req, res) =>
     }
 });
 
-adminRouter.post("/getDprsLand", async (req, res) => {
+adminRouter.post("/getDprsLand", authenticateToken, async (req, res) => {
     try {
         let body = req.body;
         let result = await adminServices.getDprsLand(body);
@@ -473,6 +473,39 @@ adminRouter.get('/getImage/:id', async (req, res) => {
     } catch (error) {
         return webAppResponse(res, error);
     };
+});
+
+adminRouter.post("/uplodMasters", upload.single('file'), async (req, res) => {
+    try {
+        const file = req.file;
+        if (!file) {
+            return res.status(400).send('No file uploaded');
+        }
+        // Read the file
+        // Use streams for handling large files
+        const workbook = XLSX.readFile(file.path, { cellText: false });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: ''});
+        // let findError = checkXlsxKeysExistOrNot(jsonData[0]);
+        // if(findError.error){
+        //     return res.send({code: 422, message: findError.message, data: {}});
+        // };
+        // Convert data to strings if needed
+        const convertedData = jsonData.map((row) => {
+            const convertedRow = {};
+            Object.keys(row).forEach((key) => {
+                convertedRow[key] = String(row[key]);
+            });
+            return convertedRow;
+        });
+        let result = await adminServices.uploadDistrictMasters(convertedData);
+        // Clean up the uploaded file
+        fs.unlinkSync(file.path);
+        res.send(result)
+    } catch (error) {
+        return webAppResponse(res, error);
+    }
 });
 
 

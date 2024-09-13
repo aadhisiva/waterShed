@@ -1,57 +1,66 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    CreateDateColumn,
-    UpdateDateColumn,
-    ManyToOne,
-    JoinColumn,
-    OneToMany,
-  } from "typeorm";
-import { Departments } from "./department";
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn
+} from "typeorm";
 import { Roles } from "./roles";
-import { WaterShedData } from "./watershedData";
-  
-  @Entity( { name: "UserData" })
-  export class UserData {
-  
-    @PrimaryGeneratedColumn()
-    id: number;
 
-    @ManyToOne(() => Departments, dep => dep.UserData)
-    @JoinColumn({name: "DepartmentId"})
-    DepartmentId: Departments
+@Entity({ name: "UserData" })
+export class UserData {
 
-    @ManyToOne(() => Roles, dep => dep.UserData)
-    @JoinColumn({name: "RoleId"})
-    RoleId: Roles
-  
-    @Column({ type: "nvarchar", length: 10 })
-    Otp: number;
-  
-    @Column({ type: "nvarchar", length: 13 })
-    Mobile: number;
-  
-    @Column({ type: "nvarchar", length: 200 })
-    DistrictCode: number;
-  
-    @Column({ type: "nvarchar", length: 200 })
-    TalukCode: number;
-  
-    @Column({ type: "nvarchar", length: 200 })
-    HobliCode: number;
-  
-    @Column({ type: "nvarchar", length: 200 })
-    VillageCode: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @OneToMany(() => WaterShedData, ws => ws.UserId)
-    @JoinColumn({name: "UserId"})
-    wateshedData: WaterShedData
-  
-    @CreateDateColumn()
-    createdDate: Date;
-  
-    @UpdateDateColumn()
-    updatedDate: Date;
-  };
-  
+  @Column({ type: "nvarchar", length: 50, default: null })
+  DistrictCode: string;
+
+  @Column({ type: "nvarchar", length: 50, default: null })
+  TalukCode: string;
+
+  @Column({ type: "nvarchar", length: 50, default: null })
+  HobliCode: string;
+
+  @Column({ type: "nvarchar", length: 50, default: null })
+  VillageCode: string;
+
+  @Column({ type: "nvarchar", length: 50, default: null })
+  Name: string;
+
+  @Column({ type: "nvarchar", length: 15, default: null })
+  Mobile: string;
+
+  @Column({ type: "nvarchar", length: 50, default: null })
+  Otp: string;
+
+  @ManyToOne(() => Roles, lr => lr.AssignedMasterFK)
+  @JoinColumn({ name: "RoleId" })
+  RoleId: Roles;
+
+  @Column({ type: "nvarchar", length: 50, default: null })
+  ListType: string;
+
+  @Column({ type: "nvarchar", length: 50, default: null })
+  Version: string;
+
+  @Column({ type: "nvarchar", length: 30, default: null })
+  UserId: string;
+
+  @Column({ type: "nvarchar", length: 30, default: null })
+  CreatedMobile: string;
+
+  @Column({ type: "nvarchar", length: 30, default: null })
+  CreatedRole: string;
+
+  @Column({ type: "nvarchar", length: 30, default: null })
+  CreatedName: string;
+
+  @CreateDateColumn()
+  createdDate: Date;
+
+  @UpdateDateColumn()
+  updatedDate: Date;
+};

@@ -15,7 +15,7 @@ import { AppDataSource } from './db/config';
 import Logger from './loggers/winstonLogger';
 
 //controllers
-import { adminRouter, sectorRouter, mobileRouter, userRouter } from "./apiController";
+import { adminRouter, mobileRouter } from "./apiController";
 
 // for accessing env variables
 dotenv.config();
@@ -61,8 +61,6 @@ if (!fs.existsSync('uploads')) {
 }
 
 // controllers
-app.use('/wapi/sector', sectorRouter);
-app.use('/wapi/login', userRouter);
 app.use('/wapi/admin', adminRouter);
 app.use('/wapi/mobile', mobileRouter);
 

@@ -6,9 +6,11 @@ import {
     UpdateDateColumn,
     ManyToOne,
     JoinColumn,
+    OneToMany,
   } from "typeorm";
 import { Departments } from "./department";
 import { Sectors } from "./sectors";
+import { QuestionMapping } from "./QuestionMapping";
   
   @Entity( { name: "Activity" })
   export class Activity {
@@ -19,6 +21,9 @@ import { Sectors } from "./sectors";
     @ManyToOne(() => Departments, dep => dep.Activity)
     @JoinColumn({name: "DepartmentId"})
     DepartmentId: Departments;
+
+    @OneToMany(() => QuestionMapping, qm => qm.ActivityId, {cascade: true, onDelete: 'CASCADE'})
+    ActivityToQuestionMappingFK: QuestionMapping[];
 
     @ManyToOne(() => Sectors, sec => sec.activity)
     @JoinColumn({name: "SectorId"})

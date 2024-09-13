@@ -23,7 +23,8 @@ import {
     AssignedMasters,
     WatershedImgAndVideo,
     ChildRoles,
-    AssignMastersHistory
+    AssignMastersHistory,
+    WaterShedDataHistory
 } from "../entities"
 
 
@@ -53,6 +54,7 @@ export const entities = () => {
         AssignedMasters,
         WatershedImgAndVideo,
         ChildRoles,
-        AssignMastersHistory
+        AssignMastersHistory,
+        WaterShedDataHistory
     ]
 }

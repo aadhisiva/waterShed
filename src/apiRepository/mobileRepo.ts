@@ -1,7 +1,8 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { Activity, AssignedMasters, DprsCommonLand, DprsPrivateLand, loginData, MasterData, QuestionDropdownTypes, QuestionMapping, Questions, Roles, RolesAccess, Schemes, Sectors, UploadImgAndVideo, Versions, WaterShedData, WatershedImgAndVideo } from '../entities';
+import { Activity, AssignedMasters, DprsCommonLand, DprsPrivateLand, loginData, MasterData, QuestionDropdownTypes, QuestionMapping, Questions, Roles, RolesAccess, Schemes, Sectors, UploadImgAndVideo, UserData, Versions, WaterShedData, WatershedImgAndVideo } from '../entities';
 import { Brackets, Equal, ILike } from 'typeorm';
+import { WaterShedDataHistory } from '../entities/watershedDataHistory';
 
 
 const loginDataRepo = AppDataSource.getRepository(loginData);
@@ -17,9 +18,11 @@ const dprsCommonLandRepo = AppDataSource.getRepository(DprsCommonLand);
 const questionMappingRepo = AppDataSource.getRepository(QuestionMapping);
 const questionDropdownTypesRepo = AppDataSource.getRepository(QuestionDropdownTypes);
 const waterShedDataRepo = AppDataSource.getRepository(WaterShedData);
+const waterShedDataHistoryRepo = AppDataSource.getRepository(WaterShedDataHistory);
 const masterDataRepo = AppDataSource.getRepository(MasterData);
 const assignedMastersRepo = AppDataSource.getRepository(AssignedMasters);
 const watershedImgAndVideoRepo = AppDataSource.getRepository(WatershedImgAndVideo);
+const userDataRepo = AppDataSource.getRepository(UserData);
 @Service()
 export class MobileRepo {
 
@@ -42,10 +45,17 @@ export class MobileRepo {
 
     async sendOtp(data) {
         const { Mobile, RoleId } = data;
-        let findData = await assignedMastersRepo.findOneBy({ Mobile, RoleId });
+        let findData = await userDataRepo.findOneBy({ Mobile, RoleId });
         if (!findData) return { code: 404 };
         let newData = { ...findData, ...data };
-        return await assignedMastersRepo.save(newData);
+        await userDataRepo.save(newData);
+        return await userDataRepo.createQueryBuilder('vs')
+        .innerJoinAndSelect(MasterData, 'md', 'md.DistrictCode=vs.DistrictCode and md.TalukCode=vs.TalukCode and md.HobliCode=vs.HobliCode')
+        .select([`DISTINCT vs.DistrictCode DistrictCode, vs.TalukCode TalukCode, vs.HobliCode HobliCode, vs.UserId UserId, 
+            CONCAT('D-',md.DistrictName,'-T-',md.TalukName,'-H-',md.HobliName) as assignedHobli`
+        ])
+        .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile, RoleId })
+        .getRawMany();
     };
 
     async fetchUser(data: loginData) {
@@ -54,6 +64,34 @@ export class MobileRepo {
         if (!findData) return { code: 404 };
         return findData;
     };
+
+    async assignedHobliDetails(data) {
+        const { DistrictCode, TalukCode, HobliCode } = data;
+        return masterDataRepo.createQueryBuilder('md')
+        .select(['DISTINCT md.VillageName'])
+        .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode", 
+            {dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode})
+        .getRawMany();
+            
+      }
+
+    async getWatershedOrSub(data) {
+        const { DistrictCode, TalukCode, HobliCode, VillageName } = data;
+        return masterDataRepo.createQueryBuilder('md')
+        .select(['DISTINCT md.SubWatershedCode, md.SubWatershedName SubWatershedName'])
+        .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode and md.VillageName = :vName", 
+            {dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode, vName: VillageName})
+        .getRawMany();
+      };
+
+    async getMicroWatershedData(data) {
+        const { DistrictCode, TalukCode, HobliCode, VillageName, SubWatershedCode } = data;
+        return masterDataRepo.createQueryBuilder('md')
+        .select(['DISTINCT md.MicroWatershedCode, md.MicroWatershedName MicroWatershedName'])
+        .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode and md.VillageName = :vName and md.SubWatershedCode = :swc", 
+            {dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode, vName: VillageName, swc: SubWatershedCode})
+        .getRawMany();
+      };
 
     async fetchUserById(UserId) {
         let findData = await AppDataSource.getRepository(loginData).findOneBy({ UserId });
@@ -232,7 +270,20 @@ export class MobileRepo {
 
 
     async saveSurveyData(data) {
+        let findData = await userDataRepo.findOneBy({UserId: Equal(data?.UserId)});
+        if(!findData) return {code: 422, message: "Access Denied"};
+        data.CreatedName = findData.CreatedName;
+        data.CreatedRole = findData.CreatedRole;
+        data.CreatedMobile = findData.CreatedMobile;
+        waterShedDataHistoryRepo.save({...data, ...{Status: "Added New"}})
         return await waterShedDataRepo.save(data);
+    };
+
+    async updateSurveyData(data){
+        let findData = await waterShedDataRepo.findOneBy({SubmissionId: Equal(data?.SubmissionId)});
+        let newData = {...findData, ...data};
+        await waterShedDataHistoryRepo.save({...newData, ...{Status: "Updated"}});
+        return await waterShedDataRepo.save(newData);
     };
 
     async saveSurveyImages(data) {

@@ -1,10 +1,13 @@
 import {
     Entity,
     PrimaryGeneratedColumn,
-    Column,
     CreateDateColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
+    ManyToOne,
+    JoinColumn
   } from "typeorm";
+import { Activity } from "./activity";
+import { Questions } from "./questions";
   
   @Entity( { name: "QuestionMapping" })
   export class QuestionMapping {
@@ -12,11 +15,13 @@ import {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: "int", default: null })
-    ActivityId: string;
-  
-    @Column({ type: "int", default: null })
-    QuestionId: string;
+    @ManyToOne(() => Activity, ac => ac.ActivityToQuestionMappingFK)
+    @JoinColumn({name: "ActivityId"})
+    ActivityId: Activity;
+
+    @ManyToOne(() => Questions, ac => ac.QuestionIdToQuestionMappingFK)
+    @JoinColumn({name: "QuestionId"})
+    QuestionId: Questions;
   
     @CreateDateColumn()
     createdDate: Date;

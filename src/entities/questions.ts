@@ -3,8 +3,10 @@ import {
     PrimaryGeneratedColumn,
     Column,
     CreateDateColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
+    OneToMany
   } from "typeorm";
+import { QuestionMapping } from "./QuestionMapping";
   
   @Entity({ name: "Questions"})
   export class Questions {
@@ -23,6 +25,9 @@ import {
   
     @Column({ type: "nvarchar", length: 200, default: null })
     DropDownValues: string;
+
+    @OneToMany(() => QuestionMapping, qm => qm.ActivityId, {cascade: true, onDelete: 'CASCADE'})
+    QuestionIdToQuestionMappingFK: QuestionMapping[];
   
     @CreateDateColumn()
     createdDate: Date;

@@ -6,9 +6,6 @@ import { MOBILE_MESSAGES } from '../utils/constants';
 import { checkXlsxKeysExistOrNot, getRoleAndUserId } from '../utils/resuableCode';
 import { MobileServices } from '../apiServices/mobileServ';
 import multer from "multer";
-import { SimpleConsoleLogger } from 'typeorm';
-import { DprsPrivateLand } from '../entities';
-import { AppDataSource } from '../db/config';
 
 const mobileRouter = express.Router()
 
@@ -38,6 +35,26 @@ mobileRouter.post('/sendOtp', authVersion, async (req, res) => {
     }
 });
 
+mobileRouter.post('/assignedHobliDetails', async (req, res) => {
+    try {
+        let body = {...req.body, ...{UserId: req.headers.userid}};
+        let result = await mobileServices.assignedHobliDetails(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, MOBILE_MESSAGES.ADDED));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    }
+});
+
+mobileRouter.post('/getWatershedOrSub', async (req, res) => {
+    try {
+        let body = {...req.body, ...{UserId: req.headers.userid}};
+        let result = await mobileServices.getWatershedOrSub(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, "getWatershedOrSub-Fetcheing Data With Vilages"));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    }
+});
+
 mobileRouter.post('/verifyOtp', authenticateToken, async (req, res) => {
     try {
         let body = req.body;
@@ -62,6 +79,7 @@ mobileRouter.post('/saveActualData', authenticateToken, async (req, res) => {
     try {
         let body = req.body;
         body.UserRole = req.headers["role"]
+        body.UserId = req.user.UserId
         let result = await mobileServices.saveActualData(body);
         return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'Saved Survey Data.'));
     } catch (error) {
@@ -161,7 +179,17 @@ mobileRouter.post('/saveSurveyData', authenticateToken, async (req, res) => {
     try {
         let body = {...req.body, ...{UserId: req.user.userid}};
         let result = await mobileServices.saveSurveyData(body);
-        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'saveSurveyData'));
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'saveSurveyData - saved with submissin id.'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    };
+});
+
+mobileRouter.post('/updateSurveyData', authenticateToken, async (req, res) => {
+    try {
+        let body = {...req.body, ...{UserId: req.user.userid}};
+        let result = await mobileServices.updateSurveyData(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'updateSurveyData - updated with submissin id.'));
     } catch (error) {
         return mobileAppResponse(res, error);
     };
