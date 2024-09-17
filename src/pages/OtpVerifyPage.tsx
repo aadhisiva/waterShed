@@ -24,7 +24,7 @@ interface RoleAccess {
   RoleName: string;
 }
 
-export default function OtpVerifyPage({ userData }: any) {
+export default function OtpVerifyPage({ userData, handleResendOTP }: any) {
   const [loading, setLoading] = React.useState(false);
   const initialValues = {
     Mobile: userData?.Mobile,
@@ -197,7 +197,7 @@ export default function OtpVerifyPage({ userData }: any) {
               style={{ display: 'flex', flexDirection: 'row' }}
             >
               <Grid item>
-                <Link href="signup" variant="body2">
+                <Link onClick={handleResendOTP} variant="body2">
                   {'RESEND OTP'}
                 </Link>
               </Grid>

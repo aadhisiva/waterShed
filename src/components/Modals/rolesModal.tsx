@@ -36,6 +36,7 @@ export default function RolesModal({
   const initialValues = {
     RoleName: formData.RoleName,
     DepartmentId: formData.DepartmentId,
+    IsMobile: formData.IsMobile,
   };
 
   const validationSchema = {
@@ -55,6 +56,14 @@ export default function RolesModal({
         return null;
       },
     },
+    IsMobile: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'IsMobile is required';
+        }
+        return null;
+      },
+    }
   };
   const onSubmit = (values: Values) => {
     // Handle form submission logic, e.g., API call
@@ -121,6 +130,16 @@ export default function RolesModal({
                 onBlur={handleBlur}
                 error={touched.DepartmentId && Boolean(errors.DepartmentId)}
                 helperText={touched.DepartmentId && errors.DepartmentId}
+              />
+              <SelectField
+                name="IsMobile"
+                label="Is this Mobile role"
+                value={values.IsMobile}
+                onChange={handleChange}
+                options={[{value: "Yes", name: "Yes"}, {value: "No", name: "No"}]}
+                onBlur={handleBlur}
+                error={touched.IsMobile && Boolean(errors.IsMobile)}
+                helperText={touched.IsMobile && errors.IsMobile}
               />
             </Box>
             <DialogActions>

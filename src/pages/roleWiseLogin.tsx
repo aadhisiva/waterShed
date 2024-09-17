@@ -39,7 +39,7 @@ type Values = {
 export default function RoleWiseLogin() {
   const [loading, setLoading] = React.useState(false);
   const [isOtpValidate, setIsOtpValidate] = React.useState(false);
-  const [userData, setUsersData] = React.useState({});
+  const [userData, setUsersData] = React.useState<any>({});
   const initialValues = {
     Mobile: '',
   };
@@ -61,6 +61,7 @@ export default function RoleWiseLogin() {
   };
 
   const onSubmit = async (values: Values) => {
+    console.log("values",values)
     setLoading(true);
     setTimeout(async () => {
       let { data } = await axiosInstance.post('checkMobileLogin', {
@@ -75,6 +76,22 @@ export default function RoleWiseLogin() {
       }
     }, 2000);
   };
+
+  const handleResendOTP = () => {
+    setLoading(true);
+    setTimeout(async () => {
+      let { data } = await axiosInstance.post('checkMobileLogin', {
+        Mobile: userData['Mobile'],
+      });
+      if (data?.code == 200) {
+        setUsersData(data.data);
+        setIsOtpValidate(true);
+        setLoading(false);
+      } else {
+        setLoading(false);
+      }
+    }, 2000);
+  }
 
   const {
     values,
@@ -200,24 +217,13 @@ export default function RoleWiseLogin() {
                     <span>Send OTP</span>
                   </LoadingButton>
                 </Grid>
-                <Grid
-                  item
-                  md={12}
-                  style={{ display: 'flex', flexDirection: 'row' }}
-                >
-                  <Grid item>
-                    <Link href="signup" variant="body2">
-                      {'RESEND OTP'}
-                    </Link>
-                  </Grid>
-                </Grid>
               </Grid>
               <Copyright />
             </Box>
           </Box>
         </Grid>
       ) : (
-        <OtpVerifyPage userData={userData} />
+        <OtpVerifyPage userData={userData} handleResendOTP={handleResendOTP} />
       )}
     </Grid>
   );

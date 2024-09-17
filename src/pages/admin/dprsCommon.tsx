@@ -7,6 +7,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import axiosInstance from '../../axiosInstance';
 import SchemesModal from '../../components/Modals/schemesModal';
 import SpinnerLoader from '../../components/spinner/spinner';
+import TableWithPagination from '../../components/TableWithPagination';
 
 const headCells = [
   {
@@ -59,28 +60,31 @@ interface Data {
 }
 
 export default function DprsCommon() {
+  const [totalCount, setTotalCount] = useState(0);
+
   const [tableData, setTableData] = useState([]);
   const [copyTableData, setCopyTableData] = useState([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({});
 
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
   const handleClickModify = (data: Data) => {
     setOpenModal(true);
     setFormData(data);
   };
 
-  const handleClickAdd = () => {
-    setOpenModal(true);
-  };
   const fecthIntialData = async () => {
     setLoading(true);
     let { data } = await axiosInstance.post('getDprsLand', {
-      DataType: 'Common',
+      DataType: 'Common', Page: page + 1, RowsPerPage: rowsPerPage
     });
     if (data?.code == 200) {
-      setTableData(data.data);
-      setCopyTableData(data.data);
+      setTotalCount(data.data?.total);
+      setTableData(data.data?.totalData);
+      setCopyTableData(data.data?.totalData);
       setLoading(false);
     } else {
       setLoading(false);
@@ -89,7 +93,7 @@ export default function DprsCommon() {
   };
   useEffect(() => {
     fecthIntialData();
-  }, []);
+  }, [rowsPerPage, page]);
 
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
@@ -159,12 +163,17 @@ export default function DprsCommon() {
           <input type="file" accept=".xlsx" onChange={handleFileUpload} />
         </Button>
       </Grid>
-      <EnhancedTableData
+      <TableWithPagination
         handleClickModify={handleClickModify}
         rows={copyTableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
         title="Dpr's Common Land"
+        totalCount={Number(totalCount)}
+        page={page}
+        setPage={setPage}
+        rowsPerPage={rowsPerPage}
+        setRowsPerPage={setRowsPerPage}
       />
     </Box>
   );

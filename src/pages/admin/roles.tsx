@@ -22,6 +22,12 @@ const headCells = [
     label: 'Department Name',
   },
   {
+    id: 'IsMobile',
+    numeric: false,
+    disablePadding: true,
+    label: 'IsMobile',
+  },
+  {
     id: 'Action',
     numeric: false,
     disablePadding: false,

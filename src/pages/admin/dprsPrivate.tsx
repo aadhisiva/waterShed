@@ -1,14 +1,12 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
-import EnhancedTableData from '../../components/TableData';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import UploadIcon from '@mui/icons-material/Upload';
 import axiosInstance from '../../axiosInstance';
 import SchemesModal from '../../components/Modals/schemesModal';
-import Papa from "papaparse";
-import * as XLSX from 'xlsx';
 import SpinnerLoader from '../../components/spinner/spinner';
+import TableWithPagination from '../../components/TableWithPagination';
 
 const headCells = [
   {
@@ -64,27 +62,28 @@ interface ExcelData {
 
 
 export default function DprsPrivate() {
+  const [totalCount, setTotalCount] = useState(0);
   const [tableData, setTableData] = useState([]);
   const [copyTableData, setCopyTableData] = useState([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({});
-  const [csvData, setCsvData] = useState<ExcelData[]>();
+
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
   const handleClickModify = (data: Data) => {
     setOpenModal(true);
     setFormData(data);
   };
 
-  const handleClickAdd = () => {
-    setOpenModal(true);
-  };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('getDprsLand', { DataType: 'Private' });
+    let { data } = await axiosInstance.post('getDprsLand', { DataType: 'Private', Page: page + 1, RowsPerPage: rowsPerPage });
     if (data?.code == 200) {
-      setTableData(data.data);
-      setCopyTableData(data.data);
+      setTotalCount(data.data?.total);
+      setTableData(data.data?.totalData);
+      setCopyTableData(data.data?.totalData);
       setLoading(false);
     } else {
       setLoading(false);
@@ -93,7 +92,7 @@ export default function DprsPrivate() {
   };
   useEffect(() => {
     fecthIntialData();
-  }, []);
+  }, [rowsPerPage, page]);
 
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
@@ -117,75 +116,6 @@ export default function DprsPrivate() {
       handleSubmitForm={handleSubmitForm}
     />
   );
-
-  // const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
-  //   if (!file) return;
-
-  //   const reader = new FileReader();
-  //   reader.onload = () => {
-  //     const text = reader.result;
-  //     Papa.parse<CSVData>(text as string, {
-  //       complete: (result) => {
-  //         console.log("Res",result.data);
-  //         // setCsvData(result.data);
-  //       },
-  //       header: true,
-  //     });
-  //   };
-  //   reader.readAsText(file, 'UTF-8');
-  // };
-
-  // const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
-  //   if (!file) return;
-
-  //   const reader = new FileReader();
-  //   reader.onload = async (e) => {
-  //     const data = new Uint8Array(e.target?.result as ArrayBuffer);
-  //     const workbook = XLSX.read(data, { type: 'array' });
-  //     const sheetName = workbook.SheetNames[0];
-  //     const worksheet = workbook.Sheets[sheetName];
-  //     const jsonData: ExcelData[] = XLSX.utils.sheet_to_json(worksheet);
-  //     console.log("json", jsonData[0])
-  //     let response = await axiosInstance.post('/uploadPrivateLand', {data: jsonData});
-  //     console.log(response);
-  //   };
-  //   reader.readAsArrayBuffer(file);
-  // };
-
-  // const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
-  //   if (!file) return;
-
-  //   const reader = new FileReader();
-  //   reader.onload = async (e) => {
-  //     const data = new Uint8Array(e.target?.result as ArrayBuffer);
-  //     const workbook = XLSX.read(data, { type: 'array' });
-  //     const sheetName = workbook.SheetNames[0];
-  //     const worksheet = workbook.Sheets[sheetName];
-  //     const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
-
-  //     const convertedData = jsonData.map((row: any) => {
-  //       const convertedRow: ExcelData = {};
-  //       Object.keys(row).forEach((key) => {
-  //         convertedRow[key] = String(row[key]);
-  //       });
-  //       return convertedRow;
-  //     });
-
-  //     const chunkSize = 100;
-  //     for (let i = 0; i < jsonData.length; i += chunkSize) {
-  //       const chunk = jsonData.slice(i, i + chunkSize);
-  //       console.log("i",i)
-  //       console.log("json", chunk)
-  //       let response = await axiosInstance.post('/uploadPrivateLand', {data: chunk});
-  
-  //     }
-  //   };
-  //   reader.readAsArrayBuffer(file);
-  // };
-
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     setLoading(true);
     const selectedFile = event.target.files?.[0];
@@ -212,8 +142,6 @@ export default function DprsPrivate() {
     }
   };
 
-
-
   return (
     <Box sx={{ padding: 2 }}>
       {renderDeoartModal}
@@ -233,12 +161,17 @@ export default function DprsPrivate() {
           <input type="file" accept=".xlsx" onChange={handleFileUpload} />
         </Button>
       </Grid>
-      <EnhancedTableData
+      <TableWithPagination
         handleClickModify={handleClickModify}
         rows={copyTableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
         title="Dpr's Private Land"
+        totalCount={Number(totalCount)}
+        page={page}
+        setPage={setPage}
+        rowsPerPage={rowsPerPage}
+        setRowsPerPage={setRowsPerPage}
       />
     </Box>
   );
