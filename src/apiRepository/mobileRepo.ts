@@ -68,7 +68,7 @@ export class MobileRepo {
     async assignedHobliDetails(data) {
         const { DistrictCode, TalukCode, HobliCode } = data;
         return masterDataRepo.createQueryBuilder('md')
-        .select(['DISTINCT md.VillageName'])
+        .select(["DISTINCT CONCAT(md.VillageName,' -k- ', md.VillageNameKa) as VillageName"])
         .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode", 
             {dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode})
         .getRawMany();
@@ -220,42 +220,33 @@ export class MobileRepo {
 
     async getPrivateLand(data) {
         const { Village, Page = 1, PageSize = 20 } = data;
+        let [VillageEn, VillageKa] = Village.split("-k-");
         const page = Page; // Example: current page number
         const pageSize = PageSize; // Example: number of records per page
-        // const [results, total] = await dprsPrivateLandRepo.createQueryBuilder('dprs')
-        //     .where('dprs."Fruit ID" = :fruitId', { fruitId: FruitId })
-        //     .where(new Brackets(qb => {
-        //         qb.where('dprs."Survey hissa" LIKE :surveyNo', { surveyNo: `%${SurveyNo}%` })
-        //             .orWhere('dprs."Owner Name" LIKE :owner', { owner: `%${OwnerName}%` })
-        //             .orWhere('dprs."SWC Farmer Requirement" = :activityName', { activityName: ActivityName });
-        //     }))
-        //     .orderBy('dprs."id"', 'ASC') // Make sure to use an appropriate column for ordering
-        //     .skip((page - 1) * pageSize)
-        //     .take(pageSize)
-        //     .getManyAndCount();
         const [results, total] = await dprsPrivateLandRepo.createQueryBuilder('dprs')
-            .where('dprs.Village = :Village', { Village: Village })
+            .where('dprs.Village = :Village or dprs.Village = :VillageKa', { Village: VillageEn.trim(), VillageKa: VillageKa.trim() })
             .orderBy('dprs."id"', 'ASC') // Make sure to use an appropriate column for ordering
             .skip((page - 1) * pageSize)
             .take(pageSize)
             .getManyAndCount();
-
-        const totalPages = Math.ceil(total / pageSize);
-        return {
-            total,
-            page,
-            pageSize,
-            totalPages,
-            totalData: results
-        };
+            const totalPages = Math.ceil(total / pageSize);
+            return {
+                total,
+                page,
+                pageSize,
+                totalPages,
+                totalData: results
+            };
     };
 
     async getCommonLand(data) {
         const { Village, Page = 1, PageSize = 20 } = data;
+        let [VillageEn, VillageKa] = Village.split("-k-");
         const page = Page; // Example: current page number
         const pageSize = PageSize; // Example: number of records per page
-        let [results, total]: any = await dprsCommonLandRepo.createQueryBuilder('dprs')
-            .where('dprs.Village = :Village', { Village: Village })
+        let [results, total] = await dprsCommonLandRepo.createQueryBuilder('dprs')
+            .where('dprs.Village = :Village or dprs.Village = :VillageKa', { Village: VillageEn.trim(), VillageKa: VillageKa.trim() })
+            .orderBy('dprs."id"', 'ASC') // Make sure to use an appropriate column for ordering
             .skip((page - 1) * pageSize) // Skip the results for the previous pages
             .take(pageSize) // Limit the number of results per page
             .getManyAndCount();
