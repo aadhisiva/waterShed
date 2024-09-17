@@ -26,11 +26,11 @@ import {
 
     @Column({ nullable:true,  type: "nvarchar", length: 500 })
     Password: string;
-  
+
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   
     @UpdateDateColumn()
-    updatedDate: Date;
+    UpdatedDate: Date;
   };
   

@@ -46,7 +46,7 @@ export class UserData {
   @Column({ type: "nvarchar", length: 50, default: null })
   Version: string;
 
-  @Column({ type: "nvarchar", length: 30, default: null })
+  @Column({ type: "nvarchar", length: 50, default: null })
   UserId: string;
 
   @Column({ type: "nvarchar", length: 30, default: null })
@@ -59,8 +59,8 @@ export class UserData {
   CreatedName: string;
 
   @CreateDateColumn()
-  createdDate: Date;
+  CreatedDate: Date;
 
   @UpdateDateColumn()
-  updatedDate: Date;
+  UpdatedDate: Date;
 };

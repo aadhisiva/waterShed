@@ -37,7 +37,7 @@ mobileRouter.post('/sendOtp', authVersion, async (req, res) => {
 
 mobileRouter.post('/assignedHobliDetails', async (req, res) => {
     try {
-        let body = {...req.body, ...{UserId: req.headers.userid}};
+        let body = {...req.body, ...{UserId: req.headers.UserId}};
         let result = await mobileServices.assignedHobliDetails(body);
         return mobileAppResponse(res, result, body, getRoleAndUserId(req, MOBILE_MESSAGES.ADDED));
     } catch (error) {
@@ -47,7 +47,7 @@ mobileRouter.post('/assignedHobliDetails', async (req, res) => {
 
 mobileRouter.post('/getWatershedOrSub', async (req, res) => {
     try {
-        let body = {...req.body, ...{UserId: req.headers.userid}};
+        let body = {...req.body, ...{UserId: req.headers.UserId}};
         let result = await mobileServices.getWatershedOrSub(body);
         return mobileAppResponse(res, result, body, getRoleAndUserId(req, "getWatershedOrSub-Fetcheing Data With Vilages"));
     } catch (error) {
@@ -74,19 +74,6 @@ mobileRouter.post('/locations', authenticateToken, async (req, res) => {
         return mobileAppResponse(res, error);
     }
 });
-
-mobileRouter.post('/saveActualData', authenticateToken, async (req, res) => {
-    try {
-        let body = req.body;
-        body.UserRole = req.headers["role"]
-        body.UserId = req.user.UserId
-        let result = await mobileServices.saveActualData(body);
-        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'Saved Survey Data.'));
-    } catch (error) {
-        return mobileAppResponse(res, error);
-    }
-});
-
 
 mobileRouter.post('/getAllSchemes', authenticateToken, async (req, res) => {
     try {
@@ -177,7 +164,7 @@ mobileRouter.post('/getKutubaData', authenticateToken, async (req, res) => {
 
 mobileRouter.post('/saveSurveyData', authenticateToken, async (req, res) => {
     try {
-        let body = {...req.body, ...{UserId: req.user.userid}};
+        let body = {...req.body, ...{UserId: req.user.UserId}};
         let result = await mobileServices.saveSurveyData(body);
         return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'saveSurveyData - saved with submissin id.'));
     } catch (error) {
@@ -185,9 +172,29 @@ mobileRouter.post('/saveSurveyData', authenticateToken, async (req, res) => {
     };
 });
 
+mobileRouter.post('/getSubmissionList', authenticateToken, async (req, res) => {
+    try {
+        let body = {...req.body, ...{UserId: req.user.UserId}};
+        let result = await mobileServices.getSubmissionList(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'getSubmissionList - get data with submissin id.'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    };
+});
+
+mobileRouter.post('/getAllSubmissionList', authenticateToken, async (req, res) => {
+    try {
+        let body = {...req.body, ...{UserId: req.user.UserId}};
+        let result = await mobileServices.getAllSubmissionList(body);
+        return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'getAllSubmissionList - get all data with submissin id.'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    };
+});
+
 mobileRouter.post('/updateSurveyData', authenticateToken, async (req, res) => {
     try {
-        let body = {...req.body, ...{UserId: req.user.userid}};
+        let body = {...req.body, ...{UserId: req.user.UserId}};
         let result = await mobileServices.updateSurveyData(body);
         return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'updateSurveyData - updated with submissin id.'));
     } catch (error) {
@@ -197,7 +204,7 @@ mobileRouter.post('/updateSurveyData', authenticateToken, async (req, res) => {
 
 mobileRouter.post('/retriveMasters', authenticateToken, async (req, res) => {
     try {
-        let body = {...req.body, ...{UserId: req.user.userid}};
+        let body = {...req.body, ...{UserId: req.user.UserId}};
         let result = await mobileServices.retriveMasters(body);
         return mobileAppResponse(res, result, body, getRoleAndUserId(req, 'retriveMasters'));
     } catch (error) {

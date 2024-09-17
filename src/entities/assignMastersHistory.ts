@@ -2,7 +2,8 @@ import {
     Entity,
     PrimaryGeneratedColumn,
     Column,
-    CreateDateColumn
+    CreateDateColumn,
+    UpdateDateColumn
 } from "typeorm";
 
 
@@ -56,10 +57,10 @@ export class AssignMastersHistory {
   
     @Column({ type: "nvarchar", length: 30, default: null })
     CreatedName: string;
- 
-    @CreateDateColumn()
-    createdDate: Date;
 
     @CreateDateColumn()
+    CreatedDate: Date;
+  
+    @UpdateDateColumn()
     UpdatedDate: Date;
 };

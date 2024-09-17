@@ -24,15 +24,15 @@ export class DprsCommonLand {
   @Column({ type: "nvarchar", length: 400, default: null })
   "Survey No": string;
 
-  @Column({ type: "nvarchar", length: 400, default: null })
+  @Column({ type: "nvarchar", length: 'max', default: null })
   "Identification / Ownership": string;
 
   @Column({ type: "nvarchar", length: 400, default: null })
   "Activity type (SWC/HORTI FORT/DLT)": string;
 
   @CreateDateColumn()
-  createdDate: Date;
+  CreatedDate: Date;
 
   @UpdateDateColumn()
-  updatedDate: Date;
+  UpdatedDate: Date;
 };

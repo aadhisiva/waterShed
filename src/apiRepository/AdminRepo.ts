@@ -394,7 +394,7 @@ export class AdminRepo {
         return await rolesRepo.createQueryBuilder('role')
             .leftJoinAndSelect(Departments, 'dp', "dp.id = role.DepartmentId")
             .select(["role.id as id", "role.RoleName as RoleName",
-                "dp.DepartmentName as DepartmentName", "role.DepartmentId as DepartmentId"])
+                "dp.DepartmentName as DepartmentName", "role.DepartmentId as DepartmentId", "role.IsMobile as IsMobile"])
             .getRawMany();
     };
 
@@ -586,13 +586,26 @@ export class AdminRepo {
     }
 
     async getDprsPrivateLand(data) {
-        return await dprsPrivateLandRepo.find();
+        const { RowsPerPage, Page } = data;
+        const offset = (Page - 1) * RowsPerPage;
+        const [totalData, total] = await dprsPrivateLandRepo.findAndCount({
+            take: RowsPerPage,
+            skip: offset,
+            order: {id: "ASC"}
+          });
+          return {total, totalData}
     }
 
     async getDprsCommonLand(data) {
-        return await dprsCommonLandRepo.find();
-    };
-
+        const { RowsPerPage, Page } = data;
+        const offset = (Page - 1) * RowsPerPage;
+        const [totalData, total] = await dprsCommonLandRepo.findAndCount({
+            take: RowsPerPage,
+            skip: offset,
+            order: {id: "ASC"}
+          });
+          return {total, totalData}
+        };
 
     async uploadImages(data) {
         const { ImageName, ImageData, UserId } = data;

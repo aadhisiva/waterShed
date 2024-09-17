@@ -28,11 +28,11 @@ import { QuestionMapping } from "./QuestionMapping";
 
     @OneToMany(() => QuestionMapping, qm => qm.ActivityId, {cascade: true, onDelete: 'CASCADE'})
     QuestionIdToQuestionMappingFK: QuestionMapping[];
-  
+
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   
     @UpdateDateColumn()
-    updatedDate: Date;
+    UpdatedDate: Date;
   };
   

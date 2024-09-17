@@ -40,11 +40,11 @@ import { Roles } from "./roles";
     @ManyToOne(() => Roles, rl => rl.Schemes)
     @JoinColumn({name: "RoleId"})
     RoleId: Roles;
-  
+
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   
     @UpdateDateColumn()
-    updatedDate: Date;
+    UpdatedDate: Date;
   };
   

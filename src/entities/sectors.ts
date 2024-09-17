@@ -40,11 +40,11 @@ import { Activity } from "./activity";
   
     @Column({ type: "int" })
     ParentId: number;
-  
+
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   
     @UpdateDateColumn()
-    updatedDate: Date;
+    UpdatedDate: Date;
   };
   

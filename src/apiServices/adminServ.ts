@@ -354,7 +354,9 @@ export class AdminServices {
     }
 
     async getDprsLand(data){
-        const {DataType} = data;
+        const { RowsPerPage, Page, DataType } = data;
+        if(!RowsPerPage) return {code: 422, message: "Provide RowsPerPage"};
+        if(!Page || Page <= 0) return {code: 422, message: "Provide Page"};
         if(DataType == "Private"){
             return await this.adminRepo.getDprsPrivateLand(data);
         } else if(DataType == "Common"){

@@ -135,8 +135,8 @@ export class WaterShedDataHistory {
   Status: string;
 
   @CreateDateColumn()
-  createdDate: Date;
+  CreatedDate: Date;
 
   @UpdateDateColumn()
-  updatedDate: Date;
+  UpdatedDate: Date;
 };

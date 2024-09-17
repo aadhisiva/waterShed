@@ -62,11 +62,11 @@ import {
 
     @Column({ default: null,  type: 'nvarchar', length: 100 })
     SubWatershedName: string;
-    
+
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   
     @UpdateDateColumn()
-    updatedDate: Date;
+    UpdatedDate: Date;
   };
   

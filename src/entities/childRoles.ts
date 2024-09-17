@@ -28,11 +28,11 @@ import { Roles } from "./roles";
 
     @Column({type: 'int', default: null})
     ChildId: number
-  
+
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   
     @UpdateDateColumn()
-    updatedDate: Date;
+    UpdatedDate: Date;
   };
   

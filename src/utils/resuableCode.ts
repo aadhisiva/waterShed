@@ -96,7 +96,7 @@ export const saveMobileOtps = async (Mobile, text, response, UserId='', otp) => 
 export const checkXlsxKeysExistOrNot= (data) => {
   let entityKeys = Object.keys(
     AppDataSource.getRepository(DprsPrivateLand).metadata.propertiesMap,
-  ).filter(item => item !== "id" && item !== "createdDate" && item !== "updatedDate");
+  ).filter(item => item !== "id" && item !== "CreatedDate" && item !== "UpdatedDate");
   let error = false;
   let message= "";
   entityKeys.map(key => {
@@ -111,7 +111,7 @@ export const checkXlsxKeysExistOrNot= (data) => {
 export const checkCommonXlsxKeysExistOrNot= (data) => {
   let entityKeys = Object.keys(
     AppDataSource.getRepository(DprsCommonLand).metadata.propertiesMap,
-  ).filter(item => item !== "id" && item !== "createdDate" && item !== "updatedDate");
+  ).filter(item => item !== "id" && item !== "CreatedDate" && item !== "UpdatedDate");
   let error = false;
   let message= "";
   entityKeys.map(key => {

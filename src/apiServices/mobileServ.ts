@@ -48,7 +48,8 @@ export class MobileServices {
         const { Mobile, RoleId } = data;
         if (!Mobile || !RoleId) return { code: 400 };
         let version = await this.mobileRepo.getVersionOfApp();
-        data.Otp = generateOTP(4);
+        // data.Otp = generateOTP(4);
+        data.Otp = "1111";
         data.Version = version[0].Version;
         let savedRes: ObjectParam = await this.mobileRepo.sendOtp(data);
         if (savedRes?.code) return savedRes;
@@ -64,11 +65,11 @@ export class MobileServices {
         let mappedRes = (savedRes || []).map(obj => {
             return {
                 ...obj,
-                Token: jsonWebToken.sign({ DistrictCode: savedRes.DistrictCode, TalukCode: savedRes?.TalukCode, RoleId: savedRes.RoleId, UserId: savedRes.UserId },
+                Token: jsonWebToken.sign({ DistrictCode: obj.DistrictCode, TalukCode: obj?.TalukCode, RoleId: obj.RoleId, UserId: obj.UserId },
                     process.env.SECRET_KEY, options)
             }
         })
-        return { message: RESPONSEMSG.OTP, data: mappedRes };
+        return { message: RESPONSEMSG.OTP, data: {Otp: data?.Otp , mappedRes: mappedRes} };
     };
 
     async assignedHobliDetails(data) {
@@ -105,15 +106,6 @@ export class MobileServices {
 
     async locations(data) {
         return await this.mobileRepo.locations(data);
-    };
-
-    async saveActualData(data) {
-        const { UserId } = data;
-        if (!UserId) return { code: 400 };
-        let getUserData: any = await this.mobileRepo.fetchUserById(UserId);
-        data.UserRole = getUserData?.UserRole;
-        data.CreatedBy = getUserData?.UserRole + ' ' + getUserData?.Name;
-        return await this.mobileRepo.saveActualData(data);
     };
 
     async getAllSchemes(data) {
@@ -168,6 +160,16 @@ export class MobileServices {
         }
         return savedData;
     };
+
+    async getSubmissionList(data){
+        if(!data?.UserId) return  { code: 400, message: "Provide UserId" };
+        return await this.mobileRepo.getSubmissionList(data);
+    }
+
+    async getAllSubmissionList(data){
+        if(!data?.UserId) return  { code: 400, message: "Provide UserId" };
+        return await this.mobileRepo.getAllSubmissionList(data);
+    }
 
     async updateSurveyData(data) {
         let updatedData = await this.mobileRepo.updateSurveyData(data);

@@ -65,11 +65,11 @@ import { Roles } from "./roles";
   
     @Column({ type: "nvarchar", length: 30, default: null })
     CreatedName: string;
-  
+
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   
     @UpdateDateColumn()
-    updatedDate: Date;
+    UpdatedDate: Date;
   };
   

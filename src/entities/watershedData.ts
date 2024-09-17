@@ -7,7 +7,6 @@ import {
   ManyToOne,
   JoinColumn
 } from "typeorm";
-import { UserData } from "./userData";
 
 @Entity({ name: "WaterShedData" })
 export class WaterShedData {
@@ -32,6 +31,9 @@ export class WaterShedData {
 
   @Column({ type: 'nvarchar', default: null, length: 200 })
   SubmissionId: string;
+  
+  @Column({ type: "nvarchar", length: 50, default: null })
+  UserId: string;
 
   @Column({ type: 'nvarchar', default: null, length: 200 })
   Scheme: string;
@@ -142,8 +144,8 @@ export class WaterShedData {
   MicroWatershedCode: string;
 
   @CreateDateColumn()
-  createdDate: Date;
+  CreatedDate: Date;
 
   @UpdateDateColumn()
-  updatedDate: Date;
+  UpdatedDate: Date;
 };

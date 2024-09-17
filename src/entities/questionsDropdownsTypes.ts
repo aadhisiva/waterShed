@@ -18,8 +18,8 @@ export class QuestionDropdownTypes {
   DropdownType: string;
 
   @CreateDateColumn()
-  createdDate: Date;
+  CreatedDate: Date;
 
   @UpdateDateColumn()
-  updatedDate: Date;
+  UpdatedDate: Date;
 };

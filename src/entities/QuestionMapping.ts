@@ -22,11 +22,11 @@ import { Questions } from "./questions";
     @ManyToOne(() => Questions, ac => ac.QuestionIdToQuestionMappingFK)
     @JoinColumn({name: "QuestionId"})
     QuestionId: Questions;
-  
+
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   
     @UpdateDateColumn()
-    updatedDate: Date;
+    UpdatedDate: Date;
   };
   

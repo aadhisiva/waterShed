@@ -45,7 +45,7 @@ export class MobileRepo {
 
     async sendOtp(data) {
         const { Mobile, RoleId } = data;
-        let findData = await userDataRepo.findOneBy({ Mobile, RoleId });
+        let findData = await userDataRepo.findOneBy({ Mobile: Equal(Mobile), RoleId: Equal(RoleId) });
         if (!findData) return { code: 404 };
         let newData = { ...findData, ...data };
         await userDataRepo.save(newData);
@@ -54,7 +54,7 @@ export class MobileRepo {
         .select([`DISTINCT vs.DistrictCode DistrictCode, vs.TalukCode TalukCode, vs.HobliCode HobliCode, vs.UserId UserId, 
             CONCAT('D-',md.DistrictName,'-T-',md.TalukName,'-H-',md.HobliName) as assignedHobli`
         ])
-        .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile, RoleId })
+        .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile: Mobile, RoleId: RoleId })
         .getRawMany();
     };
 
@@ -159,6 +159,7 @@ export class MobileRepo {
     async getAllRoles() {
         let savingData = await rolesRepo.createQueryBuilder('role')
             .select(["role.RoleName as RoleName", "role.id as RoleId"])
+            .where("role.IsMobile = :IsMobile", {IsMobile: 'Yes'})
             .getRawMany();
         return savingData;
     };
@@ -279,6 +280,38 @@ export class MobileRepo {
         return await waterShedDataRepo.save(data);
     };
 
+    async getSubmissionList(data){
+        const { UserId, PageNo = 1, PageSize = 10, StatusOfWork } = data;
+        let totalData = await waterShedDataRepo.findAndCount({
+          where: { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork) },
+          select: ["ActivityId", "UserId", "SubmissionId", "CreatedDate", "BeneficaryName", "FruitsId", "MobileNumber", "StatusOfWork"],
+          skip: (PageNo - 1) * PageSize,
+          take: PageSize
+        });
+        return {
+          totalCount: totalData[1],
+          PageNo,
+          PageSize,
+          totalData: totalData[0]
+        }
+    };
+
+    async getAllSubmissionList(data){
+        const { UserId, PageNo = 1, PageSize = 10 } = data;
+        let totalData = await waterShedDataRepo.findAndCount({
+          where: { UserId: Equal(UserId) },
+          select: ["ActivityId", "UserId", "SubmissionId", "CreatedDate", "BeneficaryName", "FruitsId", "MobileNumber", "StatusOfWork"],
+          skip: (PageNo - 1) * PageSize,
+          take: PageSize
+        });
+        return {
+          totalCount: totalData[1],
+          PageNo,
+          PageSize,
+          totalData: totalData[0]
+        }
+    };
+
     async updateSurveyData(data){
         let findData = await waterShedDataRepo.findOneBy({SubmissionId: Equal(data?.SubmissionId)});
         let newData = {...findData, ...data};
@@ -316,7 +349,7 @@ export class MobileRepo {
     };
     async retriveOnlyVillages(dcode, tcode, hcode) {
         return await masterDataRepo.createQueryBuilder('md')
-            .select("DISTINCT VillageCode, VillageName")
+            .select("DISTINCT VillageName")
             .where("md.TalukCode= :id and md.DistrictCode = :dcode and md.HobliCode= :hcode", { id: tcode, dcode, hcode })
             .getRawMany();
     };

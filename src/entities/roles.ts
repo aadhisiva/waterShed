@@ -28,6 +28,9 @@ import { ChildRoles } from "./childRoles";
     @ManyToOne(() => Departments, dep => dep.Roles)
     @JoinColumn({name: "DepartmentId"})
     DepartmentId: Departments;
+      
+    @Column({ type: "nvarchar", length: 10, default: null })
+    IsMobile: string;
 
     @OneToMany(() => UserData, user => user.RoleId, {cascade: true, onDelete: 'CASCADE'})
     UserData: UserData[]
@@ -46,11 +49,11 @@ import { ChildRoles } from "./childRoles";
 
     @OneToMany(() => ChildRoles, am => am.RoleId, {cascade: true, onDelete: 'CASCADE'})
     ChildRolesFK: ChildRoles[];
-  
+
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   
     @UpdateDateColumn()
-    updatedDate: Date;
+    UpdatedDate: Date;
   };
   

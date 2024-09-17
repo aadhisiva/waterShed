@@ -37,9 +37,9 @@ import { Roles } from "./roles";
     Type: string;
 
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   
     @UpdateDateColumn()
-    updatedDate: Date;
+    UpdatedDate: Date;
   };
   

@@ -94,8 +94,8 @@ export class DprsPrivateLand {
   "SWC+ WW Cost (Rs.)": string;
 
   @CreateDateColumn()
-  createdDate: Date;
+  CreatedDate: Date;
 
   @UpdateDateColumn()
-  updatedDate: Date;
+  UpdatedDate: Date;
 };

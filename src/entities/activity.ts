@@ -43,11 +43,11 @@ import { QuestionMapping } from "./QuestionMapping";
   
     @Column({ type: "int" })
     ParentId: string;
-  
+
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   
     @UpdateDateColumn()
-    updatedDate: Date;
+    UpdatedDate: Date;
   };
   
