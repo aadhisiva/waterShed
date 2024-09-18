@@ -28,22 +28,28 @@ const app = express();
 const port: any = process.env.PORT || 3000;
 
 // used for body parsers in apis
-app.use(express.json({limit: '100mb'}));
+app.use(express.json({ limit: '100mb' }));
 
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
 // cors setup for communication of sever and client
-app.use(cors({ origin: ['http://localhost:8081', "http://localhost:8080", "http://10.10.140.162", "https://spectacles.karnataka.gov.in"] }));
+app.use(cors({
+  origin: ['http://localhost:8081', "http://localhost:8080", "http://10.10.140.162", "https://spectacles.karnataka.gov.in"],
+  methods: ["GET", "POST"]
+}));
 
 //setting req headers and res headers 
 app.use(function (req, res, next) {
-  res.header("X-Frame-Options", "SAMEORIGIN");
   res.header("X-XSS-Protection", "1; mode=block'");
   res.header("X-Content-Type-Options", "nosniff");
   res.header("strict-transport-security", "max-age=63072000; includeSubdomains; preload");
-  res.header('Content-Security-Policy', '<policy-directive>; <policy-directive>')
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.removeHeader('X-Powered-By');
+  // Set Content-Security-Policy header to restrict embedding and other policies
+  res.setHeader('Content-Security-Policy', "frame-ancestors 'self'; default-src 'self'; script-src 'self'; style-src 'self';");
+
   next();
-})
+});
 
 // create for logs śad
 app.use(morgan('common', {
@@ -58,18 +64,17 @@ app.get("/wapi/run", (req, res) => {
 
 if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
-}
+}; // for creating uploads folder for file requests
 
 // controllers
 app.use('/wapi/admin', adminRouter);
 app.use('/wapi/mobile', mobileRouter);
 
-
+// intialize the db then build a server
 AppDataSource.initialize().then(async (connection) => {
   app.listen(port, () => {
     Logger.info(`⚡️[Database]: Database connected....+++++++ ${port}`);
   });
-  Logger.info(`⚡️[Database]: Database connected....+++++++ ${port}`);
 }).catch(error => {
   Logger.error("connection error :::::::", error);
   throw new Error("new Connection ERROR " + JSON.stringify(error));

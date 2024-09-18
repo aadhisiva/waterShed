@@ -97,10 +97,11 @@ export class MobileServices {
     };
 
     async verifyOtp(data) {
-        const { Mobile, RoleId, Otp } = data;
+        const { Mobile, Otp, RoleId } = data;
         if (!Mobile || !RoleId) return { code: 400 };
-        let loginUser: ObjectParam = await this.mobileRepo.fetchUser(data);
-        if (loginUser?.Otp !== Otp) return { code: 422, message: RESPONSEMSG.VALIDATE_FAILED }
+        let loginUser = await this.mobileRepo.fetchUser(data);
+        if(loginUser['code']) return {code: 404, message: "Access Denied"};
+        if (loginUser['Otp'] !== Otp) return { code: 422, message: RESPONSEMSG.VALIDATE_FAILED }
         return { message: RESPONSEMSG.VALIDATE, data: {} };
     };
 

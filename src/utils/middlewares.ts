@@ -60,7 +60,7 @@ export const authenticateToken = async (req, res, next) => {
         return res.status(401).json({ code: 401, message: 'Access denied. No token provided.' });
     }
 
-    jwt.verify(token, process.env.SECRET_KEY, async (err, user) => {
+    jwt.verify(token, process.env.SECRET_KEY, { algorithms: 'HS256' }, async (err, user) => {
         if (err) {
             return res.status(403).json({ code: 403, message: 'Failed to authenticate.' });
         }

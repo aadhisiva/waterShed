@@ -50,17 +50,17 @@ export class MobileRepo {
         let newData = { ...findData, ...data };
         await userDataRepo.save(newData);
         return await userDataRepo.createQueryBuilder('vs')
-        .innerJoinAndSelect(MasterData, 'md', 'md.DistrictCode=vs.DistrictCode and md.TalukCode=vs.TalukCode and md.HobliCode=vs.HobliCode')
-        .select([`DISTINCT vs.DistrictCode DistrictCode, vs.TalukCode TalukCode, vs.HobliCode HobliCode, vs.UserId UserId, 
+            .innerJoinAndSelect(MasterData, 'md', 'md.DistrictCode=vs.DistrictCode and md.TalukCode=vs.TalukCode and md.HobliCode=vs.HobliCode')
+            .select([`DISTINCT vs.DistrictCode DistrictCode, vs.TalukCode TalukCode, vs.HobliCode HobliCode, vs.UserId UserId, 
             CONCAT('D-',md.DistrictName,'-T-',md.TalukName,'-H-',md.HobliName) as assignedHobli`
-        ])
-        .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile: Mobile, RoleId: RoleId })
-        .getRawMany();
+            ])
+            .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile: Mobile, RoleId: RoleId })
+            .getRawMany();
     };
 
-    async fetchUser(data: loginData) {
-        const { Mobile, UserRole } = data;
-        let findData = await AppDataSource.getRepository(loginData).findOneBy({ Mobile, UserRole });
+    async fetchUser(data ) {
+        const { Mobile, RoleId } = data;
+        let findData = await userDataRepo.findOneBy({ Mobile: Equal(Mobile), RoleId: Equal(RoleId) });
         if (!findData) return { code: 404 };
         return findData;
     };
@@ -68,30 +68,30 @@ export class MobileRepo {
     async assignedHobliDetails(data) {
         const { DistrictCode, TalukCode, HobliCode } = data;
         return masterDataRepo.createQueryBuilder('md')
-        .select(["DISTINCT CONCAT(md.VillageName,' -k- ', md.VillageNameKa) as VillageName"])
-        .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode", 
-            {dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode})
-        .getRawMany();
-            
-      }
+            .select(["DISTINCT CONCAT(md.VillageName,' -k- ', md.VillageNameKa) as VillageName"])
+            .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode",
+                { dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode })
+            .getRawMany();
+
+    }
 
     async getWatershedOrSub(data) {
         const { DistrictCode, TalukCode, HobliCode, VillageName } = data;
         return masterDataRepo.createQueryBuilder('md')
-        .select(['DISTINCT md.SubWatershedCode, md.SubWatershedName SubWatershedName'])
-        .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode and md.VillageName = :vName", 
-            {dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode, vName: VillageName})
-        .getRawMany();
-      };
+            .select(['DISTINCT md.SubWatershedCode, md.SubWatershedName SubWatershedName'])
+            .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode and md.VillageName = :vName",
+                { dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode, vName: VillageName })
+            .getRawMany();
+    };
 
     async getMicroWatershedData(data) {
         const { DistrictCode, TalukCode, HobliCode, VillageName, SubWatershedCode } = data;
         return masterDataRepo.createQueryBuilder('md')
-        .select(['DISTINCT md.MicroWatershedCode, md.MicroWatershedName MicroWatershedName'])
-        .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode and md.VillageName = :vName and md.SubWatershedCode = :swc", 
-            {dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode, vName: VillageName, swc: SubWatershedCode})
-        .getRawMany();
-      };
+            .select(['DISTINCT md.MicroWatershedCode, md.MicroWatershedName MicroWatershedName'])
+            .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode and md.VillageName = :vName and md.SubWatershedCode = :swc",
+                { dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode, vName: VillageName, swc: SubWatershedCode })
+            .getRawMany();
+    };
 
     async fetchUserById(UserId) {
         let findData = await AppDataSource.getRepository(loginData).findOneBy({ UserId });
@@ -159,7 +159,7 @@ export class MobileRepo {
     async getAllRoles() {
         let savingData = await rolesRepo.createQueryBuilder('role')
             .select(["role.RoleName as RoleName", "role.id as RoleId"])
-            .where("role.IsMobile = :IsMobile", {IsMobile: 'Yes'})
+            .where("role.IsMobile = :IsMobile", { IsMobile: 'Yes' })
             .getRawMany();
         return savingData;
     };
@@ -229,14 +229,14 @@ export class MobileRepo {
             .skip((page - 1) * pageSize)
             .take(pageSize)
             .getManyAndCount();
-            const totalPages = Math.ceil(total / pageSize);
-            return {
-                total,
-                page,
-                pageSize,
-                totalPages,
-                totalData: results
-            };
+        const totalPages = Math.ceil(total / pageSize);
+        return {
+            total,
+            page,
+            pageSize,
+            totalPages,
+            totalData: results
+        };
     };
 
     async getCommonLand(data) {
@@ -262,51 +262,51 @@ export class MobileRepo {
 
 
     async saveSurveyData(data) {
-        let findData = await userDataRepo.findOneBy({UserId: Equal(data?.UserId)});
-        if(!findData) return {code: 422, message: "Access Denied"};
+        let findData = await userDataRepo.findOneBy({ UserId: Equal(data?.UserId) });
+        if (!findData) return { code: 422, message: "Access Denied" };
         data.CreatedName = findData.CreatedName;
         data.CreatedRole = findData.CreatedRole;
         data.CreatedMobile = findData.CreatedMobile;
-        waterShedDataHistoryRepo.save({...data, ...{Status: "Added New"}})
+        waterShedDataHistoryRepo.save({ ...data, ...{ Status: "Added New" } })
         return await waterShedDataRepo.save(data);
     };
 
-    async getSubmissionList(data){
+    async getSubmissionList(data) {
         const { UserId, PageNo = 1, PageSize = 10, StatusOfWork } = data;
         let totalData = await waterShedDataRepo.findAndCount({
-          where: { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork) },
-          select: ["ActivityId", "UserId", "SubmissionId", "CreatedDate", "BeneficaryName", "FruitsId", "MobileNumber", "StatusOfWork"],
-          skip: (PageNo - 1) * PageSize,
-          take: PageSize
+            where: { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork) },
+            select: ["ActivityId", "UserId", "SubmissionId", "CreatedDate", "BeneficaryName", "FruitsId", "MobileNumber", "StatusOfWork"],
+            skip: (PageNo - 1) * PageSize,
+            take: PageSize
         });
         return {
-          totalCount: totalData[1],
-          PageNo,
-          PageSize,
-          totalData: totalData[0]
+            totalCount: totalData[1],
+            PageNo,
+            PageSize,
+            totalData: totalData[0]
         }
     };
 
-    async getAllSubmissionList(data){
+    async getAllSubmissionList(data) {
         const { UserId, PageNo = 1, PageSize = 10 } = data;
         let totalData = await waterShedDataRepo.findAndCount({
-          where: { UserId: Equal(UserId) },
-          select: ["ActivityId", "UserId", "SubmissionId", "CreatedDate", "BeneficaryName", "FruitsId", "MobileNumber", "StatusOfWork"],
-          skip: (PageNo - 1) * PageSize,
-          take: PageSize
+            where: { UserId: Equal(UserId) },
+            select: ["ActivityId", "UserId", "SubmissionId", "CreatedDate", "BeneficaryName", "FruitsId", "MobileNumber", "StatusOfWork"],
+            skip: (PageNo - 1) * PageSize,
+            take: PageSize
         });
         return {
-          totalCount: totalData[1],
-          PageNo,
-          PageSize,
-          totalData: totalData[0]
+            totalCount: totalData[1],
+            PageNo,
+            PageSize,
+            totalData: totalData[0]
         }
     };
 
-    async updateSurveyData(data){
-        let findData = await waterShedDataRepo.findOneBy({SubmissionId: Equal(data?.SubmissionId)});
-        let newData = {...findData, ...data};
-        await waterShedDataHistoryRepo.save({...newData, ...{Status: "Updated"}});
+    async updateSurveyData(data) {
+        let findData = await waterShedDataRepo.findOneBy({ SubmissionId: Equal(data?.SubmissionId) });
+        let newData = { ...findData, ...data };
+        await waterShedDataHistoryRepo.save({ ...newData, ...{ Status: "Updated" } });
         return await waterShedDataRepo.save(newData);
     };
 

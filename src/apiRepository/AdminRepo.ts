@@ -92,7 +92,7 @@ export class AdminRepo {
         const { Mobile, Otp } = data;
         let getData = await assignedMastersRepo.createQueryBuilder('ud')
             .leftJoinAndSelect(Roles, 'lr', "lr.id = ud.RoleId")
-            .select(["DISTINCT ud.Mobile Mobile", "lr.RoleName RoleName", "lr.id RoleId"])
+            .select(["DISTINCT lr.RoleName", "lr.id as RoleId"])
             .where("ud.Mobile = :Mobile", { Mobile })
             .getRawMany();
         if (getData.length == 0) return { code: 422, message: "Access Denied" };
@@ -110,17 +110,11 @@ export class AdminRepo {
         return getData;
     };
 
-    async fetchUser(data: loginData) {
-        const { Mobile, UserRole } = data;
-        if (UserRole == SUPER_ADMIN) {
-            let findData = await superAdminRepo.findOneBy({ Mobile });
-            if (!findData) return { code: 404 };
-            return findData;
-        } else {
-            let findData = await loginDataRepo.findOneBy({ Mobile, UserRole });
-            if (!findData) return { code: 404 };
-            return findData;
-        }
+    async fetchUser(data ) {
+        const { Mobile } = data;
+        let findData = await assignedMastersRepo.findOneBy({ Mobile: Equal(Mobile) });
+        if (!findData) return { code: 404 };
+        return findData;
     };
 
     async getSchemes(data: loginData) {

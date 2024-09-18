@@ -55,9 +55,9 @@ mobileRouter.post('/getWatershedOrSub', async (req, res) => {
     }
 });
 
-mobileRouter.post('/verifyOtp', authenticateToken, async (req, res) => {
+mobileRouter.post('/verifyOtp', async (req, res) => {
     try {
-        let body = req.body;
+        let body = {...req.body, ...{UserId: req?.user?.UserId}};
         let result = await mobileServices.verifyOtp(body);
         return mobileAppResponse(res, result, body, getRoleAndUserId(req, MOBILE_MESSAGES.VERIFY_OTP));
     } catch (error) {

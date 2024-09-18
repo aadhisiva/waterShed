@@ -5,9 +5,11 @@ import { RESPONSEMSG } from "../utils/statusCodes";
 import { OtpServices } from "../sms/smsServceResusable";
 import { loginData } from "../entities";
 import jsonWebToken from "jsonwebtoken";
+import { encryptData } from "../utils/sensitiveData";
+import crypto from "crypto";
 
 type ObjectParam = any;
-
+const secretKey = crypto.randomBytes(32).toString('hex'); // Replace with a pre-shared secret key
 @Service()
 export class AdminServices {
     constructor(
@@ -38,7 +40,7 @@ export class AdminServices {
     };
 
     async assigningData(data) {
-        if(!data?.UserId) return {code: 400};
+        if (!data?.UserId) return { code: 400 };
         return this.adminRepo.assigningData(data);
     };
 
@@ -53,10 +55,10 @@ export class AdminServices {
         let savedRes: ObjectParam = await this.adminRepo.sendOtp(data);
         if (!savedRes?.code) {
             let sendSingleSms = await this.otpServices.sendOtpAsSingleSms(Mobile, data?.WebOtp);
-            await saveMobileOtps(Mobile, sendSingleSms?.otpMessage, sendSingleSms?.response, data?.UserId ,data?.WebOtp);
-            if (sendSingleSms.code !== 200){
+            await saveMobileOtps(Mobile, sendSingleSms?.otpMessage, sendSingleSms?.response, data?.UserId, data?.WebOtp);
+            if (sendSingleSms.code !== 200) {
                 return { code: 422, message: RESPONSEMSG.OTP_FAILED };
-            } 
+            };
             return { message: RESPONSEMSG.OTP, data: { Token: savedRes?.WebToken, UserId: savedRes?.UserId, Version: savedRes?.WebVersion, UserRole: savedRes?.UserRole } };
         };
         return savedRes;
@@ -71,32 +73,39 @@ export class AdminServices {
         data.WebVersion = version[0]?.WebVersion;
         let checkRoles: ObjectParam = await this.adminRepo.checkMobileLogin(data);
         if (checkRoles['code'] == 422) return { code: 422, message: checkRoles['message'] };
-            // let sendSingleSms = await this.otpServices.sendOtpAsSingleSms(Mobile, data?.WebOtp);
-            // await saveMobileOtps(Mobile, sendSingleSms?.otpMessage, sendSingleSms?.response, data?.UserId ,data?.WebOtp);
-            // if (sendSingleSms.code !== 200){
-            //     return { code: 422, message: RESPONSEMSG.OTP_FAILED };
-            // } 
-            let resObj = {
-                Mobile,
-                Otp: data.Otp,
-                Token: jsonWebToken.sign({ Mobile }, process.env.SECRET_KEY, { expiresIn: '24h' }),
-                UserData: checkRoles
-            }
-            return resObj;
+        // let sendSingleSms = await this.otpServices.sendOtpAsSingleSms(Mobile, data?.WebOtp);
+        // await saveMobileOtps(Mobile, sendSingleSms?.otpMessage, sendSingleSms?.response, data?.UserId ,data?.WebOtp);
+        // if (sendSingleSms.code !== 200){
+        //     return { code: 422, message: RESPONSEMSG.OTP_FAILED };
+        // } 
+        // Options for the token
+        const options = {
+            expiresIn: '12h', // Token expiration time
+            algorithm: 'HS256', // Use a secure algorithm (HS256 is symmetric, RS256 is asymmetric)
+        };
+        let resObj = {
+            Mobile,
+            Token: jsonWebToken.sign({ UserId: generateRandomString(20) }, process.env.SECRET_KEY, options),
+            UserData: checkRoles
+        };
+        return encryptData(resObj, secretKey);
     };
 
     async getAccessById(data) {
         const { RoleId } = data;
         if (!RoleId) return { code: 400, message: "Provide Mobile" };
-        return await this.adminRepo.checkRoleAccess(data);
+        let response = await this.adminRepo.checkRoleAccess(data);
+        if (response['code']) return { code: 422, message: "You don't have access." }
+        return encryptData(response, secretKey);
     };
 
 
     async verifyOtp(data) {
-        const { Mobile, UserRole, Otp } = data;
-        if (!Mobile || !UserRole) return { code: 400 };
-        let loginUser: ObjectParam = await this.adminRepo.fetchUser(data);
-        if (loginUser?.WebOtp !== Otp) return { code: 422, message: RESPONSEMSG.VALIDATE_FAILED }
+        const { Mobile, Otp } = data;
+        if (!Mobile) return { code: 400 };
+        let loginUser = await this.adminRepo.fetchUser(data);
+        if (loginUser['code']) return { code: 404, message: "Access Denied" };
+        if (loginUser['Otp'] !== Otp) return { code: 422, message: RESPONSEMSG.VALIDATE_FAILED }
         return { message: RESPONSEMSG.VALIDATE, data: {} };
     };
 
@@ -142,187 +151,194 @@ export class AdminServices {
 
     /* new modified apis */
 
-    async departments(data){
+    async departments(data) {
         const { ReqType } = data;
-        if(ReqType == "Add") {
+        if (ReqType == "Add") {
             return await this.adminRepo.addDepartment(data);
-        } else if(ReqType == "Get"){
+        } else if (ReqType == "Get") {
             return await this.adminRepo.getDepartment(data);
-        } else if(ReqType == "Dd"){
+        } else if (ReqType == "Dd") {
             return await this.adminRepo.getDropdownDepart();
         } else {
-            return {code: 422, message: "Sending wrong request to server."};
+            return { code: 422, message: "Sending wrong request to server." };
         }
     };
 
-    async addOrGetschemes(data){
+    async addOrGetschemes(data) {
         const { ReqType } = data;
-        if(ReqType == "Add") {
+        if (ReqType == "Add") {
             return await this.adminRepo.addschemes(data);
-        } else if(ReqType == "Get"){
+        } else if (ReqType == "Get") {
             return await this.adminRepo.getSchemesData();
-        } else if(ReqType == "Dd"){
+        } else if (ReqType == "Dd") {
             return await this.adminRepo.getDropdownSchemes();
-        }else {
-            return {code: 422, message: "Sending wrong request to server."};
-        }
-    };
-
-    async addOrGetSectors(data){
-        const { ReqType } = data;
-        if(ReqType == "Add") {
-            return await this.adminRepo.addSectors(data);
-        } else if(ReqType == "Get"){
-            return await this.adminRepo.getSectorsData();
-        } else if(ReqType == "Dd"){
-            return await this.adminRepo.getDropdownSectors();
-        }else {
-            return {code: 422, message: "Sending wrong request to server."};
-        }
-    };
-
-    async addOrGetsActivity(data){
-        const { ReqType } = data;
-        if(ReqType == "Add") {
-            return await this.adminRepo.addActivity(data);
-        } else if(ReqType == "Get"){
-            return await this.adminRepo.getActivityData();
-        } else if(ReqType == "Dd"){
-            return await this.adminRepo.getDropdownActivty();
-        }else {
-            return {code: 422, message: "Sending wrong request to server."};
-        }
-    };
-
-    async addOrGetRoles(data){
-        const { ReqType } = data;
-        if(ReqType == "Add") {
-            return await this.adminRepo.addRoles(data);
-        } else if(ReqType == "Get"){
-            return await this.adminRepo.getRolesData();
-        } else if(ReqType == "Dd"){
-            return await this.adminRepo.getDropdownRoles();
         } else {
-            return {code: 422, message: "Sending wrong request to server."};
+            return { code: 422, message: "Sending wrong request to server." };
         }
     };
 
-    async addOrGetQuestions(data){
+    async addOrGetSectors(data) {
         const { ReqType } = data;
-        if(ReqType == "Add") {
+        if (ReqType == "Add") {
+            return await this.adminRepo.addSectors(data);
+        } else if (ReqType == "Get") {
+            return await this.adminRepo.getSectorsData();
+        } else if (ReqType == "Dd") {
+            return await this.adminRepo.getDropdownSectors();
+        } else {
+            return { code: 422, message: "Sending wrong request to server." };
+        }
+    };
+
+    async addOrGetsActivity(data) {
+        const { ReqType } = data;
+        if (ReqType == "Add") {
+            return await this.adminRepo.addActivity(data);
+        } else if (ReqType == "Get") {
+            return await this.adminRepo.getActivityData();
+        } else if (ReqType == "Dd") {
+            return await this.adminRepo.getDropdownActivty();
+        } else {
+            return { code: 422, message: "Sending wrong request to server." };
+        }
+    };
+
+    async addOrGetRoles(data) {
+        const { ReqType } = data;
+        if (ReqType == "Add") {
+            let encrypt = await this.adminRepo.addRoles(data);
+            return encryptData(encrypt, secretKey);
+        } else if (ReqType == "Get") {
+            let encrypt = await this.adminRepo.getRolesData();
+            return encryptData(encrypt, secretKey);
+        } else if (ReqType == "Dd") {
+            let encrypt = await this.adminRepo.getDropdownRoles();
+            return encryptData(encrypt, secretKey);
+        } else {
+            return { code: 422, message: "Sending wrong request to server." };
+        }
+    };
+
+    async addOrGetQuestions(data) {
+        const { ReqType } = data;
+        if (ReqType == "Add") {
             return await this.adminRepo.addQuestion(data);
-        } else if(ReqType == "Get"){
+        } else if (ReqType == "Get") {
             return await this.adminRepo.getQuestionData();
-        } else if(ReqType == "Dd"){
+        } else if (ReqType == "Dd") {
             return await this.adminRepo.getDropdownQuestions();
         } else {
-            return {code: 422, message: "Sending wrong request to server."};
+            return { code: 422, message: "Sending wrong request to server." };
         };
     };
 
-    async addOrGetQuestionDropDownTypes(data){
+    async addOrGetQuestionDropDownTypes(data) {
         const { ReqType } = data;
-        if(ReqType == "Add") {
+        if (ReqType == "Add") {
             return await this.adminRepo.addQuestionDropDownTypes(data);
-        } else if(ReqType == "Get"){
+        } else if (ReqType == "Get") {
             return await this.adminRepo.getQuestionDataDropDownTypes();
-        } else if(ReqType == "Dd"){
+        } else if (ReqType == "Dd") {
             return await this.adminRepo.getDropdownDropDownTypes();
         } else {
-            return {code: 422, message: "Sending wrong request to server."};
+            return { code: 422, message: "Sending wrong request to server." };
         };
     };
 
-    async mapQuestionOrUpdate(data){
+    async mapQuestionOrUpdate(data) {
         const { ReqType, MappedData } = data;
-        if(ReqType == "Add") {
+        if (ReqType == "Add") {
             return await this.adminRepo.addMapping(MappedData);
-        } else if(ReqType == "Get"){
+        } else if (ReqType == "Get") {
             return await this.adminRepo.getMappedQuestion();
-        } else if(ReqType == "Edit"){
+        } else if (ReqType == "Edit") {
             return await this.adminRepo.editMappedQuestion(data);
         } else {
-            return {code: 422, message: "Sending wrong request to server."};
+            return { code: 422, message: "Sending wrong request to server." };
         };
     };
 
-    async addOrGetRoleAccess(data){
+    async addOrGetRoleAccess(data) {
         const { ReqType } = data;
-        if(ReqType == "Add") {
-            return await this.adminRepo.addRoleAccess(data);
-        } else if(ReqType == "Get"){
-            return await this.adminRepo.getRolesDataAccess();
+        if (ReqType == "Add") {
+            let encrypt = await this.adminRepo.addRoleAccess(data);
+            return encryptData(encrypt, secretKey);
+        } else if (ReqType == "Get") {
+            let encrypt = await this.adminRepo.getRolesDataAccess();
+            return encryptData(encrypt, secretKey);
         } else {
-            return {code: 422, message: "Sending wrong request to server."};
+            return { code: 422, message: "Sending wrong request to server." };
         }
     };
 
-    
+
     async assignChildAndGet(data) {
         const { RoleId, ReqType } = data;
         if (ReqType == "Get") {
-            return await this.adminRepo.getChildAccess();
+            let encrypt = await this.adminRepo.getChildAccess();
+            return encryptData(encrypt, secretKey);
         } else if (ReqType == "Add") {
             if (!RoleId) return { code: 400, message: "Provide RoleId" };
-            return await this.adminRepo.assignChildAccess(data);
+            let encrypt = await this.adminRepo.assignChildAccess(data);
+            return encryptData(encrypt, secretKey);
         } else {
             return { code: 400, message: "Your request is not found", data: {} };
         }
     };
 
-    async getChildBasedOnParent(data){
+    async getChildBasedOnParent(data) {
         return await this.adminRepo.getChildBasedOnParent(data);
     }
 
-    async superLogin(data){
+    async superLogin(data) {
         const { Username, Password, ReqType } = data;
-        if(!Username) return {code:400, message: "Provide Username"};
-        if(!Password) return {code:400, message: "Provide Password"};
-        if(ReqType == "Get"){
+        if (!Username) return { code: 400, message: "Provide Username" };
+        if (!Password) return { code: 400, message: "Provide Password" };
+        if (ReqType == "Get") {
             let check = await this.adminRepo.checkUsername(Username);
-            if(!check) return {code: 422, message: "User not found."};
+            if (!check) return { code: 422, message: "User not found." };
             let checkPassword = check.Password == Password;
-            if(!checkPassword) return {code: 422, message: "Passord not matched."};
-            const token = jsonWebToken.sign({ Username: check.Username, RoleId: check.Name, Mobile: check.Mobile }, 
+            if (!checkPassword) return { code: 422, message: "Passord not matched." };
+            const token = jsonWebToken.sign({ Username: check.Username, RoleId: check.Name, Mobile: check.Mobile },
                 process.env.SECRET_KEY, { expiresIn: '1h' });
-            return {message: "Successfully Verified.", data: {token, username: check.Username, Name: check.Name}};
-        } else if(ReqType == "Add") {
+            return { message: "Successfully Verified.", data: { token, username: check.Username, Name: check.Name } };
+        } else if (ReqType == "Add") {
             let check = await this.adminRepo.checkUsername(Username);
-            if(check) return {code: 422, message: "Already Registered."};
+            if (check) return { code: 422, message: "Already Registered." };
             let savedValues = await this.adminRepo.addSuperAdminData(data);
-            const token = jsonWebToken.sign({ Username: savedValues.Username, Name: savedValues.Name, Mobile: savedValues.Mobile }, 
+            const token = jsonWebToken.sign({ Username: savedValues.Username, Name: savedValues.Name, Mobile: savedValues.Mobile },
                 process.env.SECRET_KEY, { expiresIn: '1h' });
-            return {message: "User Registered.", data: {token, username: savedValues.Username, Name: savedValues.Name, Mobile: savedValues.Mobile}};
+            return { message: "User Registered.", data: { token, username: savedValues.Username, Name: savedValues.Name, Mobile: savedValues.Mobile } };
         } else {
-            return {code: 422, message: "Sending wrong request to server."};
+            return { code: 422, message: "Sending wrong request to server." };
         }
     };
 
-    async assignmentProcess(data){
+    async assignmentProcess(data) {
         const { ReqType } = data;
-        if(ReqType == 1){
+        if (ReqType == 1) {
             return await this.adminRepo.assignmentProcess(data);
-        } else if(ReqType == 2) {
+        } else if (ReqType == 2) {
             return await this.adminRepo.assignToSurvey(data);
         }
     };
-    
+
     async getMasterDropDown(data) {
-        const { ReqType, UDCode, UTCode, UHCode,Mobile, loginType, Type } = data;
+        const { ReqType, UDCode, UTCode, UHCode, Mobile, loginType, Type } = data;
         if (!ReqType) return { code: 400, message: "Provide ReqType" };
         if (ReqType == 1) {
-            if(loginType == "District"){
+            if (loginType == "District") {
                 return await this.adminRepo.getAuthDistrictDD(data);
             };
             return await this.adminRepo.getDistrictsDD(data);
         } else if (ReqType == 2) {
-            if(loginType == "Taluk"){
+            if (loginType == "Taluk") {
                 return await this.adminRepo.getAuthTalukDD(data);
             };
             if (!UDCode) return { code: 400, message: "Provide UDCode" };
             return await this.adminRepo.getTalukDD(UDCode);
         } else if (ReqType == 3) {
-            if(loginType == "Hobli"){
+            if (loginType == "Hobli") {
                 return await this.adminRepo.getAuthHobliDD(data);
             };
             if (!UDCode) return { code: 400, message: "Provide UDCode" };
@@ -345,43 +361,43 @@ export class AdminServices {
         return await this.adminRepo.getAssignedData(data);
     };
 
-    async uploadPrivateLand(data){
+    async uploadPrivateLand(data) {
         return await this.adminRepo.uploadPrivateLand(data);
     }
 
-    async uploadCommonLand(data){
+    async uploadCommonLand(data) {
         return await this.adminRepo.uploadCommonLand(data);
     }
 
-    async getDprsLand(data){
+    async getDprsLand(data) {
         const { RowsPerPage, Page, DataType } = data;
-        if(!RowsPerPage) return {code: 422, message: "Provide RowsPerPage"};
-        if(!Page || Page <= 0) return {code: 422, message: "Provide Page"};
-        if(DataType == "Private"){
+        if (!RowsPerPage) return { code: 422, message: "Provide RowsPerPage" };
+        if (!Page || Page <= 0) return { code: 422, message: "Provide Page" };
+        if (DataType == "Private") {
             return await this.adminRepo.getDprsPrivateLand(data);
-        } else if(DataType == "Common"){
+        } else if (DataType == "Common") {
             return await this.adminRepo.getDprsCommonLand(data);
         } else {
-            return {code: 422, message: "Sending wrong request to server."};
+            return { code: 422, message: "Sending wrong request to server." };
         }
     };
 
-    
-    async uploadImages(data){
+
+    async uploadImages(data) {
         let savedData = await this.adminRepo.uploadImages(data);
         let insertedId = savedData.id;
 
         // Construct video URL
-        const imageUrl =  `${process.env.PRO_URL}/wapi/admin/getImage/${insertedId}`;
-        return { insertedId: insertedId, imageUrl: imageUrl};
+        const imageUrl = `${process.env.PRO_URL}/wapi/admin/getImage/${insertedId}`;
+        return { insertedId: insertedId, imageUrl: imageUrl };
     }
 
-    async getImage(id){
+    async getImage(id) {
         let fetchData = await this.adminRepo.getImage(id);
-        if(!fetchData) return {code: 422, message: "Image not found"};
-       return fetchData;
+        if (!fetchData) return { code: 422, message: "Image not found" };
+        return fetchData;
     };
-   
+
     async uploadDistrictMasters(data) {
         let chunkSize = 50;
         for (let i = 0; i < data.length; i += chunkSize) {

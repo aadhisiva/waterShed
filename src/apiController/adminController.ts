@@ -100,9 +100,9 @@ adminRouter.post('/assigningData', webAuthTokenAndVersion, async (req, res) => {
     }
 });
 
-adminRouter.post('/verifyOtp', webAuthTokenAndVersion, async (req, res) => {
+adminRouter.post('/verifyOtp', async (req, res) => {
     try {
-        let body = req.body;
+        let body = {...req.body, ...{UserId: req?.user?.UserId}};
         let result = await adminServices.verifyOtp(body);
         return webAppResponse(res, result, body, WEBPAGES.LOGIN_PAGE, WEBMESSAGES.VERIFY_OTP, req.user?.userid, req.user?.role);
     } catch (error) {
