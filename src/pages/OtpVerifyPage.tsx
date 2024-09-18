@@ -14,6 +14,7 @@ import { otpValid } from '../utils/validations';
 import SelectField from '../components/formhandle/SelectField';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { Avatar, Paper, Typography } from '@mui/material';
+import { decryptData } from '../utils/decrypt';
 
 type Values = {
   [key: string]: string;
@@ -68,7 +69,12 @@ export default function OtpVerifyPage({ userData, handleResendOTP }: any) {
   // Handle form submission
   const onSubmit = async (values: any) => {
     // Handle form data submission here
-    if (values.Otp !== userData.Otp) return alert('Enter Valid Otp.');
+    let response = await axiosInstance.post('verifyOtp', {
+      Mobile: userData?.Mobile,
+      Otp: values?.Otp,
+      RoleId: values.RoleId
+    });
+    if (response?.data?.code !== 200) return;
     let findObj = (userData.UserData || []).find(
       (obj: RoleAccess) => obj.RoleId == values.RoleId,
     );
@@ -76,13 +82,14 @@ export default function OtpVerifyPage({ userData, handleResendOTP }: any) {
       RoleId: values.RoleId,
     });
     if (data.code !== 200) return alert(data.message || 'Please try again');
+    let decryptedAccess = decryptData(data.data);
     dispatch(
       userLoggedIn({
         ...userData,
         ...{
           RoleName: findObj.RoleName,
           RoleId: values.RoleId,
-          RoleAccess: data.data,
+          RoleAccess: decryptedAccess,
         },
       }),
     );
@@ -115,7 +122,7 @@ export default function OtpVerifyPage({ userData, handleResendOTP }: any) {
         {'.'}
       </Typography>
     );
-  };
+  }
 
   return (
     <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>

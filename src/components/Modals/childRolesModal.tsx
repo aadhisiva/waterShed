@@ -12,6 +12,7 @@ import SelectField from '../formhandle/SelectField';
 import axiosInstance from '../../axiosInstance';
 import SpinnerLoader from '../spinner/spinner';
 import { nameValid } from '../../utils/validations';
+import { decryptData } from '../../utils/decrypt';
 
 interface ChildRolesModalProps {
   open: boolean;
@@ -80,8 +81,9 @@ export default function ChildRolesModal({
   const fecthIntialData = async () => {
     setLoading(true);
     let { data } = await axiosInstance.post('addOrGetRoles', { ReqType: 'Dd' });
+    let decrypt = decryptData(data.data);
     if (data?.code == 200) {
-      setRoleOptions(data.data);
+      setRoleOptions(decrypt);
       setLoading(false);
     } else {
       setLoading(false);

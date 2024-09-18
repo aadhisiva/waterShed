@@ -13,6 +13,7 @@ import axiosInstance from '../axiosInstance';
 import { LoadingButton } from '@mui/lab';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import OtpVerifyPage from './OtpVerifyPage';
+import { decryptData } from '../utils/decrypt';
 
 function Copyright() {
   return (
@@ -61,14 +62,14 @@ export default function RoleWiseLogin() {
   };
 
   const onSubmit = async (values: Values) => {
-    console.log("values",values)
     setLoading(true);
     setTimeout(async () => {
       let { data } = await axiosInstance.post('checkMobileLogin', {
         Mobile: values.Mobile,
       });
+      let decrypted = decryptData(data.data);
       if (data?.code == 200) {
-        setUsersData(data.data);
+        setUsersData(decrypted);
         setIsOtpValidate(true);
         setLoading(false);
       } else {
@@ -83,8 +84,9 @@ export default function RoleWiseLogin() {
       let { data } = await axiosInstance.post('checkMobileLogin', {
         Mobile: userData['Mobile'],
       });
+      let decrypted = decryptData(data.data);
       if (data?.code == 200) {
-        setUsersData(data.data);
+        setUsersData(decrypted);
         setIsOtpValidate(true);
         setLoading(false);
       } else {

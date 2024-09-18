@@ -7,6 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import axiosInstance from '../../axiosInstance';
 import RolesModal from '../../components/Modals/rolesModal';
 import SpinnerLoader from '../../components/spinner/spinner';
+import { decryptData } from '../../utils/decrypt';
 
 const headCells = [
   {
@@ -59,9 +60,10 @@ export default function Roles() {
   const fecthIntialData = async () => {
     setLoading(true);
     let { data } = await axiosInstance.post('addOrGetRoles', { ReqType: 'Get' });
+    let decrypt = decryptData(data.data);
     if (data?.code == 200) {
-      setTableData(data.data);
-      setCopyTableData(data.data);
+      setTableData(decrypt);
+      setCopyTableData(decrypt);
       setLoading(false);
     } else {
       setLoading(false);

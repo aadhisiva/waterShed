@@ -13,6 +13,7 @@ import axiosInstance from '../../axiosInstance';
 import SpinnerLoader from '../spinner/spinner';
 import ImageUploadMU from '../formhandle/ImageUpload';
 import { nameValid } from '../../utils/validations';
+import { decryptData } from '../../utils/decrypt';
 
 interface SchemesModalProps {
   open: boolean;
@@ -125,9 +126,10 @@ const [loading, setLoading] = React.useState(false);
     let { data } = await axiosInstance.post('departments', { ReqType: 'Dd' });
     let response = await axiosInstance.post('addOrGetschemes', { ReqType: 'Dd' });
     let rolesRes = await axiosInstance.post('addOrGetRoles', { ReqType: 'Dd' });
+    let decrypt = decryptData(rolesRes.data.data);
     if (data?.code == 200) {
       setDepartmentOptions(data.data);
-      setRoleOption(rolesRes.data.data);
+      setRoleOption(decrypt);
       setSchemeOption([...response.data.data, ...[{value: -1, name: "NoParent"}]]);
       setLoading(false);
     } else {
