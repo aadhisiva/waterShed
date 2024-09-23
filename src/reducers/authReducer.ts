@@ -22,10 +22,8 @@ const initialState: ExampleState = {
   token: '',
   Mobile: '',
   Name: '',
-  Username: '',
   RoleName: "",
   RoleAccess: {},
-  Otp: '',
   RoleId: ''
 };
 
@@ -38,11 +36,9 @@ const authSlice = createSlice({
       state.isLoggedIn = true;
       state.Mobile = Mobile;
       state.token = Token;
-      state.Username = Username,
       state.RoleName = RoleName,
       state.RoleAccess = RoleAccess,
-      state.RoleId = RoleId,
-      state.Otp = Otp
+      state.RoleId = RoleId
     },
     userLoggedOut(state) {
       state.isLoggedIn = false;

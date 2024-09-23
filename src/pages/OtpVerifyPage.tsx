@@ -14,7 +14,8 @@ import { otpValid } from '../utils/validations';
 import SelectField from '../components/formhandle/SelectField';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { Avatar, Paper, Typography } from '@mui/material';
-import { decryptData } from '../utils/decrypt';
+import { decryptData, generateRandomString } from '../utils/decrypt';
+import SpinnerLoader from '../components/spinner/spinner';
 
 type Values = {
   [key: string]: string;
@@ -23,10 +24,11 @@ type Values = {
 interface RoleAccess {
   RoleId: string;
   RoleName: string;
-}
+};
 
 export default function OtpVerifyPage({ userData, handleResendOTP }: any) {
   const [loading, setLoading] = React.useState(false);
+  const [userAccess, setUserAccess] = React.useState({UserId: '', access: {}});
   const initialValues = {
     Mobile: userData?.Mobile,
     RoleId: '',
@@ -70,26 +72,21 @@ export default function OtpVerifyPage({ userData, handleResendOTP }: any) {
   const onSubmit = async (values: any) => {
     // Handle form data submission here
     let response = await axiosInstance.post('verifyOtp', {
-      Mobile: userData?.Mobile,
-      Otp: values?.Otp,
-      RoleId: values.RoleId
+      Id: userAccess.UserId,
+      Otp: values?.Otp
     });
+    let decrypt = decryptData(response.data.data);
     if (response?.data?.code !== 200) return;
     let findObj = (userData.UserData || []).find(
       (obj: RoleAccess) => obj.RoleId == values.RoleId,
     );
-    let { data } = await axiosInstance.post('getAccessById', {
-      RoleId: values.RoleId,
-    });
-    if (data.code !== 200) return alert(data.message || 'Please try again');
-    let decryptedAccess = decryptData(data.data);
     dispatch(
       userLoggedIn({
-        ...userData,
+        ...{Mobile: userData.Mobile, Token: decrypt.Token},
         ...{
           RoleName: findObj.RoleName,
           RoleId: values.RoleId,
-          RoleAccess: decryptedAccess,
+          RoleAccess: userAccess['access']
         },
       }),
     );
@@ -122,10 +119,33 @@ export default function OtpVerifyPage({ userData, handleResendOTP }: any) {
         {'.'}
       </Typography>
     );
-  }
+  };
+
+  const handleRoleSelection = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValues({
+      ...values,
+      [e.target.name]: e.target.value,
+    });
+    setLoading(true);
+    try {
+      let { data } = await axiosInstance.post('getDataAccess', {
+        Id: generateRandomString(10)+e.target.value+generateRandomString(10),
+        Mobile: userData?.Mobile
+      });
+      let decrypt = decryptData(data.data);
+      if(data.code == 200){
+        setUserAccess(decrypt);
+      }
+      setLoading(false);
+      return;
+    } catch (e) {
+      setLoading(false);
+    }
+  };
 
   return (
     <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+      <SpinnerLoader isLoading={loading} />
       <Box
         sx={{
           my: 8,
@@ -165,7 +185,7 @@ export default function OtpVerifyPage({ userData, handleResendOTP }: any) {
                 name="RoleId"
                 label="Role Name"
                 value={values.RoleId}
-                onChange={handleChange}
+                onChange={handleRoleSelection}
                 options={(userData.UserData || []).map((obj: RoleAccess) => {
                   return { value: obj.RoleId, name: obj.RoleName };
                 })}
@@ -192,7 +212,7 @@ export default function OtpVerifyPage({ userData, handleResendOTP }: any) {
                 loading={loading}
                 loadingPosition="start"
                 fullWidth
-                endIcon={<LockOpenIcon />}
+                startIcon={<LockOpenIcon />}
                 variant="contained"
               >
                 <span>Verify OTP</span>

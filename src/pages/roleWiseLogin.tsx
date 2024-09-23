@@ -80,6 +80,7 @@ export default function RoleWiseLogin() {
 
   const handleResendOTP = () => {
     setLoading(true);
+    try{
     setTimeout(async () => {
       let { data } = await axiosInstance.post('checkMobileLogin', {
         Mobile: userData['Mobile'],
@@ -93,6 +94,10 @@ export default function RoleWiseLogin() {
         setLoading(false);
       }
     }, 2000);
+  } catch(e){
+    console.log("e",e)
+    setLoading(false);
+  }
   }
 
   const {
@@ -213,7 +218,7 @@ export default function RoleWiseLogin() {
                     loading={loading}
                     loadingPosition="start"
                     fullWidth
-                    endIcon={<LockOpenIcon />}
+                    startIcon={<LockOpenIcon />}
                     variant="contained"
                   >
                     <span>Send OTP</span>
@@ -225,7 +230,7 @@ export default function RoleWiseLogin() {
           </Box>
         </Grid>
       ) : (
-        <OtpVerifyPage userData={userData} handleResendOTP={handleResendOTP} />
+        <OtpVerifyPage userData={{...userData, ...{Mobile: values.Mobile}}} handleResendOTP={handleResendOTP} />
       )}
     </Grid>
   );
