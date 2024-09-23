@@ -1,6 +1,6 @@
 import { Service } from "typedi";
 import { AdminRepo } from "../apiRepository/AdminRepo";
-import { generateEOfTTime, generateOTP, generateRandomString, generateUniqueId, saveMobileOtps } from "../utils/resuableCode";
+import { decryptUserId, generateEOfTTime, generateOTP, generateRandomString, generateUniqueId, saveMobileOtps } from "../utils/resuableCode";
 import { RESPONSEMSG } from "../utils/statusCodes";
 import { OtpServices } from "../sms/smsServceResusable";
 import { loginData } from "../entities";
@@ -17,60 +17,45 @@ export class AdminServices {
         public otpServices: OtpServices
     ) { };
 
-    async addUser(data) {
-        const { Mobile, UserRole } = data;
-        if (!Mobile || !UserRole) return { code: 400 };
-        // let checkMobile = await this.adminRepo.checkWithMobile(Mobile);
-        // if(checkMobile) return {code: 422, message: "Already Registered"}
-        data.UserId = 'WS' + generateUniqueId();
-        return this.adminRepo.addUser(data);
-    };
-
-    async addSuperAdmin(data) {
-        const { Mobile, UserRole } = data;
-        if (!Mobile || !UserRole) return { code: 400 };
-        // let checkMobile = await this.adminRepo.checkWithMobile(Mobile);
-        // if(checkMobile) return {code: 422, message: "Already Registered"}
-        data.UserId = 'WS' + generateUniqueId();
-        return this.adminRepo.addSuperAdmin(data);
-    };
-
-    async allUsersData(data) {
-        return this.adminRepo.allUsersData(data);
-    };
-
     async assigningData(data) {
         if (!data?.UserId) return { code: 400 };
         return this.adminRepo.assigningData(data);
-    };
+    }
 
-    async sendOtp(data: loginData) {
-        const { Mobile, UserRole } = data;
-        if (!Mobile || !UserRole) return { code: 400 };
-        let version = await this.adminRepo.getVersionOfApp();
-        data.WebOtp = generateOTP(4);
-        data.WebToken = generateRandomString(40);
-        data.WebVersion = version[0]?.WebVersion;
-        data.WebTokenExpirationTime = generateEOfTTime();
-        let savedRes: ObjectParam = await this.adminRepo.sendOtp(data);
-        if (!savedRes?.code) {
-            let sendSingleSms = await this.otpServices.sendOtpAsSingleSms(Mobile, data?.WebOtp);
-            await saveMobileOtps(Mobile, sendSingleSms?.otpMessage, sendSingleSms?.response, data?.UserId, data?.WebOtp);
-            if (sendSingleSms.code !== 200) {
-                return { code: 422, message: RESPONSEMSG.OTP_FAILED };
-            };
-            return { message: RESPONSEMSG.OTP, data: { Token: savedRes?.WebToken, UserId: savedRes?.UserId, Version: savedRes?.WebVersion, UserRole: savedRes?.UserRole } };
-        };
-        return savedRes;
-    };
+    // async checkMobileLogin(data: loginData) {
+    //     const { Mobile } = data;
+    //     if (!Mobile) return { code: 400 };
+    //     let version = await this.adminRepo.getVersionOfApp();
+    //     // data.Otp = generateOTP(4);
+    //     data.Otp = "1111";
+    //     data.WebVersion = version[0]?.WebVersion;
+    //     let checkRoles: ObjectParam = await this.adminRepo.checkMobileLogin(data);
+    //     if (checkRoles['code'] == 422) return { code: 422, message: checkRoles['message'] };
+    //     // let sendSingleSms = await this.otpServices.sendOtpAsSingleSms(Mobile, data?.WebOtp);
+    //     // await saveMobileOtps(Mobile, sendSingleSms?.otpMessage, sendSingleSms?.response, data?.UserId ,data?.WebOtp);
+    //     // if (sendSingleSms.code !== 200){
+    //     //     return { code: 422, message: RESPONSEMSG.OTP_FAILED };
+    //     // } 
+    //     // Options for the token
+    //     const options = {
+    //         expiresIn: '12h', // Token expiration time
+    //         algorithm: 'HS256', // Use a secure algorithm (HS256 is symmetric, RS256 is asymmetric)
+    //     };
+    //     let resObj = {
+    //         Mobile,
+    //         Token: jsonWebToken.sign({ UserId: generateRandomString(20) }, process.env.SECRET_KEY, options),
+    //         UserData: checkRoles
+    //     };
+    //     return encryptData(resObj, secretKey);
+    // };
 
     async checkMobileLogin(data: loginData) {
         const { Mobile } = data;
         if (!Mobile) return { code: 400 };
-        let version = await this.adminRepo.getVersionOfApp();
+        // let version = await this.adminRepo.getVersionOfApp();
         // data.Otp = generateOTP(4);
         data.Otp = "1111";
-        data.WebVersion = version[0]?.WebVersion;
+
         let checkRoles: ObjectParam = await this.adminRepo.checkMobileLogin(data);
         if (checkRoles['code'] == 422) return { code: 422, message: checkRoles['message'] };
         // let sendSingleSms = await this.otpServices.sendOtpAsSingleSms(Mobile, data?.WebOtp);
@@ -79,74 +64,48 @@ export class AdminServices {
         //     return { code: 422, message: RESPONSEMSG.OTP_FAILED };
         // } 
         // Options for the token
-        const options = {
-            expiresIn: '12h', // Token expiration time
-            algorithm: 'HS256', // Use a secure algorithm (HS256 is symmetric, RS256 is asymmetric)
-        };
+        // const options = {
+        //     expiresIn: '12h', // Token expiration time
+        //     algorithm: 'HS256', // Use a secure algorithm (HS256 is symmetric, RS256 is asymmetric)
+        // };
         let resObj = {
-            Mobile,
-            Token: jsonWebToken.sign({ UserId: generateRandomString(20) }, process.env.SECRET_KEY, options),
+            // Mobile,
+            // Token: jsonWebToken.sign({ UserId: generateRandomString(20) }, process.env.SECRET_KEY, options),
             UserData: checkRoles
         };
         return encryptData(resObj, secretKey);
     };
 
-    async getAccessById(data) {
-        const { RoleId } = data;
-        if (!RoleId) return { code: 400, message: "Provide Mobile" };
-        let response = await this.adminRepo.checkRoleAccess(data);
-        if (response['code']) return { code: 422, message: "You don't have access." }
+    async getDataAccess(data) {
+        const { Id } = data;
+        data.Otp = "1111";
+        data.Id = Id.slice(10,-10)
+        if (!Id) return { code: 400, message: "Provide Id" };
+        let userResponse = await this.adminRepo.findUserAndUpdate(data);
+        if (userResponse['code']) return { code: 422, message: "You don't have access" };
+        let accessResponse = await this.adminRepo.getDataAccess(data);
+        if (accessResponse['code']) return { code: 422, message: "You don't have access" };
+        let response = {
+            UserId: generateRandomString(15)+userResponse['id']+generateRandomString(15),
+            access: accessResponse
+        };
         return encryptData(response, secretKey);
     };
 
-
     async verifyOtp(data) {
-        const { Mobile, Otp } = data;
-        if (!Mobile) return { code: 400 };
+        const { Id } = data;
+        if (!Id) return { code: 400 };
+        data.Id = Id.slice(15,-15)
         let loginUser = await this.adminRepo.fetchUser(data);
-        if (loginUser['code']) return { code: 404, message: "Access Denied" };
-        if (loginUser['Otp'] !== Otp) return { code: 422, message: RESPONSEMSG.VALIDATE_FAILED }
-        return { message: RESPONSEMSG.VALIDATE, data: {} };
-    };
-
-    async getSchemes(data) {
-        return await this.adminRepo.getSchemes(data);
-    };
-
-    async allDistricts(data) {
-        return await this.adminRepo.allDistricts(data);
-    };
-
-    async districtWiseTaluk(data) {
-        return await this.adminRepo.districtWiseTaluk(data);
-    };
-
-    async talukWiseHobli(data) {
-        return await this.adminRepo.talukWiseHobli(data);
-    };
-
-    async subWaterSheadInHobli(data) {
-        return await this.adminRepo.subWaterSheadInHobli(data);
-    };
-
-    async microWaterShedInSubWaterShed(data) {
-        return await this.adminRepo.microWaterShedInSubWaterShed(data);
-    };
-
-    async schemeSelect(data) {
-        return await this.adminRepo.schemeSelect(data);
-    };
-
-    async sectorInSchemes(data) {
-        return await this.adminRepo.sectorInSchemes(data);
-    };
-
-    async activityInSector(data) {
-        return await this.adminRepo.activityInSector(data);
-    };
-
-    async locations(data) {
-        return await this.adminRepo.locations(data);
+        if (loginUser['code']) return { code: 422, message: RESPONSEMSG.VALIDATE_FAILED };
+        const options = {
+            expiresIn: '12h', // Token expiration time
+            algorithm: 'HS256', // Use a secure algorithm (HS256 is symmetric, RS256 is asymmetric)
+        };
+        let resObj = {
+            Token: jsonWebToken.sign({ UserId: data.Id }, process.env.SECRET_KEY, options)
+        };
+        return { message: RESPONSEMSG.VALIDATE, data: encryptData(resObj, secretKey) };
     };
 
     /* new modified apis */

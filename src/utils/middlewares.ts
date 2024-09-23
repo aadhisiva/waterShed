@@ -64,7 +64,7 @@ export const authenticateToken = async (req, res, next) => {
         if (err) {
             return res.status(403).json({ code: 403, message: 'Failed to authenticate.' });
         }
-        req.user = user;
+        req.user = {...req.user, ...user};
         next();
     });
 };

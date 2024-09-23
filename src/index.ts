@@ -38,18 +38,19 @@ app.use(cors({
   methods: ["GET", "POST"]
 }));
 
-//setting req headers and res headers 
-app.use(function (req, res, next) {
-  res.header("X-XSS-Protection", "1; mode=block'");
-  res.header("X-Content-Type-Options", "nosniff");
-  res.header("strict-transport-security", "max-age=63072000; includeSubdomains; preload");
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.removeHeader('X-Powered-By');
-  // Set Content-Security-Policy header to restrict embedding and other policies
-  res.setHeader('Content-Security-Policy', "frame-ancestors 'self'; default-src 'self'; script-src 'self'; style-src 'self';");
+// Set headers for security
+app.use((req, res, next) =>
+  {
+      res.setHeader('X-Frame-Options', 'DENY');  // Prevent clickjacking
+      res.setHeader('Content-Security-Policy', "frame-ancestors 'none'");  // Or use CSP
+      res.setHeader('X-XSS-Protection', '1; mode=block');  // Basic XSS protection
+      res.setHeader('X-Content-Type-Options', 'nosniff');  // Prevent MIME sniffing
+      res.header("strict-transport-security", "max-age=63072000; includeSubdomains; preload");
+      res.removeHeader('Server');  // Hide 'Server' header
+      next();
+  });
 
-  next();
-});
+  app.disable('x-powered-by');  // Hide 'X-Powered-By' header  
 
 // create for logs śad
 app.use(morgan('common', {
@@ -57,6 +58,7 @@ app.use(morgan('common', {
 }));
 
 app.use(morgan('dev'));
+
 // we are adding port connection here
 app.get("/wapi/run", (req, res) => {
   res.send("running")

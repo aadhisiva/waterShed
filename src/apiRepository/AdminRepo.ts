@@ -34,14 +34,6 @@ let assignMastersHositoryRepo = AppDataSource.getRepository(AssignMastersHistory
 @Service()
 export class AdminRepo {
 
-    async addUser(data: loginData) {
-        return await loginDataRepo.save(data);
-    };
-
-    async addSuperAdmin(data: loginData) {
-        return await superAdminRepo.save(data);
-    };
-
     async checkWithMobile(Mobile) {
         return await loginDataRepo.findOneBy({ Mobile });
     };
@@ -103,6 +95,21 @@ export class AdminRepo {
     };
 
 
+    async findUserAndUpdate(data) {
+        const { Mobile, Id } = data;
+        let getData = await assignedMastersRepo.findOneBy({ RoleId: Equal(Id), Mobile: Equal(Mobile) });
+        if (!getData) return { code: 422 };
+        let newData = {...getData, ...{Otp: data?.Otp}}
+        return assignedMastersRepo.save(newData);
+    };
+
+    async getDataAccess(data) {
+        const { Id } = data;
+        let getData = await roleAccessRepo.findOneBy({ RoleId: Equal(Id) });
+        if (!getData) return { code: 422, message: "You dont have access to go further" }
+        return getData;
+    };
+
     async checkRoleAccess(data) {
         const { RoleId } = data;
         let getData = await roleAccessRepo.findOneBy({ RoleId: Equal(RoleId) });
@@ -111,117 +118,10 @@ export class AdminRepo {
     };
 
     async fetchUser(data ) {
-        const { Mobile } = data;
-        let findData = await assignedMastersRepo.findOneBy({ Mobile: Equal(Mobile) });
+        const { Id, Otp } = data;
+        let findData = await assignedMastersRepo.findOneBy({ id: Equal(Id), Otp: Equal(Otp) });
         if (!findData) return { code: 404 };
         return findData;
-    };
-
-    async getSchemes(data: loginData) {
-        let findData = await schemesRepo.find();
-        return findData;
-    };
-
-    async allDistricts(data: MasterData) {
-        let findData = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.DistrictCode as value', 'master.DistrictName as name'])
-            .orderBy('master.DistrictCode', 'ASC').getRawMany();
-        return findData;
-    };
-
-    async districtWiseTaluk(data) {
-        if (!data?.code) return { code: 400 };
-        let findData = await mastersRepo.createQueryBuilder('master')
-            .select(['DISTINCT master.TalukCode as value', 'master.TalukName as name'])
-            .where("master.DistrictCode = :dCode", { dCode: data?.code })
-            .orderBy('master.TalukCode', 'ASC')
-            .getRawMany();
-        return findData;
-    };
-
-    async talukWiseHobli(data) {
-        if (!data?.code) return { code: 400 };
-        let findData = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.HobliCode as value', 'master.HobliName as name'])
-            .where("master.TalukCode = :dCode", { dCode: data?.code })
-            .orderBy('master.HobliCode', 'ASC').getRawMany();
-        return findData;
-    };
-
-    async subWaterSheadInHobli(data) {
-        if (!data?.code) return { code: 400 };
-        let findData = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.SubWatershedCode as value', 'master.SubWatershedName as name'])
-            .where("master.HobliCode = :dCode", { dCode: data?.code })
-            .orderBy('master.SubWatershedCode', 'ASC').getRawMany();
-        return findData;
-    };
-
-    async microWaterShedInSubWaterShed(data) {
-        if (!data?.code) return { code: 400 };
-        let findData = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.MicroWatershedCode as value', 'master.MicroWatershedName as name'])
-            .where("master.SubWatershedCode = :dCode", { dCode: data?.code })
-            .orderBy('master.MicroWatershedCode', 'ASC').getRawMany();
-        return findData;
-    };
-
-    async schemeSelect(data) {
-        let findData = await schemesRepo.createQueryBuilder('master').select(['DISTINCT master.SchemeCode as value', 'master.SchemeName as name'])
-            .orderBy('master.SchemeName', 'ASC').getRawMany();
-        return findData;
-    };
-
-    async sectorInSchemes(data) {
-        if (!data?.code) return { code: 400 };
-        let findData = await sectorsRepo.createQueryBuilder('master').select(['DISTINCT master.ActivityCode as value', 'master.SectorName as name'])
-            .where("master.SchemeCode = :dCode", { dCode: data?.code })
-            .orderBy('master.SectorName', 'ASC').getRawMany();
-        return findData;
-    };
-
-    async activityInSector(data) {
-        if (!data?.code) return { code: 400 };
-        let findData = await activityRepo.createQueryBuilder('master').select(['DISTINCT master.ActivityCode as value', 'master.ActivityName as name'])
-            .where("master.ActivityCode = :dCode", { dCode: data?.code }).getRawMany();
-        return findData ?? [];
-    };
-
-    async locations(data) {
-        const { UserId, Mobile, UserRole } = data;
-        let findAll = await loginDataRepo.findBy({ Mobile, UserRole });
-        let newArray = [];
-        if (UserRole == 'AO') {
-            let totalLength = findAll.length;
-            for (let i = 0; i < totalLength; i++) {
-                let newObject = {};
-                let eachIndex = findAll[i];
-                newObject['District'] = eachIndex.DistrictName;
-                newObject['Taluk'] = eachIndex.TalukName;
-                newObject['Hobli'] = eachIndex.HobliName;
-                newObject['villages'] = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.KGISVillageName as village'])
-                    .where("master.HobliName = :dCode", { dCode: eachIndex.HobliName })
-                    .orderBy('master.KGISVillageName', 'ASC')
-                    .getRawMany();
-                newObject['subWaterShead'] = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.SubWatershedName as subWaterShead'])
-                    .where("master.HobliName = :dCode", { dCode: eachIndex.HobliName })
-                    .orderBy('master.SubWatershedName', 'ASC').getRawMany();
-                newArray.push(newObject);
-            }
-            return newArray;
-        } else {
-            let totalLength = findAll.length;
-            for (let i = 0; i < totalLength; i++) {
-                let newObject = {};
-                let eachIndex = findAll[i];
-                newObject['District'] = eachIndex.DistrictName;
-                newObject['Taluk'] = eachIndex.TalukName;
-                newObject['villages'] = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.KGISVillageName as village'])
-                    .where("master.TalukName = :dCode", { dCode: eachIndex.TalukName })
-                    .orderBy('master.KGISVillageName', 'ASC').getRawMany();
-                newObject['subWaterShead'] = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.SubWatershedName as subWaterShead'])
-                    .where("master.TalukName = :dCode", { dCode: eachIndex.TalukName })
-                    .orderBy('master.SubWatershedName', 'ASC').getRawMany();
-                newArray.push(newObject);
-            }
-            return newArray;
-        }
     };
 
     async addDepartment(data) {

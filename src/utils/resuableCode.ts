@@ -1,6 +1,7 @@
 import { AppDataSource } from "../db/config";
 import { DprsCommonLand, DprsPrivateLand, MobileLogs, OtpLogs, webLogs } from "../entities";
 import cryptoJs from "crypto";
+import CryptoJS from "crypto-js";
 import Logger from "../loggers/winstonLogger";
 
 // generate random string
@@ -161,4 +162,23 @@ export const DecryptStringFromEncrypt = (key, IV, cipherText) => {
   let decrypted = aes.update(buffer, null, 'utf8');
   decrypted += aes.final('utf8');
   return decrypted;
+};
+const secretKey = "ugfskd9867sdhfgs)(*&^^5$%"; // Must match the one used for encryption
+
+// Function to decrypt the encrypted user ID
+// Function to decrypt the userId
+
+export const decryptUserId = (encryptedData) => {
+  const key = CryptoJS.enc.Utf8.parse(secretKey); // Create key from secret
+  const iv = Buffer.from(encryptedData.iv, 'hex'); // Convert IV from hex
+  const encryptedText = Buffer.from(encryptedData.content, 'hex'); // Convert encrypted content from hex
+
+  // Create a decipher using AES-256-CBC
+  const decipher = cryptoJs.createDecipheriv('aes-256-cbc', key, iv);
+
+  // Decrypt the encrypted data
+  let decrypted = decipher.update(encryptedText);
+  decrypted = Buffer.concat([decrypted, decipher.final()]); // Concatenate the final block
+
+  return decrypted.toString('utf8'); // Convert decrypted buffer to string
 };
