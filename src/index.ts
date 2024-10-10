@@ -32,25 +32,12 @@ app.use(express.json({ limit: '100mb' }));
 
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
+
 // cors setup for communication of sever and client
 app.use(cors({
   origin: ['http://localhost:8081', "http://localhost:8080", "http://10.10.140.162", "https://spectacles.karnataka.gov.in"],
   methods: ["GET", "POST"]
 }));
-
-// Set headers for security
-app.use((req, res, next) =>
-  {
-      res.setHeader('X-Frame-Options', 'DENY');  // Prevent clickjacking
-      res.setHeader('Content-Security-Policy', "frame-ancestors 'none'");  // Or use CSP
-      res.setHeader('X-XSS-Protection', '1; mode=block');  // Basic XSS protection
-      res.setHeader('X-Content-Type-Options', 'nosniff');  // Prevent MIME sniffing
-      res.header("strict-transport-security", "max-age=63072000; includeSubdomains; preload");
-      res.removeHeader('Server');  // Hide 'Server' header
-      next();
-  });
-
-  app.disable('x-powered-by');  // Hide 'X-Powered-By' header  
 
 // create for logs śad
 app.use(morgan('common', {
@@ -59,10 +46,29 @@ app.use(morgan('common', {
 
 app.use(morgan('dev'));
 
+// Disable the 'X-Powered-By' header
+app.disable('x-powered-by');
+app.disable('Server');
+// // Set headers for security
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy",
+    "default-src 'self'; " +
+    `script-src 'self' https://${req.headers.host}; ` + // Replace with your allowed script sources
+    `frame-ancestors 'self' https://${req.headers.host}; ` + // Replace with your allowed script sources
+    `style-src 'self' https://${req.headers.host};`); // Replace with your allowed style sources
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');  // Prevent clickjacking
+  res.setHeader('Content-Security-Policy', "frame-ancestors 'none'");  // Or use CSP
+  res.setHeader('X-XSS-Protection', '1; mode=block');  // Basic XSS protection
+  res.setHeader('X-Content-Type-Options', 'nosniff');  // Prevent MIME sniffing
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload'); // 1 year
+  res.removeHeader('Server');  // Hide 'Server' header
+  return next();
+});
+
 // we are adding port connection here
 app.get("/wapi/run", (req, res) => {
   res.send("running")
-})
+});
 
 if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');

@@ -12,13 +12,13 @@ import {
     @PrimaryGeneratedColumn()
     id: number;
   
-    @Column({ nullable:true, type: 'text' })
+    @Column({ nullable:true, type: 'nvarchar', length: 100 })
     UserId: string;
   
-    @Column({ nullable:true, type: 'text' })
-    Role: string;
+    @Column({ nullable:true, type: 'nvarchar', length: 100 })
+    WebPage: string;
 
-    @Column({ nullable:true, type: 'text'})
+    @Column({ nullable:true, type: 'nvarchar', length: 200})
     Message: string;
 
     @Column({ nullable:true, type: 'text' })
@@ -27,10 +27,10 @@ import {
     @Column({ nullable:true, type: 'text' })
     Response: string;
 
-    @Column({ nullable:true, type: 'text'})
+    @Column({ nullable:true, type: 'nvarchar', length: 200})
     ResponseType: string;
 
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   };
   

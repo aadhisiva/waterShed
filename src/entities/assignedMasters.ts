@@ -7,15 +7,13 @@ import {
     ManyToOne,
     JoinColumn,
   } from "typeorm";
-import { Departments } from "./department";
-import { Sectors } from "./sectors";
 import { Roles } from "./roles";
   
   @Entity( { name: "AssignedMasters" })
   export class AssignedMasters {
   
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn("uuid")
+    UserId: string;
 
     @Column({ type: "nvarchar", length: 50, default: null })
     DistrictCode: string;
@@ -38,9 +36,6 @@ import { Roles } from "./roles";
     @Column({ type: "nvarchar", length: 50, default: null })
     Otp: string;
   
-    // @Column({ type: "nvarchar", length: 50, default: null })
-    // RoleId: string;
-  
     @ManyToOne(() => Roles, lr => lr.AssignedMasterFK)
     @JoinColumn({name: "RoleId"})
     RoleId: Roles;
@@ -55,16 +50,10 @@ import { Roles } from "./roles";
     Version: string;
   
     @Column({ type: "nvarchar", length: 30, default: null })
-    UserId: string;
-  
-    @Column({ type: "nvarchar", length: 30, default: null })
     CreatedMobile: string;
   
     @Column({ type: "nvarchar", length: 30, default: null })
     CreatedRole: string;
-  
-    @Column({ type: "nvarchar", length: 30, default: null })
-    CreatedName: string;
 
     @CreateDateColumn()
     CreatedDate: Date;

@@ -122,7 +122,15 @@ export class MobileServices {
     };
 
     async getActivity(data) {
-        return await this.mobileRepo.getActivity(data);
+        if(data.Type == "Category"){
+            return await this.mobileRepo.getActivityBasedOnCategory(data.Id);
+        } else {
+            return await this.mobileRepo.getActivityBasedOnSector(data.Id);
+        };
+    };
+
+    async getCategory(data) {
+        return await this.mobileRepo.getCategory(data);
     };
 
     async getQuestionsBasedOnActivity(data) {
@@ -142,7 +150,8 @@ export class MobileServices {
     };
 
     async saveSurveyData(data) {
-        data.SubmissionId = await generateUniqueSubmissionId();
+        if(!data) return {code: 422, message: "You are not sending anything form request."}
+        data.SubmissionId = "WS"+"-"+generateUniqueId().slice(2)+"-"+Math.floor(Math.random() * 1000);
         let savedData = await this.mobileRepo.saveSurveyData(data);
         let imagesList = data.ImagesList;
         if(Array.isArray(imagesList)){

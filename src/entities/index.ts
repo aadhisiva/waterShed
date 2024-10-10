@@ -24,3 +24,5 @@ export * from "./wsImagesndVideos";
 export * from "./childRoles";
 export * from "./assignMastersHistory";
 export * from "./watershedDataHistory";
+export * from "./category";
+

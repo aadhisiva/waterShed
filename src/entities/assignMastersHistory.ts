@@ -52,11 +52,8 @@ export class AssignMastersHistory {
     @Column({ default: null, type: 'nvarchar', length: 50 })
     CreatedRole: string;
 
-    @Column({ default: null, type: 'nvarchar', length: 50 })
-    Status: string;
-  
-    @Column({ type: "nvarchar", length: 30, default: null })
-    CreatedName: string;
+    @Column({ default: null, type: 'nvarchar', length: 100 })
+    History: string;
 
     @CreateDateColumn()
     CreatedDate: Date;

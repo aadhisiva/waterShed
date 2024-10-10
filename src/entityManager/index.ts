@@ -24,7 +24,8 @@ import {
     WatershedImgAndVideo,
     ChildRoles,
     AssignMastersHistory,
-    WaterShedDataHistory
+    WaterShedDataHistory,
+    Category
 } from "../entities"
 
 
@@ -55,6 +56,7 @@ export const entities = () => {
         WatershedImgAndVideo,
         ChildRoles,
         AssignMastersHistory,
-        WaterShedDataHistory
+        WaterShedDataHistory,
+        Category
     ]
 }

@@ -103,6 +103,7 @@ adminRouter.post('/addOrGetschemes', authenticateToken, async (req, res) => {
 adminRouter.post('/addOrGetSectors', authenticateToken, async (req, res) => {
     try {
         let body = req.body;
+        console.log("req.body", req.body);
         let result = await adminServices.addOrGetSectors(body);
         return webAppResponseForLarge(res, result, body, WEBPAGES.SECTORS, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
     } catch (error) {
@@ -115,6 +116,26 @@ adminRouter.post('/addOrGetsActivity', authenticateToken, async (req, res) => {
         let body = req.body;
         let result = await adminServices.addOrGetsActivity(body);
         return webAppResponseForLarge(res, result, body, WEBPAGES.ACTIVITY, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post('/getActivityDetails', async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await adminServices.getActivityDetails(body);
+        return webAppResponseForLarge(res, result, body, WEBPAGES.ACTIVITY, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+    } catch (error) {
+        return webAppResponse(res, error);
+    }
+});
+
+adminRouter.post('/addOrGetsCategory', authenticateToken, async (req, res) => {
+    try {
+        let body = req.body;
+        let result = await adminServices.addOrGetsCategory(body);
+        return webAppResponseForLarge(res, result, body, "Category", WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
     } catch (error) {
         return webAppResponse(res, error);
     }

@@ -1,12 +1,11 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { Activity, AssignMastersHistory, ChildRoles, Departments, DprsCommonLand, DprsPrivateLand, loginData, MasterData, QuestionMapping, Roles, RolesAccess, Schemes, Sectors, superAdmin, UploadImgAndVideo, UserData, Versions } from '../entities';
+import { Activity, AssignMastersHistory, Category, ChildRoles, Departments, DprsCommonLand, DprsPrivateLand, loginData, MasterData, QuestionMapping, Roles, RolesAccess, Schemes, Sectors, superAdmin, UploadImgAndVideo, UserData, Versions } from '../entities';
 import { SUPER_ADMIN } from '../utils/constants';
 import { Equal } from 'typeorm';
 import { Questions } from '../entities/questions';
 import { QuestionDropdownTypes } from '../entities/questionsDropdownsTypes';
 import { AssignedMasters } from '../entities/assignedMasters';
-import { generateUniqueId } from '../utils/resuableCode';
 
 
 let superAdminRepo = AppDataSource.getRepository(superAdmin);
@@ -29,7 +28,8 @@ let questionMappingRepo = AppDataSource.getRepository(QuestionMapping);
 let assignedMastersRepo = AppDataSource.getRepository(AssignedMasters);
 let masterDataRepo = AppDataSource.getRepository(MasterData);
 let childRoleRepo = AppDataSource.getRepository(ChildRoles);
-let assignMastersHositoryRepo = AppDataSource.getRepository(AssignMastersHistory);
+let assignMastersHistoryRepo = AppDataSource.getRepository(AssignMastersHistory);
+let categoryRepo = AppDataSource.getRepository(Category);
 
 @Service()
 export class AdminRepo {
@@ -99,7 +99,7 @@ export class AdminRepo {
         const { Mobile, Id } = data;
         let getData = await assignedMastersRepo.findOneBy({ RoleId: Equal(Id), Mobile: Equal(Mobile) });
         if (!getData) return { code: 422 };
-        let newData = {...getData, ...{Otp: data?.Otp}}
+        let newData = { ...getData, ...{ Otp: data?.Otp } }
         return assignedMastersRepo.save(newData);
     };
 
@@ -117,9 +117,9 @@ export class AdminRepo {
         return getData;
     };
 
-    async fetchUser(data ) {
+    async fetchUser(data) {
         const { Id, Otp } = data;
-        let findData = await assignedMastersRepo.findOneBy({ id: Equal(Id), Otp: Equal(Otp) });
+        let findData = await assignedMastersRepo.findOneBy({ UserId: Equal(Id), Otp: Equal(Otp) });
         if (!findData) return { code: 404 };
         return findData;
     };
@@ -151,6 +151,7 @@ export class AdminRepo {
         return await sectorsRepo.createQueryBuilder('sc')
             .leftJoinAndSelect(Schemes, 'se', 'se.id = sc.SchemeId')
             .select(["sc.id as value", "CONCAT(sc.SectorName,'-SE-',se.SchemeName) as name"])
+            .where("sc.RecordType = :RecordType", {RecordType: "New Sector"})
             .getRawMany();
     };
 
@@ -158,6 +159,29 @@ export class AdminRepo {
         return await activityRepo.createQueryBuilder('sc')
             .leftJoinAndSelect(Sectors, 'sec', 'sec.id = sc.SectorId')
             .select(["sc.id as value", "CONCAT(sc.ActivityName,'-SEC-',sec.SectorName) as name"])
+            .getRawMany();
+    };
+
+    async addCategory(data) {
+        let existingData = await categoryRepo.findOneBy({ id: Equal(data?.id) });
+        let newData = { ...existingData, ...data };
+        return await categoryRepo.save(newData);
+    };
+
+    async getCategoryData() {
+        return await categoryRepo.createQueryBuilder('ca')
+            .leftJoinAndSelect(Departments, 'dp', "dp.id = ca.DepartmentId")
+            .leftJoinAndSelect(Category, 'ca1', 'ca1.id = ca.ParentId')
+            .leftJoinAndSelect(Sectors, 'sec', 'sec.id = ca.SectorId')
+            .select(["ca.id as id", "ca.CategoryName as CategoryName", "ca.ParentId as ParentId", "sec.id as SectorId", "sec.SectorName as SectorName",
+                'ca1.CategoryName as ParentName', "dp.DepartmentName as DepartmentName", "ca.DepartmentId as DepartmentId"])
+            .getRawMany();
+    };
+
+    async getDropdownCategory() {
+        return await categoryRepo.createQueryBuilder('ca')
+            .leftJoinAndSelect(Sectors, 'sec', 'sec.id = ca.SectorId')
+            .select(["ca.id as value", "CONCAT(ca.CategoryName,'-SEC-',sec.SectorName) as name"])
             .getRawMany();
     };
 
@@ -188,10 +212,12 @@ export class AdminRepo {
         return await sectorsRepo.createQueryBuilder('sec')
             .leftJoinAndSelect(Departments, 'dp', "dp.id = sec.DepartmentId")
             .leftJoinAndSelect(Sectors, 'sc', 'sc.id = sec.ParentId')
+            .leftJoinAndSelect(Sectors, 'sse', 'sse.id = sec.SectorId')
             .leftJoinAndSelect(Schemes, 'se', 'se.id = sec.SchemeId')
             .select(["sec.id as id", "sec.Description as Description", "se.SchemeName as SchemeName", "sec.SchemeId as SchemeId",
                 "sec.SectorName as SectorName", "sec.SectorLogo as SectorLogo", "sec.ParentId as ParentId", 'sc.SectorName as ParentName',
-                "dp.DepartmentName as DepartmentName", "sec.DepartmentId as DepartmentId"])
+                "dp.DepartmentName as DepartmentName", "sec.DepartmentId as DepartmentId", "sec.IsCategory as IsCategory",
+                "sec.RecordType as RecordType","sse.SectorName as SSectorName", "sec.SectorId as SectorId"])
             .getRawMany();
     };
 
@@ -252,7 +278,7 @@ export class AdminRepo {
 
     async getQuestionData() {
         return await questionsRepo.createQueryBuilder('qu')
-            .select(["qu.id as id", "qu.Question as Question", "qu.QuestionId as QuestionId", "qu.QuestionType as QuestionType",
+            .select(["qu.id as id", "qu.Question as Question", "qu.QuestionId as QuestionId", "qu.QuestionType as QuestionType", "qu.IsMandatory as IsMandatory",
                 "qu.DropDownValues as DropDownValues"])
             .getRawMany();
     };
@@ -313,18 +339,23 @@ export class AdminRepo {
             .leftJoinAndSelect(Activity, 'ac', "ac.id = qm.ActivityId")
             .leftJoinAndSelect(Questions, 'qu', "qu.id = qm.QuestionId")
             .select(["qm.id as id", "ac.ActivityName as ActivityName", "qu.Question as Question", "ac.id as ActivityId", "qu.id as QuestionId",
-                "qu.QuestionType as QuestionType"])
+                "qu.QuestionType as QuestionType", "qm.TypeOfLand as TypeOfLand"])
             .getRawMany();
     };
+
+    async getActivityDetails(data){
+        return await activityRepo.findOneBy({id: Equal(data?.ActivityId)});
+    }
 
     async getActivityData() {
         return await activityRepo.createQueryBuilder('ac')
             .leftJoinAndSelect(Departments, 'dp', "dp.id = ac.DepartmentId")
             .leftJoinAndSelect(Activity, 'ac1', 'ac1.id = ac.ParentId')
             .leftJoinAndSelect(Sectors, 'sec', 'sec.id = ac.SectorId')
+            .leftJoinAndSelect(Category, 'ct', 'ct.id = ac.CategoryId')
             .select(["ac.id as id", "ac.ActivityName as ActivityName", "ac.ParentId as ParentId", "ac.SectorId as SectorId", "sec.SectorName as SectorName",
-                'ac1.ActivityName as ParentName', "dp.DepartmentName as DepartmentName", "ac.DepartmentId as DepartmentId", "ac.TypeOfWork TypeOfWork",
-                "ac.TypeOfLand TypeOfLand", "ac.TypeOfStatus TypeOfStatus"])
+                'ac1.ActivityName as ParentName', "dp.DepartmentName as DepartmentName", "ac.DepartmentId as DepartmentId", "ac.TypeOfWork as TypeOfWork",
+                "ac.TypeOfLand as TypeOfLand", "ac.TypeOfStatus as TypeOfStatus", "ct.id as CategoryId", "ct.CategoryName as CategoryName"])
             .getRawMany();
     };
 
@@ -338,87 +369,78 @@ export class AdminRepo {
         return check;
     };
 
-    async assignmentProcess(data){
-    if(!data?.id){
-        await assignMastersHositoryRepo.save({...data, ...{Status: "Added"}})
-        return await assignedMastersRepo.save(data);
-      } else {
-        let findData = await assignedMastersRepo.findOneBy({id: Equal(data?.id)});
-        let newData = {...findData, ...data};
-        await assignMastersHositoryRepo.save({...data, ...{Status: "Updated"}})
-        return await assignedMastersRepo.save(newData);
-      }
+    async assignmentProcess(data) {
+        let findData = await assignedMastersRepo.findOneBy({ UserId: Equal(data?.id) });
+        let newData = { ...findData, ...data };
+        let result = await assignedMastersRepo.save(newData);
+        await assignMastersHistoryRepo.save({ ...result, ...{ History: "New user Added" } });
+        return {};
     };
 
     async assignToSurvey(data) {
-        if (!data?.id) {
-          data.UserId = generateUniqueId();
-          await assignMastersHositoryRepo.save({ ...data, ...{ Status: "Added In Survey" } })
-          return await userDataRepo.save(data);
-        } else {
-          let findData = await userDataRepo.findOneBy({ id: Equal(data?.id) });
-          let newData = { ...findData, ...data };
-          await assignMastersHositoryRepo.save({ ...data, ...{ Status: "Updated In Survey" } })
-          return await userDataRepo.save(newData);
-        }
-      };
+        let findData = await userDataRepo.findOneBy({ UserId: Equal(data?.UserId) });
+        let newData = { ...findData, ...data };
+        let result = await userDataRepo.save(newData);
+        await assignMastersHistoryRepo.save({ ...result, ...{ History: "Surveyer Added" } });
+        return {};
+    };
 
-    async getDistrictsDD(data){
+    async getDistrictsDD(data) {
         return await masterDataRepo.createQueryBuilder('dd')
-        .select(["DISTINCT dd.DistrictCode as value", "dd.DistrictName as name"])
-        .orderBy("DistrictName", "DESC")
-        .getRawMany();
-      };
-    
-      async getAuthDistrictDD(data){
+            .select(["DISTINCT dd.DistrictCode as value", "dd.DistrictName as name"])
+            .orderBy("DistrictName", "DESC")
+            .getRawMany();
+    };
+
+    async getAuthDistrictDD(data) {
         const { Mobile, ListType } = data;
         return await masterDataRepo.createQueryBuilder('dd')
-        .innerJoinAndSelect(AssignedMasters, 'am', 'am.DistrictCode=dd.DistrictCode')
-        .select(["DISTINCT dd.DistrictCode as value", "dd.DistrictName as name"])
-        .where("am.Mobile = :Mobile and am.ListType = :ListType", {Mobile, ListType})
-        .getRawMany();
-      };
-      async getTalukDD(code){
+            .innerJoinAndSelect(AssignedMasters, 'am', 'am.DistrictCode=dd.DistrictCode')
+            .select(["DISTINCT dd.DistrictCode as value", "dd.DistrictName as name"])
+            .where("am.Mobile = :Mobile and am.ListType = :ListType", { Mobile, ListType })
+            .getRawMany();
+    };
+    async getTalukDD(code) {
         return await masterDataRepo.createQueryBuilder('tt')
-        .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
-        .where("tt.DistrictCode = :dc", {dc: code})
-        .getRawMany();
-      };
-      async getAuthTalukDD(data){
-        const { Mobile, ListType} = data;
+            .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
+            .where("tt.DistrictCode = :dc", { dc: code })
+            .getRawMany();
+    };
+    async getAuthTalukDD(data) {
+        const { Mobile, ListType } = data;
         return await masterDataRepo.createQueryBuilder('tt')
-        .leftJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=tt.TalukCode and am.DistrictCode=tt.DistrictCode')
-        .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
-        .where("am.Mobile = :Mobile and am.ListType = :ListType", {Mobile, ListType})
-        .getRawMany();
-      };
-      
-      async getHobliDD(UDCode, UTCode){
-        return await masterDataRepo.createQueryBuilder('gd')
-        .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as name"])
-        .where("gd.TalukCode = :tc and gd.DistrictCode = :dc", {tc: UTCode, dc: UDCode})
-        .getRawMany();
-      };
-    
-      async getAuthHobliDD(data){
-        const { Mobile, ListType} = data;
-        return await masterDataRepo.createQueryBuilder('gd')
-        .innerJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=gd.TalukCode and am.DistrictCode=gd.DistrictCode and am.HobliCode=gd.HobliCode')
-        .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as name"])
-        .where("am.Mobile = :Mobile and am.ListType = :ListType", {Mobile, ListType})
-        .getRawMany();
-      }
-      async getVillagesDD(UDCode, UTCode, UHCode){
-        return await masterDataRepo.createQueryBuilder('vd')
-        .select(["DISTINCT vd.VillageCode as value", "vd.VillageName as name"])
-        .where("vd.HobliCode = :hc and vd.DistrictCode = :dc and vd.TalukCOde = :tc", {hc: UHCode, dc: UDCode, tc: UTCode})
-        .getRawMany();
-      };
+            .leftJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=tt.TalukCode and am.DistrictCode=tt.DistrictCode')
+            .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
+            .where("am.Mobile = :Mobile and am.ListType = :ListType", { Mobile, ListType })
+            .getRawMany();
+    };
 
-      async getAssignedData(data) {
+    async getHobliDD(UDCode, UTCode) {
+        return await masterDataRepo.createQueryBuilder('gd')
+            .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as name"])
+            .where("gd.TalukCode = :tc and gd.DistrictCode = :dc", { tc: UTCode, dc: UDCode })
+            .getRawMany();
+    };
+
+    async getAuthHobliDD(data) {
+        const { Mobile, ListType } = data;
+        return await masterDataRepo.createQueryBuilder('gd')
+            .innerJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=gd.TalukCode and am.DistrictCode=gd.DistrictCode and am.HobliCode=gd.HobliCode')
+            .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as name"])
+            .where("am.Mobile = :Mobile and am.ListType = :ListType", { Mobile, ListType })
+            .getRawMany();
+    }
+    async getVillagesDD(UDCode, UTCode, UHCode) {
+        return await masterDataRepo.createQueryBuilder('vd')
+            .select(["DISTINCT vd.VillageCode as value", "vd.VillageName as name"])
+            .where("vd.HobliCode = :hc and vd.DistrictCode = :dc and vd.TalukCOde = :tc", { hc: UHCode, dc: UDCode, tc: UTCode })
+            .getRawMany();
+    };
+
+    async getAssignedData(data) {
         const { Mobile, ReqType, DataType } = data;
-      let query = `execute assignedOfficersOrSurveyers @0,@1,@2`;
-      return await AppDataSource.query(query, [ReqType, Mobile, DataType]);
+        let query = `execute assignedOfficersOrSurveyers @0,@1,@2`;
+        return await AppDataSource.query(query, [ReqType, Mobile, DataType]);
     };
 
     async getAssignedDistricts() {
@@ -485,9 +507,9 @@ export class AdminRepo {
         const [totalData, total] = await dprsPrivateLandRepo.findAndCount({
             take: RowsPerPage,
             skip: offset,
-            order: {id: "ASC"}
-          });
-          return {total, totalData}
+            order: { id: "ASC" }
+        });
+        return { total, totalData }
     }
 
     async getDprsCommonLand(data) {
@@ -496,10 +518,10 @@ export class AdminRepo {
         const [totalData, total] = await dprsCommonLandRepo.findAndCount({
             take: RowsPerPage,
             skip: offset,
-            order: {id: "ASC"}
-          });
-          return {total, totalData}
-        };
+            order: { id: "ASC" }
+        });
+        return { total, totalData }
+    };
 
     async uploadImages(data) {
         const { ImageName, ImageData, UserId } = data;
@@ -510,8 +532,8 @@ export class AdminRepo {
         return await uploadImgAndVideoRepo.findOneBy({ id: Equal(id) })
     };
 
-    
-  async uploadDistrictMasters(data) {
-    return await masterDataRepo.save(data);
-  }
+
+    async uploadDistrictMasters(data) {
+        return await masterDataRepo.save(data);
+    }
 };

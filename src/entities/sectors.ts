@@ -11,6 +11,7 @@ import {
 import { Departments } from "./department";
 import { Schemes } from "./schemes";
 import { Activity } from "./activity";
+import { Category } from "./category";
   
   @Entity( { name: "Sectors" })
   export class Sectors {
@@ -32,11 +33,20 @@ import { Activity } from "./activity";
     @Column({ type: "nvarchar", length: 500 })
     Description: number;
   
-    @Column({ type: "nvarchar", length: 200 })
+    @Column({ type: "nvarchar", length: 200, default: null })
     SectorName: number;
   
     @Column({ type: "nvarchar", length: 500 })
     SectorLogo: number;
+  
+    @Column({ type: "nvarchar", length: 5, default: null})
+    IsCategory: string;
+  
+    @Column({ type: "int", default: null})
+    SectorId: string;
+  
+    @Column({ type: "nvarchar", length: 20, default: null})
+    RecordType: string;
   
     @Column({ type: "int" })
     ParentId: number;
@@ -46,5 +56,8 @@ import { Activity } from "./activity";
   
     @UpdateDateColumn()
     UpdatedDate: Date;
+    
+    @OneToMany(() => Category, ac => ac.SectorId, {cascade: true, onDelete: 'CASCADE'})
+    SectorToCategoryFK: Category[];
   };
   

@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { Activity, AssignedMasters, DprsCommonLand, DprsPrivateLand, loginData, MasterData, QuestionDropdownTypes, QuestionMapping, Questions, Roles, RolesAccess, Schemes, Sectors, UploadImgAndVideo, UserData, Versions, WaterShedData, WatershedImgAndVideo } from '../entities';
+import { Activity, AssignedMasters, Category, DprsCommonLand, DprsPrivateLand, loginData, MasterData, QuestionDropdownTypes, QuestionMapping, Questions, Roles, RolesAccess, Schemes, Sectors, UploadImgAndVideo, UserData, Versions, WaterShedData, WatershedImgAndVideo } from '../entities';
 import { Brackets, Equal, ILike } from 'typeorm';
 import { WaterShedDataHistory } from '../entities/watershedDataHistory';
 
@@ -10,7 +10,6 @@ const mastersRepo = AppDataSource.getRepository(MasterData);
 const schemesRepo = AppDataSource.getRepository(Schemes);
 const sectorsRepo = AppDataSource.getRepository(Sectors);
 const activityRepo = AppDataSource.getRepository(Activity);
-const rolesAccessRepo = AppDataSource.getRepository(RolesAccess);
 const rolesRepo = AppDataSource.getRepository(Roles);
 const uploadImgAndVideoRepo = AppDataSource.getRepository(UploadImgAndVideo);
 const dprsPrivateLandRepo = AppDataSource.getRepository(DprsPrivateLand);
@@ -20,9 +19,9 @@ const questionDropdownTypesRepo = AppDataSource.getRepository(QuestionDropdownTy
 const waterShedDataRepo = AppDataSource.getRepository(WaterShedData);
 const waterShedDataHistoryRepo = AppDataSource.getRepository(WaterShedDataHistory);
 const masterDataRepo = AppDataSource.getRepository(MasterData);
-const assignedMastersRepo = AppDataSource.getRepository(AssignedMasters);
 const watershedImgAndVideoRepo = AppDataSource.getRepository(WatershedImgAndVideo);
 const userDataRepo = AppDataSource.getRepository(UserData);
+const categoryRepo = AppDataSource.getRepository(Category);
 @Service()
 export class MobileRepo {
 
@@ -33,15 +32,6 @@ export class MobileRepo {
     async getVersionOfApp() {
         return await AppDataSource.getRepository(Versions).find();
     };
-
-    // async sendOtp(data: loginData) {
-    //     const { Mobile, RoleId } = data;
-    //     let loginDb = await AppDataSource.getRepository(loginData);
-    //     let findData = await loginDb.findOneBy({ Mobile, RoleId });
-    //     if (!findData) return { code: 404 };
-    //     let newData = { ...findData, ...data };
-    //     return await loginDb.save(newData);
-    // };
 
     async sendOtp(data) {
         const { Mobile, RoleId } = data;
@@ -58,7 +48,7 @@ export class MobileRepo {
             .getRawMany();
     };
 
-    async fetchUser(data ) {
+    async fetchUser(data) {
         const { Mobile, RoleId } = data;
         let findData = await userDataRepo.findOneBy({ Mobile: Equal(Mobile), RoleId: Equal(RoleId) });
         if (!findData) return { code: 404 };
@@ -165,27 +155,71 @@ export class MobileRepo {
     };
 
     async getSectors(data) {
-        let savingData = await sectorsRepo.createQueryBuilder('sec')
-            .select(["sec.SectorName as SectorName", "sec.SectorLogo as SectorLogo", "sec.id as SectorId"])
-            .where("sec.SchemeId = :SchemeId", { SchemeId: data?.SchemeId })
+        let getNewSecData = await sectorsRepo.createQueryBuilder('sec')
+            .select(["sec.SectorName as SectorName", "sec.SectorLogo as SectorLogo", "sec.id as SectorId", "sec.IsCategory as IsCategory"])
+            .where("sec.SchemeId = :SchemeId and sec.RecordType = :Record", { SchemeId: data?.SchemeId, Record: "New Sector" })
             .getRawMany();
-        return savingData;
+        let getExistingSecData = await sectorsRepo.createQueryBuilder('sec')
+            .innerJoinAndSelect(Sectors, 'sec1', 'sec1.id=sec.SectorId')
+            .select(["sec1.SectorName as SectorName", "sec.SectorLogo as SectorLogo", "sec.SectorId as SectorId", "sec.IsCategory as IsCategory"])
+            .where("sec.SchemeId = :SchemeId and sec.RecordType = :Record", { SchemeId: data?.SchemeId, Record: "Existing Sector" })
+            .getRawMany();
+        return getNewSecData.concat(getExistingSecData);
     };
 
-    async getActivity(data) {
+    async getActivityBasedOnCategory(Id) {
         let newArray = [];
         let activityData = await activityRepo.createQueryBuilder('ac')
-            .select(["ac.ActivityName as ActivityName", "ac.id as ActivityId"])
-            .where("ac.SectorId = :SectorId and ac.ParentId = :ParentId", { SectorId: data?.SectorId, ParentId: '-1' })
+            .select(["ac.ActivityName as ActivityName", "ac.id as ActivityId", "ac.TypeOfWork as TypeOfWork", "ac.TypeOfLand as TypeOfLand", "ac.TypeOfStatus as TypeOfStatus"])
+            .where("ac.CategoryId = :CategoryId and ac.ParentId = :ParentId", { CategoryId: Id, ParentId: '-1' })
             .getRawMany();
         let activityDataLength = activityData.length;
         for (let i = 0; i < activityDataLength; i++) {
-            let eachActitivy = activityData[i];
+            let eachActitivy = { ...activityData[i] };
+            delete activityData[i];
             eachActitivy['SubActivity'] = await activityRepo.createQueryBuilder('ac')
-                .select(["ac.ActivityName as ActivityName", "ac.id as SubActivityId"])
-                .where("ac.ParentId = :ParentId", { ParentId: eachActitivy.ParentId })
+                .select(["ac.ActivityName as ActivityName", "ac.id as SubActivityId", "ac.TypeOfWork as TypeOfWork", "ac.TypeOfLand as TypeOfLand", "ac.TypeOfStatus as TypeOfStatus"])
+                .where("ac.ParentId = :ParentId", { ParentId: eachActitivy?.ActivityId })
                 .getRawMany();
             newArray.push(eachActitivy);
+        }
+        return newArray;
+    };
+
+    async getActivityBasedOnSector(Id) {
+        let newArray = [];
+        let activityData = await activityRepo.createQueryBuilder('ac')
+            .select(["ac.ActivityName as ActivityName", "ac.id as ActivityId", "ac.TypeOfWork as TypeOfWork", "ac.TypeOfLand as TypeOfLand", "ac.TypeOfStatus as TypeOfStatus"])
+            .where("ac.SectorId = :SectorId and ac.ParentId = :ParentId", { SectorId: Id, ParentId: '-1' })
+            .getRawMany();
+        let activityDataLength = activityData.length;
+        for (let i = 0; i < activityDataLength; i++) {
+            let eachActitivy = { ...activityData[i] };
+            delete activityData[i];
+            eachActitivy['SubActivity'] = await activityRepo.createQueryBuilder('ac')
+                .select(["ac.ActivityName as ActivityName", "ac.id as SubActivityId", "ac.TypeOfWork as TypeOfWork", "ac.TypeOfLand as TypeOfLand", "ac.TypeOfStatus as TypeOfStatus"])
+                .where("ac.ParentId = :ParentId", { ParentId: eachActitivy?.ActivityId })
+                .getRawMany();
+            newArray.push(eachActitivy);
+        }
+        return newArray;
+    };
+
+    async getCategory(data) {
+        let newArray = [];
+        let categoryData = await categoryRepo.createQueryBuilder('ac')
+            .select(["ac.CategoryName as CategoryName", "ac.id as CategoryId"])
+            .where("ac.SectorId = :SectorId and ac.ParentId = :ParentId", { SectorId: data?.SectorId, ParentId: '-1' })
+            .getRawMany();
+        let categoryDataLength = categoryData.length;
+        for (let i = 0; i < categoryDataLength; i++) {
+            let eachCategory = { ...categoryData[i] };
+            delete categoryData[i];
+            eachCategory['SubCategory'] = await categoryRepo.createQueryBuilder('ac')
+                .select(["ac.CategoryName as CategoryName", "ac.id as CategoryId"])
+                .where("ac.ParentId = :ParentId", { ParentId: eachCategory?.CategoryId })
+                .getRawMany();
+            newArray.push(eachCategory);
         }
         return newArray;
     };
@@ -194,7 +228,7 @@ export class MobileRepo {
         const { ActivityId } = data;
         let questionsJson = await questionMappingRepo.createQueryBuilder('qm')
             .leftJoinAndSelect(Questions, 'qu', "qu.id = qm.QuestionId")
-            .select(["qu.QuestionId as QuestionId", "qu.Question as Question", "qu.QuestionType as QuestionType", "qu.DropDownValues as DropDownValues"])
+            .select(["qu.QuestionId as QuestionId", "qu.Question as Question", "qu.QuestionType as QuestionType", "qu.DropDownValues as DropDownValues", "qu.IsMandatory as IsMandatory"])
             .where("qm.ActivityId = :ActivityId", { ActivityId: ActivityId })
             .getRawMany();
         let questionsJsonLength = questionsJson.length;
@@ -264,11 +298,11 @@ export class MobileRepo {
     async saveSurveyData(data) {
         let findData = await userDataRepo.findOneBy({ UserId: Equal(data?.UserId) });
         if (!findData) return { code: 422, message: "Access Denied" };
-        data.CreatedName = findData.CreatedName;
         data.CreatedRole = findData.CreatedRole;
         data.CreatedMobile = findData.CreatedMobile;
-        waterShedDataHistoryRepo.save({ ...data, ...{ Status: "Added New" } })
-        return await waterShedDataRepo.save(data);
+        let result = await waterShedDataRepo.save(data);
+        await waterShedDataHistoryRepo.save({ ...result, ...{ History: "New Application Added" } });
+        return result;
     };
 
     async getSubmissionList(data) {
@@ -305,8 +339,11 @@ export class MobileRepo {
 
     async updateSurveyData(data) {
         let findData = await waterShedDataRepo.findOneBy({ SubmissionId: Equal(data?.SubmissionId) });
-        let newData = { ...findData, ...data };
-        await waterShedDataHistoryRepo.save({ ...newData, ...{ Status: "Updated" } });
+        let findUser = await userDataRepo.findOneBy({ UserId: Equal(data?.UserId) });
+        let userData = { CreatedMobile: findUser.Mobile, CreatedRole: findUser.RoleId, CreatedName: findUser.Name };
+        let newData = { ...findData, ...data, ...userData };
+        let findHistory = await waterShedDataHistoryRepo.findOneBy({ SubmissionId: Equal(data?.SubmissionId) });
+        await waterShedDataHistoryRepo.save({ ...findHistory, ...{ History: "Updated Application Added" }, ...newData, ...userData });
         return await waterShedDataRepo.save(newData);
     };
 

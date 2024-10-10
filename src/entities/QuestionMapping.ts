@@ -4,7 +4,8 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     ManyToOne,
-    JoinColumn
+    JoinColumn,
+    Column
   } from "typeorm";
 import { Activity } from "./activity";
 import { Questions } from "./questions";
@@ -22,6 +23,9 @@ import { Questions } from "./questions";
     @ManyToOne(() => Questions, ac => ac.QuestionIdToQuestionMappingFK)
     @JoinColumn({name: "QuestionId"})
     QuestionId: Questions;
+
+    @Column({type: 'nvarchar', length: 50, default: null})
+    TypeOfLand: string;
 
     @CreateDateColumn()
     CreatedDate: Date;

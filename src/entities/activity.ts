@@ -11,6 +11,7 @@ import {
 import { Departments } from "./department";
 import { Sectors } from "./sectors";
 import { QuestionMapping } from "./QuestionMapping";
+import { Category } from "./category";
   
   @Entity( { name: "Activity" })
   export class Activity {
@@ -22,12 +23,13 @@ import { QuestionMapping } from "./QuestionMapping";
     @JoinColumn({name: "DepartmentId"})
     DepartmentId: Departments;
 
-    @OneToMany(() => QuestionMapping, qm => qm.ActivityId, {cascade: true, onDelete: 'CASCADE'})
-    ActivityToQuestionMappingFK: QuestionMapping[];
-
     @ManyToOne(() => Sectors, sec => sec.activity)
     @JoinColumn({name: "SectorId"})
     SectorId: Sectors
+
+    @ManyToOne(() => Category, sec => sec.CategoryToActivityFK)
+    @JoinColumn({name: "CategoryId"})
+    CategoryId: Category;
 
     @Column({ type: "nvarchar", length: 200 })
     ActivityName: string;
@@ -49,5 +51,9 @@ import { QuestionMapping } from "./QuestionMapping";
   
     @UpdateDateColumn()
     UpdatedDate: Date;
+
+    @OneToMany(() => QuestionMapping, qm => qm.ActivityId, {cascade: true, onDelete: 'CASCADE'})
+    ActivityToQuestionMappingFK: QuestionMapping[];
+
   };
   

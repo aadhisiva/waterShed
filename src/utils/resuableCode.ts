@@ -1,7 +1,6 @@
 import { AppDataSource } from "../db/config";
 import { DprsCommonLand, DprsPrivateLand, MobileLogs, OtpLogs, webLogs } from "../entities";
 import cryptoJs from "crypto";
-import CryptoJS from "crypto-js";
 import Logger from "../loggers/winstonLogger";
 
 // generate random string
@@ -46,26 +45,23 @@ export function generateUniqueId() {
   return year + month + day + new Date().getHours() + new Date().getMinutes() + new Date().getSeconds() + new Date().getMilliseconds();
 };
 
-export const saveWebLogs = async (WebPage, Message, UserId, Request, Response, Role, ResponseType) => {
+export const saveWebLogs = async (WebPage, Message, UserId, Request, Response, ResponseType) => {
   // generate time
   let newBody = {
     WebPage,
     Message,
     UserId,
-    Role,
     Request: JSON.stringify(Request),
     Response: JSON.stringify(Response),
     ResponseType
   }
   return await AppDataSource.getRepository(webLogs).save(newBody);
 };
-export const saveMobileLogs = async (logMessage, apiMessage, UserId, Request, Response, Role, ResponseType) => {
+export const saveMobileLogs = async (logMessage, UserId, Request, Response, ResponseType) => {
   // generate time
   let newBody = {
     logMessage,
-    apiMessage,
     UserId,
-    Role,
     Request: JSON.stringify(Request),
     Response: JSON.stringify(Response),
     ResponseType
@@ -76,7 +72,6 @@ export const getRoleAndUserId = (req, message) => {
   // create new Object
   let newBody = {
     userId: req.headers["userid"],
-    role: req.headers["role"],
     logMessage: message
   }
   return newBody;;
@@ -162,23 +157,4 @@ export const DecryptStringFromEncrypt = (key, IV, cipherText) => {
   let decrypted = aes.update(buffer, null, 'utf8');
   decrypted += aes.final('utf8');
   return decrypted;
-};
-const secretKey = "ugfskd9867sdhfgs)(*&^^5$%"; // Must match the one used for encryption
-
-// Function to decrypt the encrypted user ID
-// Function to decrypt the userId
-
-export const decryptUserId = (encryptedData) => {
-  const key = CryptoJS.enc.Utf8.parse(secretKey); // Create key from secret
-  const iv = Buffer.from(encryptedData.iv, 'hex'); // Convert IV from hex
-  const encryptedText = Buffer.from(encryptedData.content, 'hex'); // Convert encrypted content from hex
-
-  // Create a decipher using AES-256-CBC
-  const decipher = cryptoJs.createDecipheriv('aes-256-cbc', key, iv);
-
-  // Decrypt the encrypted data
-  let decrypted = decipher.update(encryptedText);
-  decrypted = Buffer.concat([decrypted, decipher.final()]); // Concatenate the final block
-
-  return decrypted.toString('utf8'); // Convert decrypted buffer to string
 };

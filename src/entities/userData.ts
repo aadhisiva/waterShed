@@ -5,15 +5,18 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  JoinColumn
+  JoinColumn,
+  OneToMany
 } from "typeorm";
 import { Roles } from "./roles";
+import { WaterShedData } from "./watershedData";
+import { WaterShedDataHistory } from "./watershedDataHistory";
 
 @Entity({ name: "UserData" })
 export class UserData {
 
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn("uuid")
+  UserId: string;
 
   @Column({ type: "nvarchar", length: 50, default: null })
   DistrictCode: string;
@@ -46,21 +49,22 @@ export class UserData {
   @Column({ type: "nvarchar", length: 50, default: null })
   Version: string;
 
-  @Column({ type: "nvarchar", length: 50, default: null })
-  UserId: string;
-
-  @Column({ type: "nvarchar", length: 30, default: null })
+  @Column({ type: "nvarchar", length: 20, default: null })
   CreatedMobile: string;
 
   @Column({ type: "nvarchar", length: 30, default: null })
   CreatedRole: string;
-
-  @Column({ type: "nvarchar", length: 30, default: null })
-  CreatedName: string;
 
   @CreateDateColumn()
   CreatedDate: Date;
 
   @UpdateDateColumn()
   UpdatedDate: Date;
+
+  @OneToMany(() => WaterShedData, user => user.UserId, {cascade: true, onDelete: 'CASCADE'})
+  WaterShedDataFK: WaterShedData[]
+
+  @OneToMany(() => WaterShedDataHistory, user => user.UserId, {cascade: true, onDelete: 'CASCADE'})
+  WaterShedDataHistoryFK: WaterShedDataHistory[]
+
 };

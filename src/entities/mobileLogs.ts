@@ -12,17 +12,11 @@ import {
     @PrimaryGeneratedColumn()
     id: number;
   
-    @Column({ type: 'text', nullable:true })
+    @Column({ type: 'nvarchar', length: 100, nullable:true })
     UserId: string;
   
-    @Column({ type: 'text', nullable:true })
-    Role: string;
-
-    @Column({ type: 'text', nullable:true })
+    @Column({ type: 'nvarchar', length: 200, nullable:true })
     logMessage: string;
-
-    @Column({type: 'text', nullable:true })
-    apiMessage: string;
 
     @Column({ type:'text', default: null })
     Request: string;
@@ -30,10 +24,10 @@ import {
     @Column({ type:'text', default: null })
     Response: string;
 
-    @Column({ type:'text', default: null })
+    @Column({ type:'nvarchar', length: 200, default: null })
     ResponseType: string;
 
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   };
   

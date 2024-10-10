@@ -25,6 +25,9 @@ import { QuestionMapping } from "./QuestionMapping";
   
     @Column({ type: "nvarchar", length: 200, default: null })
     DropDownValues: string;
+  
+    @Column({ type: "nvarchar", length: 10, default: null })
+    IsMandatory: string;
 
     @OneToMany(() => QuestionMapping, qm => qm.ActivityId, {cascade: true, onDelete: 'CASCADE'})
     QuestionIdToQuestionMappingFK: QuestionMapping[];

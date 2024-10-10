@@ -1,6 +1,5 @@
 import { Service } from "typedi";
 import { AdminRepo } from "../apiRepository/AdminRepo";
-import { decryptUserId, generateEOfTTime, generateOTP, generateRandomString, generateUniqueId, saveMobileOtps } from "../utils/resuableCode";
 import { RESPONSEMSG } from "../utils/statusCodes";
 import { OtpServices } from "../sms/smsServceResusable";
 import { loginData } from "../entities";
@@ -21,33 +20,6 @@ export class AdminServices {
         if (!data?.UserId) return { code: 400 };
         return this.adminRepo.assigningData(data);
     }
-
-    // async checkMobileLogin(data: loginData) {
-    //     const { Mobile } = data;
-    //     if (!Mobile) return { code: 400 };
-    //     let version = await this.adminRepo.getVersionOfApp();
-    //     // data.Otp = generateOTP(4);
-    //     data.Otp = "1111";
-    //     data.WebVersion = version[0]?.WebVersion;
-    //     let checkRoles: ObjectParam = await this.adminRepo.checkMobileLogin(data);
-    //     if (checkRoles['code'] == 422) return { code: 422, message: checkRoles['message'] };
-    //     // let sendSingleSms = await this.otpServices.sendOtpAsSingleSms(Mobile, data?.WebOtp);
-    //     // await saveMobileOtps(Mobile, sendSingleSms?.otpMessage, sendSingleSms?.response, data?.UserId ,data?.WebOtp);
-    //     // if (sendSingleSms.code !== 200){
-    //     //     return { code: 422, message: RESPONSEMSG.OTP_FAILED };
-    //     // } 
-    //     // Options for the token
-    //     const options = {
-    //         expiresIn: '12h', // Token expiration time
-    //         algorithm: 'HS256', // Use a secure algorithm (HS256 is symmetric, RS256 is asymmetric)
-    //     };
-    //     let resObj = {
-    //         Mobile,
-    //         Token: jsonWebToken.sign({ UserId: generateRandomString(20) }, process.env.SECRET_KEY, options),
-    //         UserData: checkRoles
-    //     };
-    //     return encryptData(resObj, secretKey);
-    // };
 
     async checkMobileLogin(data: loginData) {
         const { Mobile } = data;
@@ -86,7 +58,7 @@ export class AdminServices {
         let accessResponse = await this.adminRepo.getDataAccess(data);
         if (accessResponse['code']) return { code: 422, message: "You don't have access" };
         let response = {
-            UserId: generateRandomString(15)+userResponse['id']+generateRandomString(15),
+            UserId: userResponse['UserId'],
             access: accessResponse
         };
         return encryptData(response, secretKey);
@@ -95,7 +67,6 @@ export class AdminServices {
     async verifyOtp(data) {
         const { Id } = data;
         if (!Id) return { code: 400 };
-        data.Id = Id.slice(15,-15)
         let loginUser = await this.adminRepo.fetchUser(data);
         if (loginUser['code']) return { code: 422, message: RESPONSEMSG.VALIDATE_FAILED };
         const options = {
@@ -103,7 +74,7 @@ export class AdminServices {
             algorithm: 'HS256', // Use a secure algorithm (HS256 is symmetric, RS256 is asymmetric)
         };
         let resObj = {
-            Token: jsonWebToken.sign({ UserId: data.Id }, process.env.SECRET_KEY, options)
+            Token: jsonWebToken.sign({ UserId: data.UserId }, process.env.SECRET_KEY, options)
         };
         return { message: RESPONSEMSG.VALIDATE, data: encryptData(resObj, secretKey) };
     };
@@ -157,6 +128,28 @@ export class AdminServices {
             return await this.adminRepo.getActivityData();
         } else if (ReqType == "Dd") {
             return await this.adminRepo.getDropdownActivty();
+        } else {
+            return { code: 422, message: "Sending wrong request to server." };
+        }
+    };
+
+    async getActivityDetails(data){
+        let result = await this.adminRepo.getActivityDetails(data);
+        let checkType = result.TypeOfLand == "Both" ? [{value: "Common Land", name: "Common Land"}, {value: "Private Land", name: "Private Land"}]
+        : result.TypeOfLand == "Private Land" ?  [{value: "Private Land", name: "Private Land"}]
+        : result.TypeOfLand == "Common Land" ?  [{value: "Common Land", name: "Common Land"}]
+        : [];
+        return checkType;
+    }
+
+    async addOrGetsCategory(data) {
+        const { ReqType } = data;
+        if (ReqType == "Add") {
+            return await this.adminRepo.addCategory(data);
+        } else if (ReqType == "Get") {
+            return await this.adminRepo.getCategoryData();
+        } else if (ReqType == "Dd") {
+            return await this.adminRepo.getDropdownCategory();
         } else {
             return { code: 422, message: "Sending wrong request to server." };
         }
