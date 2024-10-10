@@ -95,10 +95,9 @@ export default function DistrictModal({
 
   const onSubmit = (values: any) => {
     // Handle form submission logic, e.g., API call
-    values.id = formData.id;
+    values.UserId = formData.UserId;
     values.CreatedMobile = Mobile;
     values.CreatedRole = RoleName;
-    values.CreatedName = Name;
     handleSubmitForm(values);
   };
 

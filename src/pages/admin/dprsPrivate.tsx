@@ -60,7 +60,6 @@ interface ExcelData {
   [key: string]: string | number;
 }
 
-
 export default function DprsPrivate() {
   const [totalCount, setTotalCount] = useState(0);
   const [tableData, setTableData] = useState([]);
@@ -78,16 +77,24 @@ export default function DprsPrivate() {
   };
 
   const fecthIntialData = async () => {
-    setLoading(true);
-    let { data } = await axiosInstance.post('getDprsLand', { DataType: 'Private', Page: page + 1, RowsPerPage: rowsPerPage });
-    if (data?.code == 200) {
-      setTotalCount(data.data?.total);
-      setTableData(data.data?.totalData);
-      setCopyTableData(data.data?.totalData);
+    try {
+      setLoading(true);
+      let { data } = await axiosInstance.post('getDprsLand', {
+        DataType: 'Private',
+        Page: page + 1,
+        RowsPerPage: rowsPerPage,
+      });
+      if (data?.code == 200) {
+        setTotalCount(data.data?.total);
+        setTableData(data.data?.totalData);
+        setCopyTableData(data.data?.totalData);
+        setLoading(false);
+      } else {
+        setLoading(false);
+        alert(data.message || 'please try again');
+      }
+    } catch (error) {
       setLoading(false);
-    } else {
-      setLoading(false);
-      alert(data.message || 'please try again');
     }
   };
   useEffect(() => {
@@ -119,16 +126,15 @@ export default function DprsPrivate() {
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     setLoading(true);
     const selectedFile = event.target.files?.[0];
-  
+
     if (!selectedFile) {
-      console.error('No file selected');
       return;
-    };
+    }
     const formData = new FormData();
     formData.append('file', selectedFile);
 
     try {
-      const {data} = await axiosInstance.post("/uploadPrivateLand", formData);
+      const { data } = await axiosInstance.post('/uploadPrivateLand', formData);
       if (data.code == 200) {
         await fecthIntialData();
         alert('Data uploaded successfully');
@@ -138,7 +144,6 @@ export default function DprsPrivate() {
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      console.error('Error:', error);
     }
   };
 
@@ -157,7 +162,7 @@ export default function DprsPrivate() {
           // onClick={handleClickAdd}
           startIcon={<UploadIcon />}
         >
-          Uplod XLSX {" "}
+          Uplod XLSX{' '}
           <input type="file" accept=".xlsx" onChange={handleFileUpload} />
         </Button>
       </Grid>

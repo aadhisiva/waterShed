@@ -5,6 +5,7 @@ import useSelectorForUser from '../components/customHooks/useSelectForUser';
 import useDisptachForAction from '../components/customHooks/useDis';
 import { clearSessionEndTime, setSessionEndTime, userLoggedOut } from '../reducers/authReducer';
 import HeaderWithSidebar from '../components/HeaderForLogin';
+import useDocumentTitle from '../components/common/useDocumentTitle';
 
 interface PrivateRouteProps {
   timeoutInMinutes: number;
@@ -99,7 +100,7 @@ const PrivateRoute: FC<PrivateRouteProps> = ({ timeoutInMinutes }) => {
   }, [remainingTime, navigate, dispatch]);
 
   const logoutTime = new Date(Date.now() + remainingTime * 1000).toLocaleTimeString();
-
+  useDocumentTitle();
   return isLoggedIn ? 
   <HeaderWithSidebar logoutTime={logoutTime} setModalOpen={() => setModalOpen(false)} modalOpen={modalOpen}>
   <Outlet />

@@ -14,7 +14,7 @@ interface SelectFieldProps {
 };
 
 interface SelectOption {
-  value: string | number;
+  value: string | number |boolean;
   name: string;
 }
 
@@ -41,9 +41,6 @@ export default function SelectField({
         name={name}
         onBlur={onBlur}
       >
-        {/* <MenuItem value="">
-          <em>None</em>
-        </MenuItem> */}
         {(options || []).map((obj: any) => (
             <MenuItem key={obj.value+""+obj.name} value={obj.value}>{obj.name}</MenuItem>
         ))}

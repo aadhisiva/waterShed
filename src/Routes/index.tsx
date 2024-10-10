@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom';
 import PrivateRoute from './PrivateRoutes';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { ACTIVITY, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_HOBLI, ASSIGN_TALUK, ASSIGN_VILLAGE, CHILD_ROLES, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, MASTER_UPLOAD, QUESTION_DROPDOWNS, QUESTION_MASTER, ROLES, ROLES_ACCESS, SCHEMES, SECTORS } from '../utils/routingPath';
+import { ACTIVITY, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_HOBLI, ASSIGN_TALUK, ASSIGN_VILLAGE, CATEGORY, CHILD_ROLES, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, MASTER_UPLOAD, QUESTION_DROPDOWNS, QUESTION_MASTER, ROLES, ROLES_ACCESS, SCHEMES, SECTORS } from '../utils/routingPath';
 
 const LoginPageLazy = lazy(() => import('../pages/LoginPage'));
 const RoleWiseLoginLazy = lazy(() => import('../pages/roleWiseLogin'));
@@ -19,6 +19,7 @@ const RolesLazy = lazy(() => import('../pages/admin/roles'));
 const ChildRolesLazy = lazy(() => import('../pages/admin/childRoles'));
 
 const ActivityLazy = lazy(() => import('../pages/admin/activity'));
+const CategoryLazy = lazy(() => import('../pages/admin/category'));
 const SectorsLazy = lazy(() => import('../pages/admin/sectors'));
 const SchemesLazy = lazy(() => import('../pages/admin/schemes'));
 const DprsPrivateLazy = lazy(() => import('../pages/admin/dprsPrivate'));
@@ -41,7 +42,7 @@ export default function RoutesPro() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/">
-        <Route element={<PrivateRoute timeoutInMinutes={60} />}>
+        <Route element={<PrivateRoute timeoutInMinutes={120} />}>
           <Route index Component={HomeLazy} />
           <Route path={DEPARTMENT} Component={DepartmentLazy} />
           <Route path={SCHEMES} Component={SchemesLazy} />
@@ -50,6 +51,7 @@ export default function RoutesPro() {
           <Route path={CHILD_ROLES} Component={ChildRolesLazy} />
 
           <Route path={ACTIVITY} Component={ActivityLazy} />
+          <Route path={CATEGORY} Component={CategoryLazy} />
           <Route path={SECTORS} Component={SectorsLazy} />
           <Route path={DPRS_COMMON} Component={DprsCommonLazy} />
           <Route path={DPRS_PRIVATE} Component={DprsPrivateLazy} />
@@ -74,11 +76,11 @@ export default function RoutesPro() {
           Component={LoginPageLazy}
           // loader={async () => isAuthenticated()}
         />
-        <Route
+        {/* <Route
           path="/signup"
           Component={SigninPageLazy}
           // loader={async () => isAuthenticated()}
-        />
+        /> */}
         <Route path="*" element={<div>Page not found..</div>} />
       </Route>,
     ),

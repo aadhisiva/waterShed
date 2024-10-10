@@ -4,6 +4,7 @@ export const CHILD_ROLES = "/Child-Roles";
 export const SCHEMES = "/Schemes";
 export const SECTORS = "/Sectors";
 export const ACTIVITY = "/Activity";
+export const CATEGORY = "/Category";
 export const SUB_ACTIVITY = "/SubActivity";
 export const DASHBOARD = "/Dashboard";
 export const DPRS_PRIVATE = "/Dprs-Private-Land";

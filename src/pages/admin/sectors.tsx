@@ -25,13 +25,25 @@ const headCells = [
     id: 'ParentName',
     numeric: false,
     disablePadding: true,
-    label: 'Parent Activity',
+    label: 'Parent Sector',
   },
   {
     id: 'SchemeName',
     numeric: false,
     disablePadding: true,
     label: 'Scheme Name',
+  },
+  {
+    id: 'IsCategory',
+    numeric: false,
+    disablePadding: true,
+    label: 'IsCategory',
+  },
+  {
+    id: 'RecordType',
+    numeric: false,
+    disablePadding: true,
+    label: 'RecordType',
   },
   {
     id: 'Action',

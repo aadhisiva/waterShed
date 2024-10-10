@@ -36,11 +36,11 @@ export default function QuestionMappingModal({
   formData,
 }: ActivityModalProps) {
   const [loading, setLoading] = React.useState(false);
-  const [questionOptions, setQuestionOptions] = React.useState([]);
+  const [landOptions, setLandOptions] = React.useState([]);
   const [activityOption, setActivityOption] = React.useState([]);
   const [left, setLeft] = React.useState<readonly Item[]>([]);
   const [right, setRight] = React.useState<readonly Item[]>([]);
-  const [error, setError] = React.useState("");
+  const [error, setError] = React.useState('');
 
   React.useEffect(() => {
     fecthIntialData();
@@ -48,8 +48,12 @@ export default function QuestionMappingModal({
 
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('addOrGetQuestions', { ReqType: 'Dd' });
-    let response = await axiosInstance.post('addOrGetsActivity', { ReqType: 'Dd' });
+    let { data } = await axiosInstance.post('addOrGetQuestions', {
+      ReqType: 'Dd',
+    });
+    let response = await axiosInstance.post('addOrGetsActivity', {
+      ReqType: 'Dd',
+    });
     if (data?.code == 200) {
       setLeft(data.data);
       setActivityOption(response.data.data);
@@ -60,8 +64,9 @@ export default function QuestionMappingModal({
     }
   };
 
-  const initialValues:any = {
-    ActivityId: formData.ActivityId
+  const initialValues: any = {
+    ActivityId: formData.ActivityId,
+    TypeOfLand: formData.TypeOfLand,
   };
 
   const validationSchema = {
@@ -72,19 +77,21 @@ export default function QuestionMappingModal({
         }
         return null;
       },
-    }
+    },
   };
 
   const onSubmit = (values: any) => {
     // Handle form submission logic, e.g., API call
     values.id = formData.id;
-    if(right.length == 0) return setError("Select values and move to right side list") 
-      setError("");
-    let getValues = right.map((item: Item) =>{
+    if (right.length == 0)
+      return setError('Select values and move to right side list');
+    setError('');
+    let getValues = right.map((item: Item) => {
       return {
         QuestionId: item.value,
-        ActivityId: values.ActivityId
-      }
+        ActivityId: values.ActivityId,
+        TypeOfLand: values.TypeOfLand,
+      };
     });
     handleSubmitForm(getValues);
   };
@@ -98,6 +105,25 @@ export default function QuestionMappingModal({
     handleSubmit,
     setValues,
   } = useForm({ initialValues, validationSchema, onSubmit });
+
+  const handleChangeActivity = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    try {
+      setLoading(true);
+      setValues({
+        ...values,
+        ActivityId: e.target.value,
+      });
+      setLoading(true);
+      let { data } = await axiosInstance.post('getActivityDetails', {
+        ActivityId: e.target.value,
+      });
+      setLandOptions(data.data);
+    } catch (e) {
+      setLoading(false);
+    }
+  };
 
   return (
     <React.Fragment>
@@ -118,16 +144,31 @@ export default function QuestionMappingModal({
                 name="ActivityId"
                 label="Activity Name"
                 value={values.ActivityId}
-                onChange={handleChange}
+                onChange={handleChangeActivity}
                 options={activityOption}
                 onBlur={handleBlur}
                 error={touched.ActivityId && Boolean(errors.ActivityId)}
                 helperText={touched.ActivityId && errors.ActivityId}
               />
-              <FormControl error={error? true: false}>
-              <span>Select questions and move to right side list</span>
-              <TransferList left={left} right={right} setLeft={setLeft} setRight={setRight} />
-              <FormHelperText>{error}</FormHelperText>
+              <SelectField
+                name="TypeOfLand"
+                label="TypeOfLand"
+                value={values.TypeOfLand}
+                onChange={handleChange}
+                options={landOptions}
+                onBlur={handleBlur}
+                error={touched.TypeOfLand && Boolean(errors.TypeOfLand)}
+                helperText={touched.TypeOfLand && errors.TypeOfLand}
+              />
+              <FormControl error={error ? true : false}>
+                <span>Select questions and move to right side list</span>
+                <TransferList
+                  left={left}
+                  right={right}
+                  setLeft={setLeft}
+                  setRight={setRight}
+                />
+                <FormHelperText>{error}</FormHelperText>
               </FormControl>
             </Box>
             <DialogActions>

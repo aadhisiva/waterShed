@@ -77,18 +77,24 @@ export default function DprsCommon() {
   };
 
   const fecthIntialData = async () => {
-    setLoading(true);
-    let { data } = await axiosInstance.post('getDprsLand', {
-      DataType: 'Common', Page: page + 1, RowsPerPage: rowsPerPage
-    });
-    if (data?.code == 200) {
-      setTotalCount(data.data?.total);
-      setTableData(data.data?.totalData);
-      setCopyTableData(data.data?.totalData);
+    try {
+      setLoading(true);
+      let { data } = await axiosInstance.post('getDprsLand', {
+        DataType: 'Common',
+        Page: page + 1,
+        RowsPerPage: rowsPerPage,
+      });
+      if (data?.code == 200) {
+        setTotalCount(data.data?.total);
+        setTableData(data.data?.totalData);
+        setCopyTableData(data.data?.totalData);
+        setLoading(false);
+      } else {
+        setLoading(false);
+        alert(data.message || 'please try again');
+      }
+    } catch (error) {
       setLoading(false);
-    } else {
-      setLoading(false);
-      alert(data.message || 'please try again');
     }
   };
   useEffect(() => {
@@ -121,15 +127,15 @@ export default function DprsCommon() {
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     setLoading(true);
     const selectedFile = event.target.files?.[0];
-  
+
     if (!selectedFile) {
-      return alert("No file selected");
-    };
+      return alert('No file selected');
+    }
     const formData = new FormData();
     formData.append('file', selectedFile);
 
     try {
-      const {data} = await axiosInstance.post("/uploadCommonLand", formData);
+      const { data } = await axiosInstance.post('/uploadCommonLand', formData);
       if (data.code == 200) {
         await fecthIntialData();
         alert('Data uploaded successfully');
@@ -138,15 +144,13 @@ export default function DprsCommon() {
       }
       setLoading(false);
     } catch (error) {
-        setLoading(false);
-      console.error('Error:', error);
+      setLoading(false);
     }
   };
 
-
   return (
     <Box sx={{ padding: 2 }}>
-        <SpinnerLoader isLoading={loading} />
+      <SpinnerLoader isLoading={loading} />
       {renderDeoartModal}
       <Grid
         item
@@ -154,12 +158,12 @@ export default function DprsCommon() {
         xs={12}
         sx={{ display: 'flex', justifyContent: 'end' }}
       >
-       <Button
+        <Button
           variant="outlined"
           // onClick={handleClickAdd}
           startIcon={<UploadIcon />}
         >
-          Uplod XLSX {" "}
+          Uplod XLSX{' '}
           <input type="file" accept=".xlsx" onChange={handleFileUpload} />
         </Button>
       </Grid>

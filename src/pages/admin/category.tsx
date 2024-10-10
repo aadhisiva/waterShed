@@ -5,15 +5,15 @@ import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axiosInstance from '../../axiosInstance';
-import ActivityModal from '../../components/Modals/activityModal';
 import SpinnerLoader from '../../components/spinner/spinner';
+import CategoryModal from '../../components/Modals/categoryModal';
 
 const headCells = [
   {
-    id: 'ActivityName',
+    id: 'CategoryName',
     numeric: false,
     disablePadding: true,
-    label: 'Activity Name',
+    label: 'Category Name',
   },
   {
     id: 'DepartmentName',
@@ -25,19 +25,13 @@ const headCells = [
     id: 'ParentName',
     numeric: false,
     disablePadding: true,
-    label: 'Parent Activity',
+    label: 'Parent Category',
   },
   {
     id: 'SectorName',
     numeric: false,
     disablePadding: true,
     label: 'Sector Name',
-  },
-  {
-    id: 'CategoryName',
-    numeric: false,
-    disablePadding: true,
-    label: 'Category Name',
   },
   {
     id: 'Action',
@@ -52,7 +46,7 @@ interface Data {
   ParentScheme: string;
 }
 
-export default function Activity() {
+export default function Category() {
   const [tableData, setTableData] = useState([]);
   const [copyTableData, setCopyTableData] = useState([]);
   const [openModal, setOpenModal] = React.useState<boolean>(false);
@@ -70,7 +64,7 @@ export default function Activity() {
   };
   const fecthIntialData = async () => {
     setLoading(true);
-    let { data } = await axiosInstance.post('addOrGetsActivity', { ReqType: 'Get' });
+    let { data } = await axiosInstance.post('addOrGetsCategory', { ReqType: 'Get' });
     if (data?.code == 200) {
       setTableData(data.data);
       setCopyTableData(data.data);
@@ -87,7 +81,7 @@ export default function Activity() {
   const handleSubmitForm = async (values: any) => {
     setLoading(true);
     values['ReqType'] = 'Add';
-    let { data } = await axiosInstance.post('addOrGetsActivity', values);
+    let { data } = await axiosInstance.post('addOrGetsCategory', values);
     if (data.code == 200) {
       await fecthIntialData();
       setOpenModal(false);
@@ -100,7 +94,7 @@ export default function Activity() {
   };
 
   const renderDeoartModal = openModal && (
-    <ActivityModal
+    <CategoryModal
       open={openModal}
       formData={formData}
       handleClose={() => setOpenModal(false)}
@@ -131,7 +125,7 @@ export default function Activity() {
         rows={copyTableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
-        title='Activity'
+        title='Category'
       />
     </Box>
   );

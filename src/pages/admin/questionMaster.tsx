@@ -35,6 +35,12 @@ const headCells = [
     label: 'QuestionType',
   },
   {
+    id: 'IsMandatory',
+    numeric: false,
+    disablePadding: true,
+    label: 'IsMandatory',
+  },
+  {
     id: 'Action',
     numeric: false,
     disablePadding: false,

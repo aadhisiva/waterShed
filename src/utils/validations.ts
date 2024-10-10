@@ -6,7 +6,7 @@ export const mobileNoValid = (value: string) => {
   };
   
   export const nameValid = (value: string) => {
-    const regex = /^[A-Za-z\s'-]+$/;
+    const regex = /^[A-Za-z0-9\s'(.)-]+$/;
     if(!regex.test(value)) return "Enter characters only."
     return null;
   };

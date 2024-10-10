@@ -102,6 +102,18 @@ export default function QuestionDropdownTypeModal({
     {
       value: 'CropsForAEP',
       name: 'CropsForAEP',
+    },
+    {
+      value: 'TopicsCover-S',
+      name: 'TopicsCover-S',
+    },
+    {
+      value: 'TopicsCover-E',
+      name: 'TopicsCover-E',
+    },
+    {
+      value: 'TopicsCover-U',
+      name: 'TopicsCover-U',
     }
   ];
   return (

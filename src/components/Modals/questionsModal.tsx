@@ -65,6 +65,14 @@ export default function QuestionsModal({
         return null;
       },
     },
+    IsMandatory: {
+      validate: (value: string) => {
+        if (!value) {
+          return 'IsMandatory is required';
+        }
+        return null;
+      },
+    },
     DropDownValues: {
       validate: (value: string) => {
         if(values.QuestionType == "DropdownFromId" && !value){
@@ -178,6 +186,19 @@ export default function QuestionsModal({
                 onBlur={handleBlur}
                 error={touched.QuestionType && Boolean(errors.QuestionType)}
                 helperText={touched.QuestionType && errors.QuestionType}
+              />
+              <SelectField
+                name="IsMandatory"
+                label="IsMandatory"
+                value={values.IsMandatory}
+                onChange={handleChange}
+                options={[
+                  { value: "Yes", name: 'Yes' },
+                  { value: "No", name: 'No' },
+                ]}
+                onBlur={handleBlur}
+                error={touched.IsMandatory && Boolean(errors.IsMandatory)}
+                helperText={touched.IsMandatory && errors.IsMandatory}
               />
               {(values.QuestionType == "DropdownFromId") && (
                 <SelectField

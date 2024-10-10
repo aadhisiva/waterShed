@@ -29,6 +29,12 @@ const headCells = [
     label: 'Question Mapped',
   },
   {
+    id: 'TypeOfLand',
+    numeric: false,
+    disablePadding: true,
+    label: 'TypeOfLand',
+  },
+  {
     id: 'Action',
     numeric: false,
     disablePadding: false,

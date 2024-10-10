@@ -61,7 +61,7 @@ export default function SelectDistrict({
   };
 
   return (
-    <Container
+    <Box
       sx={{
         position: 'relative',
         border: '1px solid',
@@ -115,6 +115,6 @@ export default function SelectDistrict({
           </Grid>
         </Grid>
       </form>
-    </Container>
+    </Box>
   );
 }
