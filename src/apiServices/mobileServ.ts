@@ -181,6 +181,13 @@ export class MobileServices {
         return await this.mobileRepo.getAllSubmissionList(data);
     }
 
+    async getRecord(data){
+        if(!data?.UserId) return  { code: 400, message: "Provide UserId" };
+        if(!data?.SubmissionId) return  { code: 400, message: "Provide SubmissionId" };
+        if(!data?.SectorId) return  { code: 400, message: "Provide SectorId" };
+        return await this.mobileRepo.getRecord(data);
+    }
+
     async updateSurveyData(data) {
         let updatedData = await this.mobileRepo.updateSurveyData(data);
         return updatedData;

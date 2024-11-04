@@ -232,12 +232,35 @@ export class WaterShedData {
   @Column({ type: 'nvarchar', default: null, length: 400 })
   WDF: string;
 
+  @Column({ type: 'nvarchar', default: null, length: 400 })
+  Convergence: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 400 })
+  ApplicantDistrict: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 400 })
+  ApplicantTaluk: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 400 })
+  ApplicantHobli: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 400 })
+  ApplicantVillage: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 255 })
+  Convergence_Scheme: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 255 })
+  Convergence_Amount: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 255 })
+  Convergence_Person_Days: string;
+
   @CreateDateColumn()
   CreatedDate: Date;
   
   @UpdateDateColumn()
   UpdatedDate: Date;
 };
-
 
 

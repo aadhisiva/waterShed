@@ -12,6 +12,9 @@ export class DprsCommonLand {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: "nvarchar", length: 100, default: null })
+  District: string;
+
   @Column({ type: "nvarchar", length: 400, default: null })
   "MWS Code": string;
 

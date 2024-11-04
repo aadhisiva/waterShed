@@ -106,3 +106,7 @@ dist
 
 # TernJS port file
 .tern-port
+
+# some unused files
+dpsrs
+uploads

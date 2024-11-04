@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
 // cors setup for communication of sever and client
 app.use(cors({
-  origin: ['http://localhost:8081', "http://localhost:8080", "http://10.10.140.162", "https://spectacles.karnataka.gov.in"],
+  origin: ["https://mis.watershed.karnataka.gov.in"],
   methods: ["GET", "POST"]
 }));
 

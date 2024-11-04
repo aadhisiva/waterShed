@@ -179,6 +179,7 @@ mobileRouter.post('/saveSurveyData', saveSurveyValuesSanitize, authenticateToken
         let result = await mobileServices.saveSurveyData(body);
         return mobileAppResponse(res, result, req.body, getRoleAndUserId(req, 'saveSurveyData - saved with submissin id.'));
     } catch (error) {
+        console.log("Err",error)
         return mobileAppResponse(res, error);
     };
 });
@@ -198,6 +199,16 @@ mobileRouter.post('/getAllSubmissionList', authenticateToken, async (req, res) =
         let body = {...req.body, ...{UserId: req.user.UserId}};
         let result = await mobileServices.getAllSubmissionList(body);
         return mobileAppResponse(res, result, req.body, getRoleAndUserId(req, 'getAllSubmissionList - get all data with submissin id.'));
+    } catch (error) {
+        return mobileAppResponse(res, error);
+    };
+});
+
+mobileRouter.post('/getRecord', authenticateToken, async (req, res) => {
+    try {
+        let body = {...req.body, ...{UserId: req.user.UserId}};
+        let result = await mobileServices.getRecord(body);
+        return mobileAppResponse(res, result, req.body, getRoleAndUserId(req, 'getEachRecord - get data of particular record.'));
     } catch (error) {
         return mobileAppResponse(res, error);
     };

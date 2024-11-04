@@ -12,6 +12,9 @@ export class DprsPrivateLand {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: "nvarchar", length: 100, default: null })
+  District: string;
+
   @Column({ type: "nvarchar", length: 400, default: null })
   "MWS CODE": string;
 
@@ -55,7 +58,7 @@ export class DprsPrivateLand {
   "Farmer code": string;
 
   @Column({ type: "nvarchar", length: 400, default: null })
-  "Area Group (AG) Name": string;
+  "AG Code": string;
 
   @Column({ type: "nvarchar", length: 400, default: null })
   "Fruit ID": string;

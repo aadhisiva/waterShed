@@ -296,6 +296,7 @@ export class MobileRepo {
 
 
     async saveSurveyData(data) {
+        try{
         let findData = await userDataRepo.findOneBy({ UserId: Equal(data?.UserId) });
         if (!findData) return { code: 422, message: "Access Denied" };
         data.CreatedRole = findData.CreatedRole;
@@ -303,13 +304,22 @@ export class MobileRepo {
         let result = await waterShedDataRepo.save(data);
         await waterShedDataHistoryRepo.save({ ...result, ...{ History: "New Application Added" } });
         return result;
+        } catch(E){
+            console.log("E",E);
+            return E;
+        }
     };
 
     async getSubmissionList(data) {
-        const { UserId, PageNo = 1, PageSize = 10, StatusOfWork } = data;
+        const { UserId, PageNo = 1, PageSize = 10, StatusOfWork, CategoryId, SchemeId, SectorId, ActivityId, SubActivityId } = data;
+        let whereCondition = CategoryId && SubActivityId ? { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), CategoryId: Equal(CategoryId), ActivityId: Equal(ActivityId), SubActivityId: Equal(SubActivityId) } 
+        : CategoryId && !SubActivityId ?  { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork),SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), CategoryId: Equal(CategoryId), ActivityId: Equal(ActivityId) } 
+        : SubActivityId && !CategoryId ? { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), ActivityId: Equal(ActivityId), SubActivityId: Equal(SubActivityId) } 
+        : { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork),SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), ActivityId: Equal(ActivityId) };
+
         let totalData = await waterShedDataRepo.findAndCount({
-            where: { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork) },
-            select: ["ActivityId", "UserId", "SubmissionId", "CreatedDate", "BeneficaryName", "FruitsId", "MobileNumber", "StatusOfWork"],
+            where: whereCondition,
+            select: ["UserId", "SubmissionId", "CreatedDate", "BeneficaryName", "FruitsId", "MobileNumber", "StatusOfWork", "ActivityType", "TypeOfLand"],
             skip: (PageNo - 1) * PageSize,
             take: PageSize
         });
@@ -322,10 +332,15 @@ export class MobileRepo {
     };
 
     async getAllSubmissionList(data) {
-        const { UserId, PageNo = 1, PageSize = 10 } = data;
+        const { UserId, PageNo = 1, PageSize = 10, CategoryId, SchemeId, SectorId, ActivityId, SubActivityId } = data;
+        let whereCondition = CategoryId && SubActivityId ? { UserId: Equal(UserId),  SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), CategoryId: Equal(CategoryId), ActivityId: Equal(ActivityId), SubActivityId: Equal(SubActivityId) } 
+        : CategoryId && !SubActivityId ?  { UserId: Equal(UserId), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), CategoryId: Equal(CategoryId), ActivityId: Equal(ActivityId) } 
+        : SubActivityId && !CategoryId ? { UserId: Equal(UserId),  SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), ActivityId: Equal(ActivityId), SubActivityId: Equal(SubActivityId) } 
+        : { UserId: Equal(UserId), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), ActivityId: Equal(ActivityId) };
+
         let totalData = await waterShedDataRepo.findAndCount({
-            where: { UserId: Equal(UserId) },
-            select: ["ActivityId", "UserId", "SubmissionId", "CreatedDate", "BeneficaryName", "FruitsId", "MobileNumber", "StatusOfWork"],
+            where: whereCondition,
+            select: ["UserId", "SubmissionId", "CreatedDate", "BeneficaryName", "FruitsId", "MobileNumber", "StatusOfWork", "ActivityType", "TypeOfLand"],
             skip: (PageNo - 1) * PageSize,
             take: PageSize
         });
@@ -335,6 +350,16 @@ export class MobileRepo {
             PageSize,
             totalData: totalData[0]
         }
+    };
+
+    async getRecord(data) {
+        const { UserId, SubmissionId, SectorId} = data;
+        let query = `execute getRecordForPreview @0,@1,@2`;
+        let fetchedRecord = await AppDataSource.query(query, [UserId, SubmissionId, SectorId]);
+        let fetchedImages = await watershedImgAndVideoRepo.find({where: {SubmissionId: Equal(SubmissionId), UserId: Equal(UserId)}, 
+        select: ["Latitude", "Longitude", "RecordType", "Url"]})
+        fetchedRecord['ImagesList'] = fetchedImages;
+        return fetchedRecord
     };
 
     async updateSurveyData(data) {
