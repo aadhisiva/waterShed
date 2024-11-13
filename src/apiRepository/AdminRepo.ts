@@ -388,7 +388,7 @@ export class AdminRepo {
     async getDistrictsDD(data) {
         return await masterDataRepo.createQueryBuilder('dd')
             .select(["DISTINCT dd.DistrictCode as value", "dd.DistrictName as name"])
-            .orderBy("DistrictName", "DESC")
+            .orderBy("DistrictName", "ASC")
             .getRawMany();
     };
 
@@ -398,12 +398,14 @@ export class AdminRepo {
             .innerJoinAndSelect(AssignedMasters, 'am', 'am.DistrictCode=dd.DistrictCode')
             .select(["DISTINCT dd.DistrictCode as value", "dd.DistrictName as name"])
             .where("am.Mobile = :Mobile and am.ListType = :ListType", { Mobile, ListType })
+            .orderBy("DistrictName", "ASC")
             .getRawMany();
     };
     async getTalukDD(code) {
         return await masterDataRepo.createQueryBuilder('tt')
             .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
             .where("tt.DistrictCode = :dc", { dc: code })
+            .orderBy("TalukName", "ASC")
             .getRawMany();
     };
     async getAuthTalukDD(data) {
@@ -412,6 +414,7 @@ export class AdminRepo {
             .leftJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=tt.TalukCode and am.DistrictCode=tt.DistrictCode')
             .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
             .where("am.Mobile = :Mobile and am.ListType = :ListType", { Mobile, ListType })
+            .orderBy("TalukName", "ASC")
             .getRawMany();
     };
 
@@ -419,6 +422,7 @@ export class AdminRepo {
         return await masterDataRepo.createQueryBuilder('gd')
             .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as name"])
             .where("gd.TalukCode = :tc and gd.DistrictCode = :dc", { tc: UTCode, dc: UDCode })
+            .orderBy("HobliName", "ASC")
             .getRawMany();
     };
 
@@ -428,6 +432,7 @@ export class AdminRepo {
             .innerJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=gd.TalukCode and am.DistrictCode=gd.DistrictCode and am.HobliCode=gd.HobliCode')
             .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as name"])
             .where("am.Mobile = :Mobile and am.ListType = :ListType", { Mobile, ListType })
+            .orderBy("HobliName", "ASC")
             .getRawMany();
     }
     async getVillagesDD(UDCode, UTCode, UHCode) {

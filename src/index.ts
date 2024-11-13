@@ -16,6 +16,8 @@ import Logger from './loggers/winstonLogger';
 
 //controllers
 import { adminRouter, mobileRouter } from "./apiController";
+import mobileRoutes from "./routes/mobileRoutes";
+import webRoutes from "./routes/webRoutes";
 
 // for accessing env variables
 dotenv.config();
@@ -35,7 +37,7 @@ app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
 // cors setup for communication of sever and client
 app.use(cors({
-  origin: ["https://mis.watershed.karnataka.gov.in"],
+  origin: ["https://mis.watershed.karnataka.gov.in", "http://localhost:8080"],
   methods: ["GET", "POST"]
 }));
 
@@ -76,7 +78,9 @@ if (!fs.existsSync('uploads')) {
 
 // controllers
 app.use('/wapi/admin', adminRouter);
+app.use('/wapi/admin', webRoutes);
 app.use('/wapi/mobile', mobileRouter);
+app.use('/wapi/mobile', mobileRoutes);
 
 // intialize the db then build a server
 AppDataSource.initialize().then(async (connection) => {

@@ -2,7 +2,7 @@ import { Container, Service } from 'typedi';
 import express from "express";
 import { webAppResponse, webAppResponseForLarge } from '../utils/errorHandling';
 import { AdminServices } from '../apiServices/adminServ';
-import { authenticateToken, webAuthTokenAndVersion } from '../utils/middlewares';
+import { authenticateToken, authenticateTokenWeb, webAuthTokenAndVersion } from '../utils/middlewares';
 import { WEBMESSAGES, WEBPAGES } from '../utils/constants';
 import * as XLSX from "xlsx";
 import multer from "multer";
@@ -400,7 +400,6 @@ adminRouter.post("/uplodMasters", upload.single('file'), async (req, res) => {
         return webAppResponse(res, error);
     }
 });
-
 
 export {
     adminRouter

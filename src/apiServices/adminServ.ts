@@ -6,6 +6,7 @@ import { loginData } from "../entities";
 import jsonWebToken from "jsonwebtoken";
 import { encryptData } from "../utils/sensitiveData";
 import crypto from "crypto";
+import { apiErrorHandler, response200, response400 } from "../utils/resBack";
 
 type ObjectParam = any;
 const secretKey = crypto.randomBytes(32).toString('hex'); // Replace with a pre-shared secret key
@@ -358,4 +359,6 @@ export class AdminServices {
         }
         return { code: 200, message: "Uploaded Successfully.", data: {} }
     };
+  
 }
+  

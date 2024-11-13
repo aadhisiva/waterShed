@@ -133,6 +133,15 @@ export class WaterShedDataHistory {
   @Column({ type: 'nvarchar', default: null, length: 50 })
   CreatedName: string;
 
+  @Column({ type: 'nvarchar', default: null, length: 15 })
+  VerifiedMobile: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 50 })
+  VerifiedRole: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 50 })
+  VerifiedName: string;
+
   @Column({ type: 'nvarchar', default: null, length: 100 })
   SubWatershedCode: string;
 
@@ -261,6 +270,9 @@ export class WaterShedDataHistory {
 
   @Column({ type: 'nvarchar', default: null, length: 255 })
   Convergence_Person_Days: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 50 })
+  ApplicationStatus: string;
 
   @CreateDateColumn()
   CreatedDate: Date;

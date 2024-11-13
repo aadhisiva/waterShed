@@ -1,6 +1,7 @@
 import { AppDataSource } from "../db/config";
 import { loginData, superAdmin, Versions } from "../entities";
 import { API_VERSION_ISSUE, SUPER_ADMIN } from "./constants";
+import { response401, response403 } from "./resBack";
 import { generateCurrentTime, generateEOfTTime } from "./resuableCode";
 import jwt from "jsonwebtoken";
 
@@ -65,6 +66,19 @@ export const authenticateToken = async (req, res, next) => {
             return res.status(403).json({ code: 403, message: 'Failed to authenticate.' });
         }
         req.user = {...req.user, ...user};
+        next();
+    });
+};
+
+export const authenticateTokenWeb = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) return response401(res, 'Access denied. No token provided');
+    const options: any = { algorithms: 'HS256' }
+    jwt.verify(token, process.env.SECRET_KEY!, options, async (err, user) => {
+        if (err) return response403(res, 'Failed to authenticate');
+        req.user = user;
         next();
     });
 };

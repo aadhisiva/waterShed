@@ -161,6 +161,7 @@ export class MobileServices {
                 eachList['SubmissionId'] = savedData.SubmissionId;
                 if (!eachList['SubmissionId']) return { code: 400, message: "Provide SubmissionId." };
                 eachList['UserId'] = data.UserId;
+                eachList['StatusOfWork'] = data.StatusOfWork;
                 let saveImage = await this.mobileRepo.saveSurveyImages(eachList);
                 if (saveImage?.code == 422) {
                     error = saveImage.message;

@@ -256,6 +256,9 @@ export class WaterShedData {
   @Column({ type: 'nvarchar', default: null, length: 255 })
   Convergence_Person_Days: string;
 
+  @Column({ type: 'nvarchar', default: null, length: 50 })
+  ApplicationStatus: string;
+
   @CreateDateColumn()
   CreatedDate: Date;
   
