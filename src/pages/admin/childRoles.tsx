@@ -113,6 +113,7 @@ export default function ChildRoles() {
       <EnhancedTableData
         handleClickModify={handleClickModify}
         rows={copyTableData}
+        originalData={tableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
         title='Assign Child'

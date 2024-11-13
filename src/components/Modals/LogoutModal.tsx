@@ -27,8 +27,8 @@ export default function LogoutModal({ open, handleClose }: LogoutModal) {
     setLoading(true);
     setTimeout(() => {
         setLoading(false);
-        dispatch(userLoggedOut());
         dispatch(clearSessionEndTime());
+        dispatch(userLoggedOut());
         navigate('/signin', { replace: true });
     }, 2000);
   };

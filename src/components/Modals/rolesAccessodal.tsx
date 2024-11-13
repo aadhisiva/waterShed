@@ -136,7 +136,7 @@ const typeOptions = [{value: "Urban", name: "Urban"},{value: "Rural", name: "Rur
         onClose={handleClose}
       >
         <DialogTitle id="modal-modal-title" variant="h6" component="h2">
-          Adding/Modify Schemes
+          Adding/Modify Role Access
         </DialogTitle>
         <DialogContent>
           <form onSubmit={handleSubmit}>

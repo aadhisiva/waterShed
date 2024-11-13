@@ -107,7 +107,7 @@ console.log("formData",formData)
         onClose={handleClose}
       >
         <DialogTitle id="modal-modal-title" variant="h6" component="h2">
-          Mapping Questions
+         Edit Mapped Questions
         </DialogTitle>
         <DialogContent>
           <form onSubmit={handleSubmit}>

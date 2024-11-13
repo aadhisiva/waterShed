@@ -101,7 +101,7 @@ export default function ChildRolesModal({
         onClose={handleClose}
       >
         <DialogTitle id="modal-modal-title" variant="h6" component="h2">
-          Adding/Modify Roles
+          Adding/Modify Child Roles
         </DialogTitle>
         <DialogContent>
           <form onSubmit={handleSubmit}>

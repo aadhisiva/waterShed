@@ -135,6 +135,7 @@ export default function Sectors() {
       <EnhancedTableData
         handleClickModify={handleClickModify}
         rows={copyTableData}
+        originalData={tableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
         title='Sectors'

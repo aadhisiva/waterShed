@@ -112,6 +112,7 @@ export default function QuestionDropdowns() {
       <EnhancedTableData
         handleClickModify={handleClickModify}
         rows={copyTableData}
+        originalData={tableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
         title='Question Dropdown List'

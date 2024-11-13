@@ -123,6 +123,7 @@ export default function Schemes() {
       <EnhancedTableData
         handleClickModify={handleClickModify}
         rows={copyTableData}
+        originalData={tableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
         title='Schemes'

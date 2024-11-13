@@ -114,6 +114,10 @@ export default function QuestionDropdownTypeModal({
     {
       value: 'TopicsCover-U',
       name: 'TopicsCover-U',
+    },
+    {
+      value: 'Yes/No',
+      name: 'Yes/No',
     }
   ];
   return (

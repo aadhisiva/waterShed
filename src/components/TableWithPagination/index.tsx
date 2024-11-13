@@ -10,8 +10,10 @@ import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import EditIcon from '@mui/icons-material/Edit';
+
 import { EnhancedTableHead } from './Header';
 import { EnhancedTableToolbar } from './Toolbar';
+import { debounce } from '../../utils/resuableFunc';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -59,6 +61,7 @@ function stableSort<T>(
 interface EnhancedTableDataProps {
   handleClickModify: any;
   rows: any;
+  originalData?: any;
   headCells: any;
   setCopyTableData: any;
   title?: string;
@@ -69,9 +72,12 @@ interface EnhancedTableDataProps {
   totalCount: number;
 };
 
+const debounceDelay = 500;
+
 export default function TableWithPagination({
   handleClickModify,
   rows,
+  originalData,
   headCells,
   setCopyTableData,
   title,
@@ -114,33 +120,40 @@ export default function TableWithPagination({
   const visibleRows = React.useMemo(
     () =>
       stableSort(rows, getComparator(order, orderBy)).slice(
-        0,
+        0 ,
         page * rowsPerPage + rowsPerPage,
       ),
     [order, orderBy, page, rowsPerPage, rows, totalCount],
   );
 
-  const handleSearch = (event: any) => {
-    if (event.target.value.trim() == '') {
-      setSearchValue(event.target.value);
-      return rows;
-    }
-    let filteredData = (rows || []).filter((item: Record<string, any>) => {
-      return headCells.some((headCell: any) =>
-        item[headCell.id]
-          ?.toString()
-          .toLowerCase()
-          .includes(event.target.value.toLowerCase()),
-      );
-    });
-    setSearchValue(event.target.value);
-    setCopyTableData(filteredData);
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let value = event.target.value;
+    setSearchValue(value);
+    const timeoutId = setTimeout(() => {
+      // Perform the filter operation when the search term is updated
+      if (value.trim() === '') {
+        setCopyTableData(originalData); // If no search term, show all data
+      } else {
+        const filtered = (rows || []).filter((item: Record<string, any>) => {
+              return headCells.some((headCell: any) =>
+                item[headCell.id]
+                  ?.toString()
+                  .toLowerCase()
+                  .includes(value.toLowerCase()),
+              );
+            });
+        setCopyTableData(filtered);
+      }
+    }, debounceDelay);
+  
+    // Cleanup timeout on every change
+    return () => clearTimeout(timeoutId);
   };
 
   return (
     <Box
       sx={{
-        width: '100%',
+        width: '100%'
       }}
     >
       <Paper sx={{ width: '100%', mb: 2 }}>
@@ -209,7 +222,7 @@ export default function TableWithPagination({
                   </TableRow>
                 );
               })}
-              {emptyRows > 0 && (
+              {/* {emptyRows > 0 && (
                 <TableRow
                   style={{
                     height: 13 * emptyRows,
@@ -217,7 +230,7 @@ export default function TableWithPagination({
                 >
                   <TableCell colSpan={6} />
                 </TableRow>
-              )}
+              )} */}
             </TableBody>
           </Table>
         </TableContainer>

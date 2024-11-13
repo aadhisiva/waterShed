@@ -56,9 +56,11 @@ function stableSort<T>(
   return stabilizedThis.map((el) => el[0]);
 }
 
+const debounceDelay = 500;
 interface EnhancedTableDataProps {
   handleClickModify: any;
   rows: any;
+  originalData?: any;
   headCells: any;
   setCopyTableData: any;
   title?: string;
@@ -66,6 +68,7 @@ interface EnhancedTableDataProps {
 export default function EnhancedTableData({
   handleClickModify,
   rows,
+  originalData,
   headCells,
   setCopyTableData,
   title,
@@ -78,6 +81,31 @@ export default function EnhancedTableData({
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [searchValue, setSearchValue] = React.useState('');
 
+// // Debounced search handler using useEffect
+// React.useEffect(() => {
+//   // Set a timeout to debounce the search
+//   const timeoutId = setTimeout(() => {
+//     // Perform the filter operation when the search term is updated
+//     if (searchValue.trim() === '') {
+//       setCopyTableData(originalData); // If no search term, show all data
+//     } else {
+//       const filtered = (rows || []).filter((item: Record<string, any>) => {
+//             return headCells.some((headCell: any) =>
+//               item[headCell.id]
+//                 ?.toString()
+//                 .toLowerCase()
+//                 .includes(searchValue.toLowerCase()),
+//             );
+//           });
+//       setCopyTableData(filtered);
+//     }
+//   }, debounceDelay);
+
+//   // Cleanup timeout on every change
+//   return () => clearTimeout(timeoutId);
+
+// }, [searchValue]);
+
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
     property: any,
@@ -86,25 +114,6 @@ export default function EnhancedTableData({
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
-
-  // const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
-  //   const selectedIndex = selected.indexOf(id);
-  //   let newSelected: readonly number[] = [];
-
-  //   if (selectedIndex === -1) {
-  //     newSelected = newSelected.concat(selected, id);
-  //   } else if (selectedIndex === 0) {
-  //     newSelected = newSelected.concat(selected.slice(1));
-  //   } else if (selectedIndex === selected.length - 1) {
-  //     newSelected = newSelected.concat(selected.slice(0, -1));
-  //   } else if (selectedIndex > 0) {
-  //     newSelected = newSelected.concat(
-  //       selected.slice(0, selectedIndex),
-  //       selected.slice(selectedIndex + 1),
-  //     );
-  //   }
-  //   setSelected(newSelected);
-  // };
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -128,21 +137,29 @@ export default function EnhancedTableData({
       ),
     [order, orderBy, page, rowsPerPage, rows, rows.length],
   );
-  const handleSearch = (event: any) => {
-    if (event.target.value.trim() == '') {
-      setSearchValue(event.target.value);
-      return rows;
-    }
-    let filteredData = (rows || []).filter((item: Record<string, any>) => {
-      return headCells.some((headCell: any) =>
-        item[headCell.id]
-          ?.toString()
-          .toLowerCase()
-          .includes(event.target.value.toLowerCase()),
-      );
-    });
-    setSearchValue(event.target.value);
-    setCopyTableData(filteredData);
+  
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let value = event.target.value;
+    setSearchValue(value);
+    const timeoutId = setTimeout(() => {
+      // Perform the filter operation when the search term is updated
+      if (value.trim() === '') {
+        setCopyTableData(originalData); // If no search term, show all data
+      } else {
+        const filtered = (rows || []).filter((item: Record<string, any>) => {
+              return headCells.some((headCell: any) =>
+                item[headCell.id]
+                  ?.toString()
+                  .toLowerCase()
+                  .includes(value.toLowerCase()),
+              );
+            });
+        setCopyTableData(filtered);
+      }
+    }, debounceDelay);
+  
+    // Cleanup timeout on every change
+    return () => clearTimeout(timeoutId);
   };
 
   return (
@@ -217,7 +234,7 @@ export default function EnhancedTableData({
                   </TableRow>
                 );
               })}
-              {emptyRows > 0 && (
+              {/* {emptyRows > 0 && (
                 <TableRow
                   style={{
                     height: 13 * emptyRows,
@@ -225,7 +242,7 @@ export default function EnhancedTableData({
                 >
                   <TableCell colSpan={6} />
                 </TableRow>
-              )}
+              )} */}
             </TableBody>
           </Table>
         </TableContainer>

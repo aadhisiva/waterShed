@@ -20,3 +20,8 @@ export const ASSIGN_TALUK = "/Taluk-Assignment";
 export const ASSIGN_HOBLI = "/Hobli-Assignment";
 export const ASSIGN_VILLAGE = "/Village-Assignment";
 export const MASTER_UPLOAD = "/Master-Upload";
+/* for reports */
+export const SCHEME_WITH_COUNT = "/Scheme-with-count";
+export const SEARCH_REPORTS = "/Search-Reports";
+export const PREVIEW_HISTORY = "/Preview-History";
+export const PREVIEW_DETAILS = "/Preview-Details";

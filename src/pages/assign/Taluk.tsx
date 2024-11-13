@@ -129,6 +129,7 @@ export default function AssignTaluk() {
         <EnhancedTableData
           handleClickModify={handleClickModify}
           rows={copyTableData}
+          originalData={tableData}
           headCells={headCells}
           setCopyTableData={setCopyTableData}
           title="Assign Taluk"

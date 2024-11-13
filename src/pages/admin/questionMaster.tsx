@@ -130,6 +130,7 @@ export default function QuestionMasters() {
       <EnhancedTableData
         handleClickModify={handleClickModify}
         rows={copyTableData}
+        originalData={tableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
         title='Questions'

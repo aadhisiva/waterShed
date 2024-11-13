@@ -7,11 +7,34 @@ import {
 } from 'react-router-dom';
 import PrivateRoute from './PrivateRoutes';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { ACTIVITY, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_HOBLI, ASSIGN_TALUK, ASSIGN_VILLAGE, CATEGORY, CHILD_ROLES, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, MASTER_UPLOAD, QUESTION_DROPDOWNS, QUESTION_MASTER, ROLES, ROLES_ACCESS, SCHEMES, SECTORS } from '../utils/routingPath';
+import {
+  ACTIVITY,
+  ACTIVITY_MAPPING,
+  ASSIGN_DISTRICT,
+  ASSIGN_HOBLI,
+  ASSIGN_TALUK,
+  ASSIGN_VILLAGE,
+  CATEGORY,
+  CHILD_ROLES,
+  DASHBOARD,
+  DEPARTMENT,
+  DPRS_COMMON,
+  DPRS_PRIVATE,
+  MASTER_UPLOAD,
+  QUESTION_DROPDOWNS,
+  QUESTION_MASTER,
+  ROLES,
+  ROLES_ACCESS,
+  SCHEME_WITH_COUNT,
+  SCHEMES,
+  SEARCH_REPORTS,
+  SECTORS,
+  PREVIEW_HISTORY,
+  PREVIEW_DETAILS
+} from '../utils/routingPath';
 
 const LoginPageLazy = lazy(() => import('../pages/LoginPage'));
 const RoleWiseLoginLazy = lazy(() => import('../pages/roleWiseLogin'));
-const SigninPageLazy = lazy(() => import('../pages/SignUpPage'));
 
 const HomeLazy = lazy(() => import('../pages/Dashboard'));
 const DepartmentLazy = lazy(() => import('../pages/admin/department'));
@@ -25,9 +48,13 @@ const SchemesLazy = lazy(() => import('../pages/admin/schemes'));
 const DprsPrivateLazy = lazy(() => import('../pages/admin/dprsPrivate'));
 const DprsCommonLazy = lazy(() => import('../pages/admin/dprsCommon'));
 const RolesAccessLazy = lazy(() => import('../pages/admin/rolesAccess'));
-const QuestionDropdownsLazy = lazy(() => import('../pages/admin/questionDropdowns'));
+const QuestionDropdownsLazy = lazy(
+  () => import('../pages/admin/questionDropdowns'),
+);
 const QuestionMasterLazy = lazy(() => import('../pages/admin/questionMaster'));
-const ActivityQuestionLazy = lazy(() => import('../pages/admin/activityQuestion'));
+const ActivityQuestionLazy = lazy(
+  () => import('../pages/admin/activityQuestion'),
+);
 
 const DistrictAssignmentLazy = lazy(() => import('../pages/assign/District'));
 const TalukAssignmentLazy = lazy(() => import('../pages/assign/Taluk'));
@@ -37,6 +64,12 @@ const VillageAssignmentLazy = lazy(() => import('../pages/assign/Village'));
 const MastersUploadLazy = lazy(() => import('../pages/admin/masters'));
 
 const DashboardLazy = lazy(() => import('../pages/Dashboard'));
+
+/* reports paths and files */
+const SchmesWithCountLazy = lazy(() => import('../pages/reports/schmes'));
+const SearchReportsLazy = lazy(() => import('../pages/reports/searchReports'));
+const PreviewHistoryLazy = lazy(() => import('../pages/reports/previewHistory'));
+const PreviewDetailsLazy = lazy(() => import('../pages/reports/previewDetails'));
 
 export default function RoutesPro() {
   const router = createBrowserRouter(
@@ -65,6 +98,12 @@ export default function RoutesPro() {
           <Route path={ASSIGN_HOBLI} Component={HobliAssignmentLazy} />
           <Route path={ASSIGN_VILLAGE} Component={VillageAssignmentLazy} />
           <Route path={MASTER_UPLOAD} Component={MastersUploadLazy} />
+
+          {/* reports pages */}
+          <Route path={SCHEME_WITH_COUNT} Component={SchmesWithCountLazy} />
+          <Route path={SEARCH_REPORTS} Component={SearchReportsLazy} />
+          <Route path={PREVIEW_HISTORY} Component={PreviewHistoryLazy} />
+          <Route path={PREVIEW_DETAILS} Component={PreviewDetailsLazy} />
         </Route>
         <Route
           path="/login"
@@ -85,8 +124,8 @@ export default function RoutesPro() {
       </Route>,
     ),
     {
-      basename: "/watershed"
-    }
+      basename: '/watershed',
+    },
   );
   return (
     <ErrorBoundary>

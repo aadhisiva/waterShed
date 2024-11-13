@@ -180,7 +180,7 @@ const [loading, setLoading] = React.useState(false);
         onClose={handleClose}
       >
         <DialogTitle id="modal-modal-title" variant="h6" component="h2">
-          Adding/Modify Schemes
+          Adding/Modify Sectors
         </DialogTitle>
         <DialogContent>
           <form onSubmit={handleSubmit}>

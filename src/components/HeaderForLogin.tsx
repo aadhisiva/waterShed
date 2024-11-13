@@ -195,8 +195,8 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
   };
 
   const handleLogout = () => {
-    dispatch(userLoggedOut());
     dispatch(clearSessionEndTime());
+    dispatch(userLoggedOut());
     navigate('/login', { replace: true });
   }
 

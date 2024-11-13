@@ -149,6 +149,7 @@ export default function ActivityQuestion() {
       <EnhancedTableData
         handleClickModify={handleClickModify}
         rows={copyTableData}
+        originalData={tableData}
         headCells={headCells}
         setCopyTableData={setCopyTableData}
         title='Question Dropdown List'
