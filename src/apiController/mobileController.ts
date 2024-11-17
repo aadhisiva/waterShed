@@ -16,15 +16,15 @@ const mobileServices = Container.get(MobileServices);
 const memoryStorage = multer.memoryStorage();
 const uploadImage = multer({ storage: memoryStorage });
 
-mobileRouter.post('/saveLogin', async (req, res) => {
-    try {
-        let body = req.body;
-        let result = await mobileServices.saveLogin(body);
-        return mobileAppResponse(res, result);
-    } catch (error) {
-        return mobileAppResponse(res, error);
-    }
-});
+// mobileRouter.post('/saveLogin', async (req, res) => {
+//     try {
+//         let body = req.body;
+//         let result = await mobileServices.saveLogin(body);
+//         return mobileAppResponse(res, result);
+//     } catch (error) {
+//         return mobileAppResponse(res, error);
+//     }
+// });
 
 mobileRouter.post('/sendOtp', authVersion, async (req, res) => {
     try {
@@ -66,15 +66,15 @@ mobileRouter.post('/verifyOtp', async (req, res) => {
     }
 });
 
-mobileRouter.post('/locations', authenticateToken, async (req, res) => {
-    try {
-        let body = req.body;
-        let result = await mobileServices.locations(body);
-        return mobileAppResponseForLarge(res, result, req.body, getRoleAndUserId(req, 'GET Login User Location'));
-    } catch (error) {
-        return mobileAppResponse(res, error);
-    }
-});
+// mobileRouter.post('/locations', authenticateToken, async (req, res) => {
+//     try {
+//         let body = req.body;
+//         let result = await mobileServices.locations(body);
+//         return mobileAppResponseForLarge(res, result, req.body, getRoleAndUserId(req, 'GET Login User Location'));
+//     } catch (error) {
+//         return mobileAppResponse(res, error);
+//     }
+// });
 
 mobileRouter.post('/getAllSchemes', authenticateToken, async (req, res) => {
     try {

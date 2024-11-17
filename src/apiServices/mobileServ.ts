@@ -1,8 +1,7 @@
 import { Service } from "typedi";
-import { generateEOfTTime, generateOTP, generateRandomString, generateUniqueId, generateUniqueSubmissionId, saveMobileLogs, saveMobileOtps } from "../utils/resuableCode";
+import { generateUniqueId} from "../utils/resuableCode";
 import { RESPONSEMSG } from "../utils/statusCodes";
 import { OtpServices } from "../sms/smsServceResusable";
-import { AssignedMasters, loginData } from "../entities";
 import { MobileRepo } from "../apiRepository/mobileRepo";
 import jsonWebToken from "jsonwebtoken";
 
@@ -15,12 +14,12 @@ export class MobileServices {
         public otpServices: OtpServices
     ) { };
 
-    async saveLogin(data) {
-        const { Mobile, RoleId } = data;
-        if (!Mobile || !RoleId) return { code: 400, message: "Provide Mobile and RoleId" };
-        data.UserId = 'WS' + generateUniqueId();
-        return this.mobileRepo.saveLogin(data);
-    };
+    // async saveLogin(data) {
+    //     const { Mobile, RoleId } = data;
+    //     if (!Mobile || !RoleId) return { code: 400, message: "Provide Mobile and RoleId" };
+    //     data.UserId = 'WS' + generateUniqueId();
+    //     return this.mobileRepo.saveLogin(data);
+    // };
 
     // async sendOtp(data) {
     //     const { Mobile, RoleId } = data;
@@ -105,9 +104,9 @@ export class MobileServices {
         return { message: RESPONSEMSG.VALIDATE, data: {} };
     };
 
-    async locations(data) {
-        return await this.mobileRepo.locations(data);
-    };
+    // async locations(data) {
+    //     return await this.mobileRepo.locations(data);
+    // };
 
     async getAllSchemes(data) {
         return await this.mobileRepo.getAllSchemes(data);
@@ -153,7 +152,7 @@ export class MobileServices {
         if(!data) return {code: 422, message: "You are not sending anything form request."}
         data.SubmissionId = "WS"+"-"+generateUniqueId().slice(2)+"-"+Math.floor(Math.random() * 1000);
         let savedData = await this.mobileRepo.saveSurveyData(data);
-        let imagesList = data.ImagesList;
+        let imagesList = data.imagesList;
         if(Array.isArray(imagesList)){
             let error;
             for (let i = 0; i < imagesList.length; i++) {

@@ -18,6 +18,7 @@ import Logger from './loggers/winstonLogger';
 import { adminRouter, mobileRouter } from "./apiController";
 import mobileRoutes from "./routes/mobileRoutes";
 import webRoutes from "./routes/webRoutes";
+import { errorHandler, logRequestResponse } from "./utils/reqResHandler";
 
 // for accessing env variables
 dotenv.config();
@@ -76,11 +77,33 @@ if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }; // for creating uploads folder for file requests
 
+// Logging middleware
+app.use(async (req: Request, res: any, next) => {
+  // Store the original res.send function
+  const originalSend = res.send.bind(res);
+
+  // Capture response body
+  let responseBody: any;
+  res.send = async function (body: any) {
+      responseBody = body;
+      return originalSend(body);
+  };
+
+  // Call the next middleware/route handler
+  next();
+
+  // Log request and response after the response is sent
+  res.on('finish', async () => {
+      await logRequestResponse(req, res, responseBody);
+  });
+});
+
 // controllers
-app.use('/wapi/admin', adminRouter);
+// app.use('/wapi/admin', adminRouter);
 app.use('/wapi/admin', webRoutes);
 app.use('/wapi/mobile', mobileRouter);
 app.use('/wapi/mobile', mobileRoutes);
+app.use(errorHandler);
 
 // intialize the db then build a server
 AppDataSource.initialize().then(async (connection) => {

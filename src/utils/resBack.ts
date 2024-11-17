@@ -1,5 +1,4 @@
 import { Response } from "express";
-import Logger from "../loggers/winstonLogger";
 
 export const response400 = (res: Response, msg: string) => {
   return res.status(400).send({
@@ -42,19 +41,5 @@ export const response403 = (res: Response, msg?: any) => {
     code: 403,
     status: "Forbidden",
     message: msg
-  });
-};
-
-
-
-export const apiErrorHandler = (err, req, res) => {
-  // Logger.error(`'${req.originalUrl}' Internal server error ` + err);
-  return res.status(500).json({
-    code: 500,
-    message: 'Something went wrong!',
-    FMessage: err.message, // Log the error message to the console
-    EName: err.name, // Log the error name to the console
-    ApiPath: req.originalUrl,
-    EStack: process.env.NODE_ENV === 'development' ? err.stack : {} // Provide stack trace only in development
   });
 };

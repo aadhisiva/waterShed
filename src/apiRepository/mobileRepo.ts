@@ -1,33 +1,14 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { Activity, AssignedMasters, Category, DprsCommonLand, DprsPrivateLand, loginData, MasterData, QuestionDropdownTypes, QuestionMapping, Questions, Roles, RolesAccess, Schemes, Sectors, UploadImgAndVideo, UserData, Versions, WaterShedData, WatershedImgAndVideo } from '../entities';
-import { Brackets, Equal, ILike } from 'typeorm';
-import { WaterShedDataHistory } from '../entities/watershedDataHistory';
-
-
-const loginDataRepo = AppDataSource.getRepository(loginData);
-const mastersRepo = AppDataSource.getRepository(MasterData);
-const schemesRepo = AppDataSource.getRepository(Schemes);
-const sectorsRepo = AppDataSource.getRepository(Sectors);
-const activityRepo = AppDataSource.getRepository(Activity);
-const rolesRepo = AppDataSource.getRepository(Roles);
-const uploadImgAndVideoRepo = AppDataSource.getRepository(UploadImgAndVideo);
-const dprsPrivateLandRepo = AppDataSource.getRepository(DprsPrivateLand);
-const dprsCommonLandRepo = AppDataSource.getRepository(DprsCommonLand);
-const questionMappingRepo = AppDataSource.getRepository(QuestionMapping);
-const questionDropdownTypesRepo = AppDataSource.getRepository(QuestionDropdownTypes);
-const waterShedDataRepo = AppDataSource.getRepository(WaterShedData);
-const waterShedDataHistoryRepo = AppDataSource.getRepository(WaterShedDataHistory);
-const masterDataRepo = AppDataSource.getRepository(MasterData);
-const watershedImgAndVideoRepo = AppDataSource.getRepository(WatershedImgAndVideo);
-const userDataRepo = AppDataSource.getRepository(UserData);
-const categoryRepo = AppDataSource.getRepository(Category);
+import { Equal} from 'typeorm';
+import { activityRepo, categoryRepo, dprsCommonLandRepo, dprsPrivateLandRepo, masterDataRepo, questionDropdownTypesRepo, questionMappingRepo, rolesRepo, schemesRepo, sectorsRepo, uploadImgAndVideoRepo, userDataRepo, waterShedDataHistoryRepo, waterShedDataRepo, watershedImgAndVideoRepo } from '../db/repos';
+import { Versions } from '../entities/versions';
+import { MasterData } from '../entities/masterData';
+import { Sectors } from '../entities/sectors';
+import { Questions } from '../entities/questions';
+import { Roles } from '../entities/roles';
 @Service()
 export class MobileRepo {
-
-    async saveLogin(data: loginData) {
-        return await loginDataRepo.save(data);
-    };
 
     async getVersionOfApp() {
         return await AppDataSource.getRepository(Versions).find();
@@ -83,55 +64,55 @@ export class MobileRepo {
             .getRawMany();
     };
 
-    async fetchUserById(UserId) {
-        let findData = await AppDataSource.getRepository(loginData).findOneBy({ UserId });
-        if (!findData) return { code: 404 };
-        return findData;
-    };
+    // async fetchUserById(UserId) {
+    //     let findData = await AppDataSource.getRepository(loginData).findOneBy({ UserId });
+    //     if (!findData) return { code: 404 };
+    //     return findData;
+    // };
 
 
-    async locations(data) {
-        const { UserId, Mobile, UserRole } = data;
-        let findAll = await loginDataRepo.findBy({ Mobile, UserRole });
-        let newArray = [];
-        if (UserRole == 'AO') {
-            let totalLength = findAll.length;
-            for (let i = 0; i < totalLength; i++) {
-                let newObject = {};
-                let eachIndex = findAll[i];
-                if (!eachIndex.DistrictName) break;
-                newObject['District'] = eachIndex.DistrictName;
-                newObject['Taluk'] = eachIndex.TalukName;
-                if (!eachIndex.HobliName) break;
-                newObject['Hobli'] = eachIndex.HobliName;
-                newObject['villages'] = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.KGISVillageName as village'])
-                    .where("master.HobliName = :dCode", { dCode: eachIndex.HobliName })
-                    .getRawMany();
-                newObject['subWaterShead'] = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.SubWatershedName as subWaterShead'])
-                    .where("master.HobliName = :dCode", { dCode: eachIndex.HobliName })
-                    .orderBy('master.SubWatershedName', 'ASC').getRawMany();
-                newArray.push(newObject);
-            }
+    // async locations(data) {
+    //     const { UserId, Mobile, UserRole } = data;
+    //     let findAll = await loginDataRepo.findBy({ Mobile, UserRole });
+    //     let newArray = [];
+    //     if (UserRole == 'AO') {
+    //         let totalLength = findAll.length;
+    //         for (let i = 0; i < totalLength; i++) {
+    //             let newObject = {};
+    //             let eachIndex = findAll[i];
+    //             if (!eachIndex.DistrictName) break;
+    //             newObject['District'] = eachIndex.DistrictName;
+    //             newObject['Taluk'] = eachIndex.TalukName;
+    //             if (!eachIndex.HobliName) break;
+    //             newObject['Hobli'] = eachIndex.HobliName;
+    //             newObject['villages'] = await masterDataRepo.createQueryBuilder('master').select(['DISTINCT master.KGISVillageName as village'])
+    //                 .where("master.HobliName = :dCode", { dCode: eachIndex.HobliName })
+    //                 .getRawMany();
+    //             newObject['subWaterShead'] = await masterDataRepo.createQueryBuilder('master').select(['DISTINCT master.SubWatershedName as subWaterShead'])
+    //                 .where("master.HobliName = :dCode", { dCode: eachIndex.HobliName })
+    //                 .orderBy('master.SubWatershedName', 'ASC').getRawMany();
+    //             newArray.push(newObject);
+    //         }
 
-            return newArray;
-        } else {
-            let totalLength = findAll.length;
-            for (let i = 0; i < totalLength; i++) {
-                let newObject = {};
-                let eachIndex = findAll[i];
-                newObject['District'] = eachIndex.DistrictName;
-                newObject['Taluk'] = eachIndex.TalukName;
-                newObject['villages'] = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.KGISVillageName as village'])
-                    .where("master.TalukName = :dCode", { dCode: eachIndex.TalukName })
-                    .orderBy('master.KGISVillageName', 'ASC').getRawMany();
-                newObject['subWaterShead'] = await mastersRepo.createQueryBuilder('master').select(['DISTINCT master.SubWatershedName as subWaterShead'])
-                    .where("master.TalukName = :dCode", { dCode: eachIndex.TalukName })
-                    .orderBy('master.SubWatershedName', 'ASC').getRawMany();
-                newArray.push(newObject);
-            }
-            return newArray;
-        }
-    };
+    //         return newArray;
+    //     } else {
+    //         let totalLength = findAll.length;
+    //         for (let i = 0; i < totalLength; i++) {
+    //             let newObject = {};
+    //             let eachIndex = findAll[i];
+    //             newObject['District'] = eachIndex.DistrictName;
+    //             newObject['Taluk'] = eachIndex.TalukName;
+    //             newObject['villages'] = await masterDataRepo.createQueryBuilder('master').select(['DISTINCT master.KGISVillageName as village'])
+    //                 .where("master.TalukName = :dCode", { dCode: eachIndex.TalukName })
+    //                 .orderBy('master.KGISVillageName', 'ASC').getRawMany();
+    //             newObject['subWaterShead'] = await masterDataRepo.createQueryBuilder('master').select(['DISTINCT master.SubWatershedName as subWaterShead'])
+    //                 .where("master.TalukName = :dCode", { dCode: eachIndex.TalukName })
+    //                 .orderBy('master.SubWatershedName', 'ASC').getRawMany();
+    //             newArray.push(newObject);
+    //         }
+    //         return newArray;
+    //     }
+    // };
 
     async saveActualData(data) {
         let savingData = await "waterShedRepo";
@@ -296,26 +277,31 @@ export class MobileRepo {
 
 
     async saveSurveyData(data) {
-        try{
-        let findData = await userDataRepo.findOneBy({ UserId: Equal(data?.UserId) });
-        if (!findData) return { code: 422, message: "Access Denied" };
-        data.CreatedRole = findData.CreatedRole;
-        data.CreatedMobile = findData.CreatedMobile;
-        let result = await waterShedDataRepo.save(data);
-        await waterShedDataHistoryRepo.save({ ...result, ...{ History: "New Application Added" } });
-        return result;
-        } catch(E){
-            console.log("E",E);
+        try {
+            let findData = await userDataRepo.createQueryBuilder('ud')
+                .innerJoinAndSelect(Roles, 'rr', "rr.id = ud.RoleId")
+                .select(["ud.Mobile as Mobile", "ud.Name as Name", "rr.RoleName as RoleName"])
+                .where("ud.UserId = :id", { id: data?.UserId })
+                .getRawOne();
+            if (!findData) return { code: 422, message: "Access Denied" };
+            data.CreatedRole = findData['RoleName'];
+            data.CreatedMobile = findData.Mobile;
+            data.CreatedName = findData.Name;
+            let result = await waterShedDataRepo.save(data);
+            await waterShedDataHistoryRepo.save({ ...result, ...{ History: "New Application Added" } });
+            return result;
+        } catch (E) {
+            console.log("E", E.message);
             return E;
         }
     };
 
     async getSubmissionList(data) {
         const { UserId, PageNo = 1, PageSize = 10, StatusOfWork, CategoryId, SchemeId, SectorId, ActivityId, SubActivityId } = data;
-        let whereCondition = CategoryId && SubActivityId ? { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), CategoryId: Equal(CategoryId), ActivityId: Equal(ActivityId), SubActivityId: Equal(SubActivityId) } 
-        : CategoryId && !SubActivityId ?  { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork),SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), CategoryId: Equal(CategoryId), ActivityId: Equal(ActivityId) } 
-        : SubActivityId && !CategoryId ? { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), ActivityId: Equal(ActivityId), SubActivityId: Equal(SubActivityId) } 
-        : { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork),SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), ActivityId: Equal(ActivityId) };
+        let whereCondition = CategoryId && SubActivityId ? { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), CategoryId: Equal(CategoryId), ActivityId: Equal(ActivityId), SubActivityId: Equal(SubActivityId) }
+            : CategoryId && !SubActivityId ? { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), CategoryId: Equal(CategoryId), ActivityId: Equal(ActivityId) }
+                : SubActivityId && !CategoryId ? { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), ActivityId: Equal(ActivityId), SubActivityId: Equal(SubActivityId) }
+                    : { UserId: Equal(UserId), StatusOfWork: Equal(StatusOfWork), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), ActivityId: Equal(ActivityId) };
 
         let totalData = await waterShedDataRepo.findAndCount({
             where: whereCondition,
@@ -333,10 +319,10 @@ export class MobileRepo {
 
     async getAllSubmissionList(data) {
         const { UserId, PageNo = 1, PageSize = 10, CategoryId, SchemeId, SectorId, ActivityId, SubActivityId } = data;
-        let whereCondition = CategoryId && SubActivityId ? { UserId: Equal(UserId),  SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), CategoryId: Equal(CategoryId), ActivityId: Equal(ActivityId), SubActivityId: Equal(SubActivityId) } 
-        : CategoryId && !SubActivityId ?  { UserId: Equal(UserId), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), CategoryId: Equal(CategoryId), ActivityId: Equal(ActivityId) } 
-        : SubActivityId && !CategoryId ? { UserId: Equal(UserId),  SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), ActivityId: Equal(ActivityId), SubActivityId: Equal(SubActivityId) } 
-        : { UserId: Equal(UserId), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), ActivityId: Equal(ActivityId) };
+        let whereCondition = CategoryId && SubActivityId ? { UserId: Equal(UserId), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), CategoryId: Equal(CategoryId), ActivityId: Equal(ActivityId), SubActivityId: Equal(SubActivityId) }
+            : CategoryId && !SubActivityId ? { UserId: Equal(UserId), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), CategoryId: Equal(CategoryId), ActivityId: Equal(ActivityId) }
+                : SubActivityId && !CategoryId ? { UserId: Equal(UserId), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), ActivityId: Equal(ActivityId), SubActivityId: Equal(SubActivityId) }
+                    : { UserId: Equal(UserId), SchemeId: Equal(SchemeId), SectorId: Equal(SectorId), ActivityId: Equal(ActivityId) };
 
         let totalData = await waterShedDataRepo.findAndCount({
             where: whereCondition,
@@ -353,11 +339,13 @@ export class MobileRepo {
     };
 
     async getRecord(data) {
-        const { UserId, SubmissionId, SectorId} = data;
+        const { UserId, SubmissionId, SectorId } = data;
         let query = `execute getRecordForPreview @0,@1,@2`;
         let fetchedRecord = await AppDataSource.query(query, [UserId, SubmissionId, SectorId]);
-        let fetchedImages = await watershedImgAndVideoRepo.find({where: {SubmissionId: Equal(SubmissionId), UserId: Equal(UserId)}, 
-        select: ["Latitude", "Longitude", "RecordType", "Url"]})
+        let fetchedImages = await watershedImgAndVideoRepo.find({
+            where: { SubmissionId: Equal(SubmissionId), UserId: Equal(UserId) },
+            select: ["Latitude", "Longitude", "RecordType", "Url"]
+        })
         fetchedRecord['ImagesList'] = fetchedImages;
         return fetchedRecord
     };
@@ -373,7 +361,11 @@ export class MobileRepo {
     };
 
     async saveSurveyImages(data) {
+        try{
         return await watershedImgAndVideoRepo.save(data);
+        } catch(e){
+            console.log("saveSurveyImages",e.message)
+        }
     };
 
     async retriveDistrictWithCodes() {

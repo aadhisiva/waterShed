@@ -1,84 +1,67 @@
 import { Service } from 'typedi';
 import { AppDataSource } from '../db/config';
-import { Activity, AssignMastersHistory, Category, ChildRoles, Departments, DprsCommonLand, DprsPrivateLand, loginData, MasterData, QuestionMapping, Roles, RolesAccess, Schemes, Sectors, superAdmin, UploadImgAndVideo, UserData, Versions } from '../entities';
 import { SUPER_ADMIN } from '../utils/constants';
 import { Equal } from 'typeorm';
 import { Questions } from '../entities/questions';
 import { QuestionDropdownTypes } from '../entities/questionsDropdownsTypes';
 import { AssignedMasters } from '../entities/assignedMasters';
-
-
-let superAdminRepo = AppDataSource.getRepository(superAdmin);
-let loginDataRepo = AppDataSource.getRepository(loginData);
-let schemesRepo = AppDataSource.getRepository(Schemes);
-let versionRepo = AppDataSource.getRepository(Versions);
-let mastersRepo = AppDataSource.getRepository(MasterData);
-let sectorsRepo = AppDataSource.getRepository(Sectors);
-let activityRepo = AppDataSource.getRepository(Activity);
-let departmentsRepo = AppDataSource.getRepository(Departments);
-let rolesRepo = AppDataSource.getRepository(Roles);
-let roleAccessRepo = AppDataSource.getRepository(RolesAccess);
-let userDataRepo = AppDataSource.getRepository(UserData);
-let dprsCommonLandRepo = AppDataSource.getRepository(DprsCommonLand);
-let dprsPrivateLandRepo = AppDataSource.getRepository(DprsPrivateLand);
-let uploadImgAndVideoRepo = AppDataSource.getRepository(UploadImgAndVideo);
-let questionsRepo = AppDataSource.getRepository(Questions);
-let questionDropdownTypesRepo = AppDataSource.getRepository(QuestionDropdownTypes);
-let questionMappingRepo = AppDataSource.getRepository(QuestionMapping);
-let assignedMastersRepo = AppDataSource.getRepository(AssignedMasters);
-let masterDataRepo = AppDataSource.getRepository(MasterData);
-let childRoleRepo = AppDataSource.getRepository(ChildRoles);
-let assignMastersHistoryRepo = AppDataSource.getRepository(AssignMastersHistory);
-let categoryRepo = AppDataSource.getRepository(Category);
+import { activityRepo, assignedMastersRepo, assignMastersHistoryRepo, categoryRepo, childRoleRepo, departmentsRepo, dprsCommonLandRepo, dprsPrivateLandRepo, masterDataRepo, questionDropdownTypesRepo, questionMappingRepo, questionsRepo, roleAccessRepo, rolesRepo, schemesRepo, sectorsRepo, uploadImgAndVideoRepo, userDataRepo, versionRepo } from '../db/repos';
+import { Roles } from '../entities/roles';
+import { Departments } from '../entities/department';
+import { Schemes } from '../entities/schemes';
+import { Sectors } from '../entities/sectors';
+import { Category } from '../entities/category';
+import { Activity } from '../entities/activity';
+import { MasterData } from '../entities/masterData';
 
 @Service()
 export class AdminRepo {
 
-    async checkWithMobile(Mobile) {
-        return await loginDataRepo.findOneBy({ Mobile });
-    };
+    // async checkWithMobile(Mobile) {
+    //     return await loginDataRepo.findOneBy({ Mobile });
+    // };
 
-    async allUsersData(data) {
-        const { skip, take } = data;
-        let getData = await loginDataRepo
-            .createQueryBuilder('user').select(["user.UserRole as UserRole", "user.Name as Name", "user.UserId as UserId", "user.Mobile as Mobile", "user.DistrictCode as DistrictCode",
-                "user.TalukCode as TalukCode", "user.HobliCode as HobliCode", "user.Status as Status",
-                "user.Allotted as Allotted", "user.Assignment as Assignment", "user.DistrictName as DistrictName",
-                "user.TalukName as TalukName", "user.HobliName as HobliName"])
-            .skip(skip)
-            .take(take)
-            .getRawMany();
-        let count = await loginDataRepo.count();
-        return [getData, count]
-    };
+    // async allUsersData(data) {
+    //     const { skip, take } = data;
+    //     let getData = await loginDataRepo
+    //         .createQueryBuilder('user').select(["user.UserRole as UserRole", "user.Name as Name", "user.UserId as UserId", "user.Mobile as Mobile", "user.DistrictCode as DistrictCode",
+    //             "user.TalukCode as TalukCode", "user.HobliCode as HobliCode", "user.Status as Status",
+    //             "user.Allotted as Allotted", "user.Assignment as Assignment", "user.DistrictName as DistrictName",
+    //             "user.TalukName as TalukName", "user.HobliName as HobliName"])
+    //         .skip(skip)
+    //         .take(take)
+    //         .getRawMany();
+    //     let count = await loginDataRepo.count();
+    //     return [getData, count]
+    // };
 
-    async assigningData(data) {
-        let userAssign = await loginDataRepo;
-        let find = await userAssign.findOneBy({ UserId: data?.UserId });
-        if (!find) return { code: 404 };
-        let newData = { ...find, ...data };
-        return await userAssign.save(newData);
-    };
+    // async assigningData(data) {
+    //     let userAssign = await loginDataRepo;
+    //     let find = await userAssign.findOneBy({ UserId: data?.UserId });
+    //     if (!find) return { code: 404 };
+    //     let newData = { ...find, ...data };
+    //     return await userAssign.save(newData);
+    // };
 
     async getVersionOfApp() {
         return await versionRepo.find();
     };
 
-    async sendOtp(data: loginData) {
-        const { Mobile, UserRole } = data;
-        if (UserRole == SUPER_ADMIN) {
-            let findData = await superAdminRepo.findOneBy({ Mobile });
-            if (!findData) return { code: 404 };
-            let newData = { ...findData, ...data };
-            return await superAdminRepo.save(newData);
-        } else {
-            let loginDb = await loginDataRepo;
-            let findData = await loginDb.findOneBy({ Mobile, UserRole });
-            if (!findData) return { code: 404 };
-            let newData = { ...findData, ...data };
-            return await loginDb.save(newData);
-        }
-    };
+    // async sendOtp(data: loginData) {
+    //     const { Mobile, UserRole } = data;
+    //     if (UserRole == SUPER_ADMIN) {
+    //         let findData = await superAdminRepo.findOneBy({ Mobile });
+    //         if (!findData) return { code: 404 };
+    //         let newData = { ...findData, ...data };
+    //         return await superAdminRepo.save(newData);
+    //     } else {
+    //         let loginDb = await loginDataRepo;
+    //         let findData = await loginDb.findOneBy({ Mobile, UserRole });
+    //         if (!findData) return { code: 404 };
+    //         let newData = { ...findData, ...data };
+    //         return await loginDb.save(newData);
+    //     }
+    // };
 
     async checkMobileLogin(data) {
         const { Mobile, Otp } = data;
@@ -359,15 +342,15 @@ export class AdminRepo {
             .getRawMany();
     };
 
-    async checkUsername(user) {
-        let check = await superAdminRepo.findOneBy({ Username: Equal(user) })
-        return check;
-    };
+    // async checkUsername(user) {
+    //     let check = await superAdminRepo.findOneBy({ Username: Equal(user) })
+    //     return check;
+    // };
 
-    async addSuperAdminData(data) {
-        let check = await superAdminRepo.save(data);
-        return check;
-    };
+    // async addSuperAdminData(data) {
+    //     let check = await superAdminRepo.save(data);
+    //     return check;
+    // };
 
     async assignmentProcess(data) {
         let findData = await assignedMastersRepo.findOneBy({ UserId: Equal(data?.id) });

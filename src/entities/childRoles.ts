@@ -6,14 +6,7 @@ import {
     UpdateDateColumn,
     ManyToOne,
     JoinColumn,
-    OneToMany,
   } from "typeorm";
-import { Departments } from "./department";
-import { UserData } from "./userData";
-import { Schemes } from "./schemes";
-import { RolesAccess } from "./roleAccess";
-import { loginData } from "./loginData";
-import { AssignedMasters } from "./assignedMasters";
 import { Roles } from "./roles";
   
   @Entity({ name: "ChildRoles" })

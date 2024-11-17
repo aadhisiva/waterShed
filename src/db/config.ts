@@ -8,8 +8,8 @@
 
 import "reflect-metadata";
 import { DataSource } from "typeorm";
+import { allEntities } from "./entities";
 import dotenv from "dotenv";
-import { entities } from "../entityManager";
 
 dotenv.config();
 
@@ -20,7 +20,7 @@ export const AppDataSource = new DataSource({
   username: process.env.PRO_DB_USERNAME,
   password: process.env.PRO_DB_PASSWORD,
   database: process.env.PRO_DB_DATABASE,
-  entities: entities(),
+  entities: allEntities,
   logging: false,
   synchronize: true,
   options: {

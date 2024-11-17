@@ -1,15 +1,18 @@
 import { Equal } from "typeorm";
-import { AppDataSource } from "../db/config";
-import { MasterData, Roles, Schemes, Sectors, WaterShedData, WaterShedDataHistory, WatershedImgAndVideo } from "../entities";
-import { apiErrorHandler, response200, response400 } from "../utils/resBack";
+import jsonwebtoken from "jsonwebtoken";
 
-const rolesRepo = AppDataSource.getRepository(Roles);
-const schemesRepo = AppDataSource.getRepository(Schemes);
-const sectorsRepo = AppDataSource.getRepository(Sectors);
-const masterDataRepo = AppDataSource.getRepository(MasterData);
-const watershedImgAndVideoRepo = AppDataSource.getRepository(WatershedImgAndVideo);
-const waterShedDataRepo = AppDataSource.getRepository(WaterShedData);
-const waterShedDataHistoryRepo = AppDataSource.getRepository(WaterShedDataHistory);
+import { AppDataSource } from "../db/config";
+import { response200, response400 } from "../utils/resBack";
+import { generateOTP } from "../utils/resuableCode";
+import { assignedMastersRepo, waterShedDataHistoryRepo, waterShedDataRepo, watershedImgAndVideoRepo } from "../db/repos";
+import { MasterData } from "../entities/masterData";
+import { apiErrorHandler } from "../utils/reqResHandler";
+
+const options = {
+  expiresIn: '12h', // Token expiration time
+  algorithm: 'HS256', // Use a secure algorithm (HS256 is symmetric, RS256 is asymmetric)
+};
+
 
 export const updateRecordFromTalukLevel = async (req, res) => {
   const bodyData = req.body;
@@ -52,6 +55,76 @@ export const addImagesToSubId = async (req, res) => {
       await watershedImgAndVideoRepo.save(eachList);
     };
     return response200(res, {}, "New Images Added");
+  } catch (error) {
+    return apiErrorHandler(error, req, res);
+  };
+};
+
+
+export const loginToTaluk = async (req, res) => {
+  const bodyData = req.body;
+  const { RoleId, Mobile } = bodyData;
+  if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
+  if (!Mobile) return response400(res, "Missing 'Mobile' in req formate");
+  bodyData.Otp = generateOTP(4);
+  try {
+    let fetchedUser = await assignedMastersRepo.findOneBy({ RoleId: Equal(RoleId), Mobile: Equal(Mobile) });
+    let newData = { ...fetchedUser, ...bodyData };
+    await assignedMastersRepo.save(newData);
+    let fetchedWithRole = await assignedMastersRepo.createQueryBuilder('vs')
+      .innerJoinAndSelect(MasterData, 'md', 'md.DistrictCode=vs.DistrictCode and md.TalukCode=vs.TalukCode')
+      .select([`DISTINCT vs.DistrictCode DistrictCode, vs.TalukCode TalukCode, vs.UserId UserId, 
+    CONCAT('D-',md.DistrictName,'-T-',md.TalukName) as AssignedTaluk`
+      ])
+      .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile: Mobile, RoleId: RoleId })
+      .getRawMany();
+    let result = (fetchedWithRole || []).map(obj => {
+      return {
+        ...obj,
+        Token: jsonwebtoken.sign({ DistrictCode: obj.DistrictCode, TalukCode: obj?.TalukCode, RoleId: obj.RoleId, UserId: obj.UserId },
+          process.env.SECRET_KEY, options)
+      }
+    })
+    return response200(res, result);
+  } catch (error) {
+    return apiErrorHandler(error, req, res);
+  };
+};
+
+export const verfiyTalukOtp = async (req, res) => {
+  const bodyData = req.body;
+  const { RoleId, Mobile, Otp } = bodyData;
+  if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
+  if (!Mobile) return response400(res, "Missing 'Mobile' in req formate");
+  if (!Otp) return response400(res, "Missing 'Otp' in req formate");
+  try {
+    let fetchedUser = await assignedMastersRepo.findOneBy({ RoleId: Equal(RoleId), Mobile: Equal(Mobile) });
+    let otpCheck = fetchedUser.Otp == Otp;
+    if (otpCheck) return response400(res, "Otp verfification failed");
+    return response200(res, {}, "Otp verification successfully");
+  } catch (error) {
+    return apiErrorHandler(error, req, res);
+  };
+};
+
+export const getTalukLevelSurvey = async (req, res) => {
+  const bodyData = req.body;
+  const { CategoryId, SubActivityId, SchemeId, SectorId, ActivityId, StatusOfWork, PageNo = 1, PageSize = 10 } = bodyData;
+  if (!SchemeId) return response400(res, "Missing 'SchemeId' in req formate");
+  if (!SectorId) return response400(res, "Missing 'SectorId' in req formate");
+  try {
+    let ActivityType = !SubActivityId || SubActivityId == '' ? "No" : "Yes";
+    let sp = `execute MobileTalukLevelSurveyList @0,@1,@2,@3,@4,@5,@6,@7,@8`;
+    let spForCounts = `execute MobileTalukLevelSurveyCounts @0,@1,@2,@3,@4,@5,@6`;
+    let resultForData = await AppDataSource.query(sp, [SchemeId, SectorId, CategoryId, ActivityId, SubActivityId, StatusOfWork, ActivityType, PageNo, PageSize]);
+    let resultForCounts = await AppDataSource.query(spForCounts, [SchemeId, SectorId, CategoryId, ActivityId, SubActivityId, StatusOfWork, ActivityType]);
+    let result = {
+      TotalCount: resultForCounts[0]?.TotalCount || 0,
+      PageNo: PageNo,
+      PageSize: PageSize,
+      TotalData: resultForData || []
+    };
+    return response200(res, result, "Retireved successFully");
   } catch (error) {
     return apiErrorHandler(error, req, res);
   };

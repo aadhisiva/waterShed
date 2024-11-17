@@ -13,13 +13,13 @@ export class WatershedImgAndVideo {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ default: null, type: 'nvarchar', length: 50 })
+    @Column({ default: null, type: 'nvarchar', length: 100 })
     SubmissionId: string;
 
-    @Column({ default: null, type: 'nvarchar', length: 50 })
-    UserId: number;
+    @Column({ default: null, type: 'nvarchar', length: 100 })
+    UserId: string;
 
-    @Column({ default: null, type: 'varbinary', length: 200 })
+    @Column({ default: null, type: 'nvarchar', length: 200 })
     Url: string;
 
     @Column({ default: null, type: 'nvarchar', length: 100 })

@@ -1,7 +1,7 @@
 import { AppDataSource } from "../db/config";
-import { DprsCommonLand, DprsPrivateLand, MobileLogs, OtpLogs, webLogs } from "../entities";
 import cryptoJs from "crypto";
 import Logger from "../loggers/winstonLogger";
+import { dprsCommonLandRepo, dprsPrivateLandRepo, mobileLogsRepo, otpLogsRepo, webLogsRepo } from "../db/repos";
 
 // generate random string
 export const generateRandomString = (RequiredLength) => {
@@ -55,7 +55,7 @@ export const saveWebLogs = async (WebPage, Message, UserId, Request, Response, R
     Response: JSON.stringify(Response),
     ResponseType
   }
-  return await AppDataSource.getRepository(webLogs).save(newBody);
+  return await webLogsRepo.save(newBody);
 };
 export const saveMobileLogs = async (logMessage, UserId, Request, Response, ResponseType) => {
   // generate time
@@ -66,7 +66,7 @@ export const saveMobileLogs = async (logMessage, UserId, Request, Response, Resp
     Response: JSON.stringify(Response),
     ResponseType
   }
-  return await AppDataSource.getRepository(MobileLogs).save(newBody);
+  return await mobileLogsRepo.save(newBody);
 };
 export const getRoleAndUserId = (req, message) => {
   // create new Object
@@ -85,13 +85,13 @@ export const saveMobileOtps = async (Mobile, text, response, UserId='', otp) => 
     Response: JSON.stringify(response),
     UserId
   }
-  return await AppDataSource.getRepository(OtpLogs).save(newBody);
+  return await otpLogsRepo.save(newBody);
 };
 
 
 export const checkXlsxKeysExistOrNot= (data) => {
   let entityKeys = Object.keys(
-    AppDataSource.getRepository(DprsPrivateLand).metadata.propertiesMap,
+    dprsPrivateLandRepo.metadata.propertiesMap,
   ).filter(item => item !== "id" && item !== "CreatedDate" && item !== "UpdatedDate");
   let error = false;
   let message= "";
@@ -106,7 +106,7 @@ export const checkXlsxKeysExistOrNot= (data) => {
 };
 export const checkCommonXlsxKeysExistOrNot= (data) => {
   let entityKeys = Object.keys(
-    AppDataSource.getRepository(DprsCommonLand).metadata.propertiesMap,
+    dprsCommonLandRepo.metadata.propertiesMap,
   ).filter(item => item !== "id" && item !== "CreatedDate" && item !== "UpdatedDate");
   let error = false;
   let message= "";

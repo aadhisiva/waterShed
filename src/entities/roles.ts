@@ -12,7 +12,6 @@ import { Departments } from "./department";
 import { UserData } from "./userData";
 import { Schemes } from "./schemes";
 import { RolesAccess } from "./roleAccess";
-import { loginData } from "./loginData";
 import { AssignedMasters } from "./assignedMasters";
 import { ChildRoles } from "./childRoles";
   
@@ -41,8 +40,8 @@ import { ChildRoles } from "./childRoles";
     @OneToMany(() => RolesAccess, ra => ra.RoleId, {cascade: true, onDelete: 'CASCADE'})
     RolesAccess: RolesAccess[];
 
-    @OneToMany(() => loginData, ld => ld.RoleId, {cascade: true, onDelete: 'CASCADE'})
-    loginData: loginData[];
+    // @OneToMany(() => loginData, ld => ld.RoleId, {cascade: true, onDelete: 'CASCADE'})
+    // loginData: loginData[];
 
     @OneToMany(() => AssignedMasters, am => am.RoleId, {cascade: true, onDelete: 'CASCADE'})
     AssignedMasterFK: AssignedMasters[];

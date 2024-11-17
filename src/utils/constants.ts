@@ -40,3 +40,10 @@ export enum MOBILE_MESSAGES {
     SAVE_ACTIVITY="Save Activity",
     SAVE_SUBACTIVITY="Save SubActivity"
 }
+
+export enum RESPONSEAPI_MESSAGE {
+    FETCHED = "Fetched Successfully",
+    UPDATED = "Updated Successfully",
+    INSERTED = "Inserted Successfully",
+    CORRECT = "Send correct info to server",
+}

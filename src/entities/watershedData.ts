@@ -50,7 +50,7 @@ export class WaterShedData {
   Taluk: string;
 
   @Column({ type: 'nvarchar', default: null, length: 250 })
-  ProjectNameSubWatershed: string;
+  SubWatershedName: string;
 
   @Column({ type: 'nvarchar', default: null, length: 200 })
   GramPanchayat: string;
@@ -140,7 +140,7 @@ export class WaterShedData {
   MicroWatershedCode: string;
 
   @Column({ type: 'nvarchar', default: null, length: 200 })
-  AmountutilizedfromtheProjectfundsInRs: string;
+  AmountUFTPFInRs: string;
 
   @Column({ type: 'nvarchar', default: null, length: 400 })
   BankLinkagetoavailLoan: string;
@@ -259,11 +259,87 @@ export class WaterShedData {
   @Column({ type: 'nvarchar', default: null, length: 50 })
   ApplicationStatus: string;
 
+  @Column({ type: 'nvarchar', default: null, length: 200 })
+  ManualLocation: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  Polybagfilling: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  Nurseryseedling: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  NumberofPlants: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  CowsNo: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  BuffaloNo: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  PoultryNo: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  DuckeryNo: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  TypeofTrees: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  NoOfTrees: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  AmountInRs: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  TypeOfFodder: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  PhysicalNo: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  AnimalTreated: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  NumberOfGoats: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  AreaCoveredinHa: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  DPRUnitcost: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  DPRTotalCost: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  length: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  Width: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  Depth: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  TotalMeasurement: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  NameOfTheBeneficiaries: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  ProtectiveIrrigationLand: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  NumberOfVents: string;
+
   @CreateDateColumn()
   CreatedDate: Date;
-  
+
   @UpdateDateColumn()
   UpdatedDate: Date;
 };
+
 
 

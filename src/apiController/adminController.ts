@@ -2,7 +2,7 @@ import { Container, Service } from 'typedi';
 import express from "express";
 import { webAppResponse, webAppResponseForLarge } from '../utils/errorHandling';
 import { AdminServices } from '../apiServices/adminServ';
-import { authenticateToken, authenticateTokenWeb, webAuthTokenAndVersion } from '../utils/middlewares';
+import { authenticateToken } from '../utils/middlewares';
 import { WEBMESSAGES, WEBPAGES } from '../utils/constants';
 import * as XLSX from "xlsx";
 import multer from "multer";
@@ -59,15 +59,15 @@ adminRouter.post('/getDataAccess', async (req, res) => {
     }
 });
 
-adminRouter.post('/assigningData', webAuthTokenAndVersion, async (req, res) => {
-    try {
-        let body = req.body;
-        let result = await adminServices.assigningData(body);
-        return webAppResponse(res, result, body, WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.UPDATE, req.user?.userid, req.user?.role);
-    } catch (error) {
-        return webAppResponse(res, error);
-    }
-});
+// adminRouter.post('/assigningData', async (req, res) => {
+//     try {
+//         let body = req.body;
+//         let result = await adminServices.assigningData(body);
+//         return webAppResponse(res, result, body, WEBPAGES.USER_MANAGEMENT, WEBMESSAGES.UPDATE, req.user?.userid, req.user?.role);
+//     } catch (error) {
+//         return webAppResponse(res, error);
+//     }
+// });
 
 adminRouter.post('/verifyOtp', async (req, res) => {
     try {
@@ -223,15 +223,15 @@ adminRouter.post('/mapQuestionOrUpdate', authenticateToken, async (req, res) => 
     }
 });
 
-adminRouter.post("/superLogin", async (req, res) => {
-    try {
-        let body = req.body;
-        let result = await adminServices.superLogin(body);
-        return webAppResponseForLarge(res, result, body, WEBPAGES.LOGIN_PAGE, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
-    } catch (error) {
-        return webAppResponse(res, error);
-    }
-});
+// adminRouter.post("/superLogin", async (req, res) => {
+//     try {
+//         let body = req.body;
+//         let result = await adminServices.superLogin(body);
+//         return webAppResponseForLarge(res, result, body, WEBPAGES.LOGIN_PAGE, WEBMESSAGES.GET_ALLDATA, req.user?.userid, req.user?.role);
+//     } catch (error) {
+//         return webAppResponse(res, error);
+//     }
+// });
 
 adminRouter.post("/assignmentProcess", authenticateToken, async (req, res) => {
     try {

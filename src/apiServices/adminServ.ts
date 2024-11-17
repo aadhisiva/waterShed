@@ -2,11 +2,9 @@ import { Service } from "typedi";
 import { AdminRepo } from "../apiRepository/AdminRepo";
 import { RESPONSEMSG } from "../utils/statusCodes";
 import { OtpServices } from "../sms/smsServceResusable";
-import { loginData } from "../entities";
 import jsonWebToken from "jsonwebtoken";
 import { encryptData } from "../utils/sensitiveData";
 import crypto from "crypto";
-import { apiErrorHandler, response200, response400 } from "../utils/resBack";
 
 type ObjectParam = any;
 const secretKey = crypto.randomBytes(32).toString('hex'); // Replace with a pre-shared secret key
@@ -17,12 +15,12 @@ export class AdminServices {
         public otpServices: OtpServices
     ) { };
 
-    async assigningData(data) {
-        if (!data?.UserId) return { code: 400 };
-        return this.adminRepo.assigningData(data);
-    }
+    // async assigningData(data) {
+    //     if (!data?.UserId) return { code: 400 };
+    //     return this.adminRepo.assigningData(data);
+    // }
 
-    async checkMobileLogin(data: loginData) {
+    async checkMobileLogin(data) {
         const { Mobile } = data;
         if (!Mobile) return { code: 400 };
         // let version = await this.adminRepo.getVersionOfApp();
@@ -243,29 +241,29 @@ export class AdminServices {
         return await this.adminRepo.getChildBasedOnParent(data);
     }
 
-    async superLogin(data) {
-        const { Username, Password, ReqType } = data;
-        if (!Username) return { code: 400, message: "Provide Username" };
-        if (!Password) return { code: 400, message: "Provide Password" };
-        if (ReqType == "Get") {
-            let check = await this.adminRepo.checkUsername(Username);
-            if (!check) return { code: 422, message: "User not found." };
-            let checkPassword = check.Password == Password;
-            if (!checkPassword) return { code: 422, message: "Passord not matched." };
-            const token = jsonWebToken.sign({ Username: check.Username, RoleId: check.Name, Mobile: check.Mobile },
-                process.env.SECRET_KEY, { expiresIn: '1h' });
-            return { message: "Successfully Verified.", data: { token, username: check.Username, Name: check.Name } };
-        } else if (ReqType == "Add") {
-            let check = await this.adminRepo.checkUsername(Username);
-            if (check) return { code: 422, message: "Already Registered." };
-            let savedValues = await this.adminRepo.addSuperAdminData(data);
-            const token = jsonWebToken.sign({ Username: savedValues.Username, Name: savedValues.Name, Mobile: savedValues.Mobile },
-                process.env.SECRET_KEY, { expiresIn: '1h' });
-            return { message: "User Registered.", data: { token, username: savedValues.Username, Name: savedValues.Name, Mobile: savedValues.Mobile } };
-        } else {
-            return { code: 422, message: "Sending wrong request to server." };
-        }
-    };
+    // async superLogin(data) {
+    //     const { Username, Password, ReqType } = data;
+    //     if (!Username) return { code: 400, message: "Provide Username" };
+    //     if (!Password) return { code: 400, message: "Provide Password" };
+    //     if (ReqType == "Get") {
+    //         let check = await this.adminRepo.checkUsername(Username);
+    //         if (!check) return { code: 422, message: "User not found." };
+    //         let checkPassword = check.Password == Password;
+    //         if (!checkPassword) return { code: 422, message: "Passord not matched." };
+    //         const token = jsonWebToken.sign({ Username: check.Username, RoleId: check.Name, Mobile: check.Mobile },
+    //             process.env.SECRET_KEY, { expiresIn: '1h' });
+    //         return { message: "Successfully Verified.", data: { token, username: check.Username, Name: check.Name } };
+    //     } else if (ReqType == "Add") {
+    //         let check = await this.adminRepo.checkUsername(Username);
+    //         if (check) return { code: 422, message: "Already Registered." };
+    //         let savedValues = await this.adminRepo.addSuperAdminData(data);
+    //         const token = jsonWebToken.sign({ Username: savedValues.Username, Name: savedValues.Name, Mobile: savedValues.Mobile },
+    //             process.env.SECRET_KEY, { expiresIn: '1h' });
+    //         return { message: "User Registered.", data: { token, username: savedValues.Username, Name: savedValues.Name, Mobile: savedValues.Mobile } };
+    //     } else {
+    //         return { code: 422, message: "Sending wrong request to server." };
+    //     }
+    // };
 
     async assignmentProcess(data) {
         const { ReqType } = data;
