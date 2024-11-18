@@ -1,4 +1,4 @@
-import { versionRepo } from "../db/repos";
+import { repository } from "../db/repos";
 import { API_VERSION_ISSUE } from "./constants";
 import { response401, response403 } from "./resBack";
 import jwt from "jsonwebtoken";
@@ -7,7 +7,7 @@ export async function authVersion(req, res, next) {
     // Read the version from the request header
     const authVersion = req.headers["version"];
     if (!authVersion) return res.status(403).send({ code: 403, status: "Failed", message: "Api Version Not Provided." })
-    let getVersion = await versionRepo.find();
+    let getVersion = await repository.versionRepo.find();
     let checkVersion = authVersion == getVersion[0].Version;
     if (!checkVersion) return res.status(403).send({ code: 403, status: "Failed", message: API_VERSION_ISSUE });
     next();

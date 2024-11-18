@@ -44,7 +44,7 @@ router.post('/getAssignedMasters', authenticateToken, webController.getAssignedM
 router.post('/getDprsLand', authenticateToken, webController.getDprsLand);
 router.post('/uploadPrivateLand', authenticateToken, upload.single('file'), webController.uploadPrivateLand);
 router.post('/uploadCommonLand', authenticateToken, upload.single('file'), webController.uploadCommonLand);
-router.post('/uploadImage', authenticateToken, uploadImage.single('image'), webController.uploadImages);
+router.post('/uploadImage', uploadImage.single('image'), webController.uploadImages);
 router.post('/getImage/:id', authenticateToken, webController.getImage);
 router.post('/uplodMasters', authenticateToken, upload.single('file'), webController.uploadDistrictMasters);
 

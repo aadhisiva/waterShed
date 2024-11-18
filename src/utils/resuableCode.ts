@@ -1,7 +1,7 @@
 import { AppDataSource } from "../db/config";
 import cryptoJs from "crypto";
 import Logger from "../loggers/winstonLogger";
-import { dprsCommonLandRepo, dprsPrivateLandRepo, mobileLogsRepo, otpLogsRepo, webLogsRepo } from "../db/repos";
+import { repository } from "../db/repos";
 
 // generate random string
 export const generateRandomString = (RequiredLength) => {
@@ -55,7 +55,7 @@ export const saveWebLogs = async (WebPage, Message, UserId, Request, Response, R
     Response: JSON.stringify(Response),
     ResponseType
   }
-  return await webLogsRepo.save(newBody);
+  return await repository.webLogsRepo.save(newBody);
 };
 export const saveMobileLogs = async (logMessage, UserId, Request, Response, ResponseType) => {
   // generate time
@@ -66,7 +66,7 @@ export const saveMobileLogs = async (logMessage, UserId, Request, Response, Resp
     Response: JSON.stringify(Response),
     ResponseType
   }
-  return await mobileLogsRepo.save(newBody);
+  return await repository.mobileLogsRepo.save(newBody);
 };
 export const getRoleAndUserId = (req, message) => {
   // create new Object
@@ -85,13 +85,13 @@ export const saveMobileOtps = async (Mobile, text, response, UserId='', otp) => 
     Response: JSON.stringify(response),
     UserId
   }
-  return await otpLogsRepo.save(newBody);
+  return await repository.otpLogsRepo.save(newBody);
 };
 
 
 export const checkXlsxKeysExistOrNot= (data) => {
   let entityKeys = Object.keys(
-    dprsPrivateLandRepo.metadata.propertiesMap,
+    repository.dprsPrivateLandRepo.metadata.propertiesMap,
   ).filter(item => item !== "id" && item !== "CreatedDate" && item !== "UpdatedDate");
   let error = false;
   let message= "";
@@ -106,7 +106,7 @@ export const checkXlsxKeysExistOrNot= (data) => {
 };
 export const checkCommonXlsxKeysExistOrNot= (data) => {
   let entityKeys = Object.keys(
-    dprsCommonLandRepo.metadata.propertiesMap,
+    repository.dprsCommonLandRepo.metadata.propertiesMap,
   ).filter(item => item !== "id" && item !== "CreatedDate" && item !== "UpdatedDate");
   let error = false;
   let message= "";

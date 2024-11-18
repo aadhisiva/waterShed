@@ -46,4 +46,6 @@ export enum RESPONSEAPI_MESSAGE {
     UPDATED = "Updated Successfully",
     INSERTED = "Inserted Successfully",
     CORRECT = "Send correct info to server",
+    OTP_VERFIY = "Otp versification successfully",
+    OTP_VERFIY_FAILED = "Otp versification failed",
 }

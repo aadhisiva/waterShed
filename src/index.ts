@@ -101,7 +101,7 @@ app.use(async (req: Request, res: any, next) => {
 // controllers
 // app.use('/wapi/admin', adminRouter);
 app.use('/wapi/admin', webRoutes);
-app.use('/wapi/mobile', mobileRouter);
+// app.use('/wapi/mobile', mobileRouter);
 app.use('/wapi/mobile', mobileRoutes);
 app.use(errorHandler);
 

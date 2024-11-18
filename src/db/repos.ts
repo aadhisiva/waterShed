@@ -25,28 +25,59 @@ import { webLogs } from "../entities/webLogs";
 import { WatershedImgAndVideo } from "../entities/wsImagesndVideos";
 import { AppDataSource } from "./config";
 
-export const schemesRepo = AppDataSource.getRepository(Schemes);
-export const sectorsRepo = AppDataSource.getRepository(Sectors);
-export const activityRepo = AppDataSource.getRepository(Activity);
-export const rolesRepo = AppDataSource.getRepository(Roles);
-export const uploadImgAndVideoRepo = AppDataSource.getRepository(UploadImgAndVideo);
-export const dprsPrivateLandRepo = AppDataSource.getRepository(DprsPrivateLand);
-export const dprsCommonLandRepo = AppDataSource.getRepository(DprsCommonLand);
-export const questionMappingRepo = AppDataSource.getRepository(QuestionMapping);
-export const questionDropdownTypesRepo = AppDataSource.getRepository(QuestionDropdownTypes);
-export const waterShedDataRepo = AppDataSource.getRepository(WaterShedData);
-export const waterShedDataHistoryRepo = AppDataSource.getRepository(WaterShedDataHistory);
-export const masterDataRepo = AppDataSource.getRepository(MasterData);
-export const watershedImgAndVideoRepo = AppDataSource.getRepository(WatershedImgAndVideo);
-export const userDataRepo = AppDataSource.getRepository(UserData);
-export const categoryRepo = AppDataSource.getRepository(Category);
-export const assignedMastersRepo = AppDataSource.getRepository(AssignedMasters);
-export const webLogsRepo = AppDataSource.getRepository(webLogs);
-export const mobileLogsRepo = AppDataSource.getRepository(MobileLogs);
-export const otpLogsRepo = AppDataSource.getRepository(OtpLogs);
-export const roleAccessRepo = AppDataSource.getRepository(RolesAccess);
-export const departmentsRepo = AppDataSource.getRepository(Departments);
-export const questionsRepo = AppDataSource.getRepository(Questions);
-export const childRoleRepo = AppDataSource.getRepository(ChildRoles);
-export const assignMastersHistoryRepo = AppDataSource.getRepository(AssignMastersHistory);
-export const versionRepo = AppDataSource.getRepository(Versions);
+
+export const repository = {
+    schemesRepo: AppDataSource.getRepository(Schemes),
+    sectorsRepo: AppDataSource.getRepository(Sectors),
+    activityRepo: AppDataSource.getRepository(Activity),
+    rolesRepo: AppDataSource.getRepository(Roles),
+    uploadImgAndVideoRepo: AppDataSource.getRepository(UploadImgAndVideo),
+    dprsPrivateLandRepo: AppDataSource.getRepository(DprsPrivateLand),
+    dprsCommonLandRepo: AppDataSource.getRepository(DprsCommonLand),
+    questionMappingRepo: AppDataSource.getRepository(QuestionMapping),
+    questionDropdownTypesRepo: AppDataSource.getRepository(QuestionDropdownTypes),
+    waterShedDataRepo: AppDataSource.getRepository(WaterShedData),
+    waterShedDataHistoryRepo: AppDataSource.getRepository(WaterShedDataHistory),
+    masterDataRepo: AppDataSource.getRepository(MasterData),
+    watershedImgAndVideoRepo: AppDataSource.getRepository(WatershedImgAndVideo),
+    userDataRepo: AppDataSource.getRepository(UserData),
+    categoryRepo: AppDataSource.getRepository(Category),
+    assignedMastersRepo: AppDataSource.getRepository(AssignedMasters),
+    webLogsRepo: AppDataSource.getRepository(webLogs),
+    mobileLogsRepo: AppDataSource.getRepository(MobileLogs),
+    otpLogsRepo: AppDataSource.getRepository(OtpLogs),
+    roleAccessRepo: AppDataSource.getRepository(RolesAccess),
+    departmentsRepo: AppDataSource.getRepository(Departments),
+    questionsRepo: AppDataSource.getRepository(Questions),
+    childRoleRepo: AppDataSource.getRepository(ChildRoles),
+    assignMastersHistoryRepo: AppDataSource.getRepository(AssignMastersHistory),
+    versionRepo: AppDataSource.getRepository(Versions)
+};
+
+export const repoNames = {
+    SchemesTable: Schemes,
+    SectorsTable: Sectors,
+    ActivityTable: Activity,
+    RolesTable: Roles,
+    UploadImgAndVideoTable: UploadImgAndVideo,
+    DprsPrivateLandTable: DprsPrivateLand,
+    DprsCommonLandTable: DprsCommonLand,
+    QuestionMappingTable: QuestionMapping,
+    QuestionDropdownTypesTable: QuestionDropdownTypes,
+    WaterShedDataTable: WaterShedData,
+    WaterShedDataHistoryTable: WaterShedDataHistory,
+    MasterDataTable: MasterData,
+    WatershedImgAndVideoTable: WatershedImgAndVideo,
+    UserDataTable: UserData,
+    CategoryTable: Category,
+    AssignedMastersTable: AssignedMasters,
+    webLogsTable: webLogs,
+    MobileLogsTable: MobileLogs,
+    OtpLogsTable: OtpLogs,
+    RolesAccessTable: RolesAccess,
+    DepartmentsTable: Departments,
+    QuestionsTable: Questions,
+    ChildRolesTable: ChildRoles,
+    AssignMastersHistoryTable: AssignMastersHistory,
+    VersionsTable: Versions
+}

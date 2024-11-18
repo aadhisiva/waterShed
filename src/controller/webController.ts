@@ -1,4 +1,5 @@
 import { Equal } from "typeorm";
+import { Service } from "typedi";
 import jsonwebtoken from 'jsonwebtoken';
 import crypto from "crypto";
 import XLSX from "xlsx";
@@ -6,20 +7,11 @@ import fs from "fs";
 
 import { AppDataSource } from "../db/config";
 import { response200, response400, response404 } from "../utils/resBack";
-import { activityRepo, assignedMastersRepo, assignMastersHistoryRepo, categoryRepo, childRoleRepo, departmentsRepo, dprsCommonLandRepo, dprsPrivateLandRepo, masterDataRepo, questionDropdownTypesRepo, questionMappingRepo, questionsRepo, roleAccessRepo, rolesRepo, schemesRepo, sectorsRepo, uploadImgAndVideoRepo, userDataRepo, waterShedDataHistoryRepo, waterShedDataRepo, watershedImgAndVideoRepo } from "../db/repos";
-import { Service } from "typedi";
-import { Roles } from "../entities/roles";
 import { checkXlsxKeysExistOrNot, generateOTP } from "../utils/resuableCode";
 import { apiErrorHandler } from "../utils/reqResHandler";
 import { encryptData } from "../utils/sensitiveData";
 import { RESPONSEAPI_MESSAGE } from "../utils/constants";
-import { Departments } from "../entities/department";
-import { Schemes } from "../entities/schemes";
-import { Sectors } from "../entities/sectors";
-import { Category } from "../entities/category";
-import { Activity } from "../entities/activity";
-import { AssignedMasters } from "../entities/assignedMasters";
-import { Questions } from "../entities/questions";
+import { repoNames, repository } from "../db/repos";
 
 interface ExcelData {
   [key: string]: string | number;
@@ -41,15 +33,15 @@ export class WebController {
 
     if (!Mobile) return response400(res, "Missing 'Mobile' in req formate");
     try {
-      let fetchedUser = await assignedMastersRepo.createQueryBuilder('ud')
-        .leftJoinAndSelect(Roles, 'lr', "lr.id = ud.RoleId")
+      let fetchedUser = await repository.assignedMastersRepo.createQueryBuilder('ud')
+        .leftJoinAndSelect(repoNames.RolesTable, 'lr', "lr.id = ud.RoleId")
         .select(["DISTINCT lr.RoleName", "lr.id as RoleId"])
         .where("ud.Mobile = :Mobile", { Mobile })
         .getRawMany();
       if (fetchedUser.length == 0) return response404(res, "User not found");
-      // let fetchedRecord = await assignedMastersRepo.findOneBy({ Mobile: Equal(Mobile) });
+      // let fetchedRecord = await repository.assignedMastersRepo.findOneBy({ Mobile: Equal(Mobile) });
       // let updateObj = { ...fetchedRecord, ...{ Otp: bodyData.Otp } }
-      // await assignedMastersRepo.save(updateObj);
+      // await repository.assignedMastersRepo.save(updateObj);
       let result = {
         UserData: fetchedUser
       };
@@ -70,12 +62,12 @@ export class WebController {
     if (!Id) return response400(res, "Missing 'Id' in req formate");
     if (!Mobile) return response400(res, "Missing 'Mobile' in req formate");
     try {
-      let fetchedUser = await assignedMastersRepo.findOneBy({ RoleId: Equal(bodyData.Id), Mobile: Equal(Mobile) });
+      let fetchedUser = await repository.assignedMastersRepo.findOneBy({ RoleId: Equal(bodyData.Id), Mobile: Equal(Mobile) });
       if (!fetchedUser) return response404(res, "User not found");
       let newData = { ...fetchedUser, ...{ Otp: bodyData?.Otp } }
-      await assignedMastersRepo.save(newData);
+      await repository.assignedMastersRepo.save(newData);
 
-      let fecthedRole = await roleAccessRepo.findOneBy({ RoleId: Equal(bodyData.Id) });
+      let fecthedRole = await repository.roleAccessRepo.findOneBy({ RoleId: Equal(bodyData.Id) });
       if (!fecthedRole) return response404(res, "Role access not found");
 
       let result = {
@@ -95,7 +87,7 @@ export class WebController {
     if (!Id) return response400(res, "Missing 'Id' in req formate");
     if (!Otp) return response400(res, "Missing 'Otp' in req formate");
     try {
-      let fetchedUser = await assignedMastersRepo.findOneBy({ UserId: Equal(Id) });
+      let fetchedUser = await repository.assignedMastersRepo.findOneBy({ UserId: Equal(Id) });
       if (!fetchedUser) return response404(res, "User not found");
       let checkOtp = fetchedUser.Otp === Otp;
       if (!checkOtp) return response400(res, "Otp verification failed");
@@ -116,15 +108,15 @@ export class WebController {
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
       if (ReqType == "Add") {
-        let fetchedRecord = await departmentsRepo.findOneBy({ id: Equal(id) });
+        let fetchedRecord = await repository.departmentsRepo.findOneBy({ id: Equal(id) });
         let newData = { ...fetchedRecord, ...bodyData };
-        await departmentsRepo.save(newData);
+        await repository.departmentsRepo.save(newData);
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
-        let result = await departmentsRepo.find();
+        let result = await repository.departmentsRepo.find();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
       } else if (ReqType == "Dd") {
-        let result = await departmentsRepo.createQueryBuilder('dd')
+        let result = await repository.departmentsRepo.createQueryBuilder('dd')
           .select(["dd.id as value", "dd.DepartmentName as name"])
           .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
@@ -144,23 +136,23 @@ export class WebController {
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
       if (ReqType == "Add") {
-        let fetchedRecord = await schemesRepo.findOneBy({ id: Equal(id) });
+        let fetchedRecord = await repository.schemesRepo.findOneBy({ id: Equal(id) });
         let newData = { ...fetchedRecord, ...bodyData };
-        await schemesRepo.save(newData);
+        await repository.schemesRepo.save(newData);
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
-        let result = await schemesRepo.createQueryBuilder('scheme')
-          .leftJoinAndSelect(Departments, 'dp', "dp.id = scheme.DepartmentId")
-          .leftJoinAndSelect(Schemes, 'sc', 'sc.id = scheme.ParentId')
-          .leftJoinAndSelect(Roles, 'rl', 'rl.id = scheme.RoleId')
+        let result = await repository.schemesRepo.createQueryBuilder('scheme')
+          .leftJoinAndSelect(repoNames.DepartmentsTable, 'dp', "dp.id = scheme.DepartmentId")
+          .leftJoinAndSelect(repoNames.SchemesTable, 'sc', 'sc.id = scheme.ParentId')
+          .leftJoinAndSelect(repoNames.RolesTable, 'rl', 'rl.id = scheme.RoleId')
           .select(["scheme.id as id", "scheme.Description as Description", "rl.RoleName as RoleName", "scheme.RoleId as RoleId",
             "scheme.SchemeName as SchemeName", "scheme.SchemeLogo as SchemeLogo", "scheme.ParentId as ParentId", 'sc.SchemeName as ParentName',
             "dp.DepartmentName as DepartmentName", "scheme.DepartmentId as DepartmentId"])
           .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
       } else if (ReqType == "Dd") {
-        let result = await schemesRepo.createQueryBuilder('sc')
-          .leftJoinAndSelect(Departments, 'dp', 'dp.id = sc.DepartmentId')
+        let result = await repository.schemesRepo.createQueryBuilder('sc')
+          .leftJoinAndSelect(repoNames.DepartmentsTable, 'dp', 'dp.id = sc.DepartmentId')
           .select(["sc.id as value", "CONCAT(sc.SchemeName,'-D-',dp.DepartmentName ) as name"])
           .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
@@ -180,16 +172,16 @@ export class WebController {
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
       if (ReqType == "Add") {
-        let fetchedRecord = await sectorsRepo.findOneBy({ id: Equal(id) });
+        let fetchedRecord = await repository.sectorsRepo.findOneBy({ id: Equal(id) });
         let newData = { ...fetchedRecord, ...bodyData };
-        await sectorsRepo.save(newData);
+        await repository.sectorsRepo.save(newData);
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
-        let result = await sectorsRepo.createQueryBuilder('sec')
-          .leftJoinAndSelect(Departments, 'dp', "dp.id = sec.DepartmentId")
-          .leftJoinAndSelect(Sectors, 'sc', 'sc.id = sec.ParentId')
-          .leftJoinAndSelect(Sectors, 'sse', 'sse.id = sec.SectorId')
-          .leftJoinAndSelect(Schemes, 'se', 'se.id = sec.SchemeId')
+        let result = await repository.sectorsRepo.createQueryBuilder('sec')
+          .leftJoinAndSelect(repoNames.DepartmentsTable, 'dp', "dp.id = sec.DepartmentId")
+          .leftJoinAndSelect(repoNames.SectorsTable, 'sc', 'sc.id = sec.ParentId')
+          .leftJoinAndSelect(repoNames.SectorsTable, 'sse', 'sse.id = sec.SectorId')
+          .leftJoinAndSelect(repoNames.SchemesTable, 'se', 'se.id = sec.SchemeId')
           .select(["sec.id as id", "sec.Description as Description", "se.SchemeName as SchemeName", "sec.SchemeId as SchemeId",
             "sec.SectorName as SectorName", "sec.SectorLogo as SectorLogo", "sec.ParentId as ParentId", 'sc.SectorName as ParentName',
             "dp.DepartmentName as DepartmentName", "sec.DepartmentId as DepartmentId", "sec.IsCategory as IsCategory",
@@ -197,8 +189,8 @@ export class WebController {
           .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
       } else if (ReqType == "Dd") {
-        let result = await sectorsRepo.createQueryBuilder('sc')
-          .leftJoinAndSelect(Schemes, 'se', 'se.id = sc.SchemeId')
+        let result = await repository.sectorsRepo.createQueryBuilder('sc')
+          .leftJoinAndSelect(repoNames.SchemesTable, 'se', 'se.id = sc.SchemeId')
           .select(["sc.id as value", "CONCAT(sc.SectorName,'-SE-',se.SchemeName) as name"])
           .where("sc.RecordType = :RecordType", { RecordType: "New Sector" })
           .getRawMany();
@@ -219,24 +211,24 @@ export class WebController {
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
       if (ReqType == "Add") {
-        let fetchedRecord = await activityRepo.findOneBy({ id: Equal(id) });
+        let fetchedRecord = await repository.activityRepo.findOneBy({ id: Equal(id) });
         let newData = { ...fetchedRecord, ...bodyData };
-        await activityRepo.save(newData);
+        await repository.activityRepo.save(newData);
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
-        let result = await activityRepo.createQueryBuilder('ac')
-          .leftJoinAndSelect(Departments, 'dp', "dp.id = ac.DepartmentId")
-          .leftJoinAndSelect(Activity, 'ac1', 'ac1.id = ac.ParentId')
-          .leftJoinAndSelect(Sectors, 'sec', 'sec.id = ac.SectorId')
-          .leftJoinAndSelect(Category, 'ct', 'ct.id = ac.CategoryId')
+        let result = await repository.activityRepo.createQueryBuilder('ac')
+          .leftJoinAndSelect(repoNames.DepartmentsTable, 'dp', "dp.id = ac.DepartmentId")
+          .leftJoinAndSelect(repoNames.ActivityTable, 'ac1', 'ac1.id = ac.ParentId')
+          .leftJoinAndSelect(repoNames.SectorsTable, 'sec', 'sec.id = ac.SectorId')
+          .leftJoinAndSelect(repoNames.CategoryTable, 'ct', 'ct.id = ac.CategoryId')
           .select(["ac.id as id", "ac.ActivityName as ActivityName", "ac.ParentId as ParentId", "ac.SectorId as SectorId", "sec.SectorName as SectorName",
             'ac1.ActivityName as ParentName', "dp.DepartmentName as DepartmentName", "ac.DepartmentId as DepartmentId", "ac.TypeOfWork as TypeOfWork",
             "ac.TypeOfLand as TypeOfLand", "ac.TypeOfStatus as TypeOfStatus", "ct.id as CategoryId", "ct.CategoryName as CategoryName"])
           .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
       } else if (ReqType == "Dd") {
-        let result = await activityRepo.createQueryBuilder('sc')
-          .leftJoinAndSelect(Sectors, 'sec', 'sec.id = sc.SectorId')
+        let result = await repository.activityRepo.createQueryBuilder('sc')
+          .leftJoinAndSelect(repoNames.SectorsTable, 'sec', 'sec.id = sc.SectorId')
           .select(["sc.id as value", "CONCAT(sc.ActivityName,'-SEC-',sec.SectorName) as name"])
           .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
@@ -256,22 +248,22 @@ export class WebController {
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
       if (ReqType == "Add") {
-        let fetchedRecord = await categoryRepo.findOneBy({ id: Equal(id) });
+        let fetchedRecord = await repository.categoryRepo.findOneBy({ id: Equal(id) });
         let newData = { ...fetchedRecord, ...bodyData };
-        await categoryRepo.save(newData);
+        await repository.categoryRepo.save(newData);
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
-        let result = await categoryRepo.createQueryBuilder('ca')
-          .leftJoinAndSelect(Departments, 'dp', "dp.id = ca.DepartmentId")
-          .leftJoinAndSelect(Category, 'ca1', 'ca1.id = ca.ParentId')
-          .leftJoinAndSelect(Sectors, 'sec', 'sec.id = ca.SectorId')
+        let result = await repository.categoryRepo.createQueryBuilder('ca')
+          .leftJoinAndSelect(repoNames.DepartmentsTable, 'dp', "dp.id = ca.DepartmentId")
+          .leftJoinAndSelect(repoNames.CategoryTable, 'ca1', 'ca1.id = ca.ParentId')
+          .leftJoinAndSelect(repoNames.SectorsTable, 'sec', 'sec.id = ca.SectorId')
           .select(["ca.id as id", "ca.CategoryName as CategoryName", "ca.ParentId as ParentId", "sec.id as SectorId", "sec.SectorName as SectorName",
             'ca1.CategoryName as ParentName', "dp.DepartmentName as DepartmentName", "ca.DepartmentId as DepartmentId"])
           .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
       } else if (ReqType == "Dd") {
-        let result = await categoryRepo.createQueryBuilder('ca')
-          .leftJoinAndSelect(Sectors, 'sec', 'sec.id = ca.SectorId')
+        let result = await repository.categoryRepo.createQueryBuilder('ca')
+          .leftJoinAndSelect(repoNames.SectorsTable, 'sec', 'sec.id = ca.SectorId')
           .select(["ca.id as value", "CONCAT(ca.CategoryName,'-SEC-',sec.SectorName) as name"])
           .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
@@ -291,19 +283,19 @@ export class WebController {
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
       if (ReqType == "Add") {
-        let fetchedRecord = await rolesRepo.findOneBy({ id: Equal(id) });
+        let fetchedRecord = await repository.rolesRepo.findOneBy({ id: Equal(id) });
         let newData = { ...fetchedRecord, ...bodyData };
-        await rolesRepo.save(newData);
+        await repository.rolesRepo.save(newData);
         return response200(res, encryptData({}, secretKey), RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
-        let result = await rolesRepo.createQueryBuilder('role')
-          .leftJoinAndSelect(Departments, 'dp', "dp.id = role.DepartmentId")
+        let result = await repository.rolesRepo.createQueryBuilder('role')
+          .leftJoinAndSelect(repoNames.DepartmentsTable, 'dp', "dp.id = role.DepartmentId")
           .select(["role.id as id", "role.RoleName as RoleName",
             "dp.DepartmentName as DepartmentName", "role.DepartmentId as DepartmentId", "role.IsMobile as IsMobile"])
           .getRawMany();
         return response200(res, encryptData(result, secretKey), RESPONSEAPI_MESSAGE.FETCHED);
       } else if (ReqType == "Dd") {
-        let result = await rolesRepo.createQueryBuilder('sc')
+        let result = await repository.rolesRepo.createQueryBuilder('sc')
           .select(["sc.id as value", "sc.RoleName as name"])
           .getRawMany();
         return response200(res, encryptData(result, secretKey), RESPONSEAPI_MESSAGE.FETCHED);
@@ -323,18 +315,18 @@ export class WebController {
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
       if (ReqType == "Add") {
-        let fetchedRecord = await rolesRepo.findOneBy({ id: Equal(id) });
+        let fetchedRecord = await repository.rolesRepo.findOneBy({ id: Equal(id) });
         let newData = { ...fetchedRecord, ...bodyData };
-        await rolesRepo.save(newData);
+        await repository.rolesRepo.save(newData);
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
-        let result = await questionsRepo.createQueryBuilder('qu')
+        let result = await repository.questionsRepo.createQueryBuilder('qu')
           .select(["qu.id as id", "qu.Question as Question", "qu.QuestionId as QuestionId", "qu.QuestionType as QuestionType", "qu.IsMandatory as IsMandatory",
             "qu.DropDownValues as DropDownValues"])
           .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
       } else if (ReqType == "Dd") {
-        let result = await questionsRepo.createQueryBuilder('sc')
+        let result = await repository.questionsRepo.createQueryBuilder('sc')
           .select(["sc.id as value", "sc.Question as name"])
           .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
@@ -354,20 +346,20 @@ export class WebController {
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
       if (ReqType == "Add") {
-        await questionMappingRepo.save(bodyData)
+        await repository.questionMappingRepo.save(bodyData)
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
-        let result = await questionMappingRepo.createQueryBuilder('qm')
-        .leftJoinAndSelect(Activity, 'ac', "ac.id = qm.ActivityId")
-        .leftJoinAndSelect(Questions, 'qu', "qu.id = qm.QuestionId")
+        let result = await repository.questionMappingRepo.createQueryBuilder('qm')
+        .leftJoinAndSelect(repoNames.ActivityTable, 'ac', "ac.id = qm.ActivityId")
+        .leftJoinAndSelect(repoNames.QuestionsTable, 'qu', "qu.id = qm.QuestionId")
         .select(["qm.id as id", "ac.ActivityName as ActivityName", "qu.Question as Question", "ac.id as ActivityId", "qu.id as QuestionId",
             "qu.QuestionType as QuestionType", "qm.TypeOfLand as TypeOfLand"])
         .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
       } else if (ReqType == "Edit") {
-        let fetchedRecord = await questionMappingRepo.findOneBy({ id: Equal(id) });
+        let fetchedRecord = await repository.questionMappingRepo.findOneBy({ id: Equal(id) });
         let newData = { ...fetchedRecord, ...bodyData };
-        await questionMappingRepo.save(newData);
+        await repository.questionMappingRepo.save(newData);
         return response200(res, {}, RESPONSEAPI_MESSAGE.FETCHED);
 
       } else {
@@ -385,17 +377,17 @@ export class WebController {
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
       if (ReqType == "Add") {
-        let fetchedRecord = await questionDropdownTypesRepo.findOneBy({ id: Equal(id) });
+        let fetchedRecord = await repository.questionDropdownTypesRepo.findOneBy({ id: Equal(id) });
         let newData = { ...fetchedRecord, ...bodyData };
-        await questionDropdownTypesRepo.save(newData);
+        await repository.questionDropdownTypesRepo.save(newData);
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
-        let result = await questionDropdownTypesRepo.createQueryBuilder('qu')
+        let result = await repository.questionDropdownTypesRepo.createQueryBuilder('qu')
           .select(["qu.id as id", "qu.DropdownName as DropdownName", "qu.DropdownType as DropdownType"])
           .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
       } else if (ReqType == "Dd") {
-        let result = await questionDropdownTypesRepo.createQueryBuilder('sc')
+        let result = await repository.questionDropdownTypesRepo.createQueryBuilder('sc')
           .select(["DISTINCT sc.DropdownType as value", "sc.DropdownType as name"])
           .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
@@ -416,14 +408,14 @@ export class WebController {
     try {
       if (ReqType == "Add") {
         if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
-        let fetchedRecord = await childRoleRepo.findOneBy({ id: Equal(id) });
+        let fetchedRecord = await repository.childRoleRepo.findOneBy({ id: Equal(id) });
         let newData = { ...fetchedRecord, ...bodyData };
-        await childRoleRepo.save(newData);
+        await repository.childRoleRepo.save(newData);
         return response200(res, encryptData({}, secretKey), RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
-        let result = await childRoleRepo.createQueryBuilder('la')
-          .leftJoinAndSelect(Roles, 'lr', 'lr.id=la.RoleId')
-          .leftJoinAndSelect(Roles, 'lr1', 'lr1.id=la.ChildId')
+        let result = await repository.childRoleRepo.createQueryBuilder('la')
+          .leftJoinAndSelect(repoNames.RolesTable, 'lr', 'lr.id=la.RoleId')
+          .leftJoinAndSelect(repoNames.RolesTable, 'lr1', 'lr1.id=la.ChildId')
           .select(["la.id id", "lr.RoleName RoleName", 'lr.id RoleId', "lr1.RoleName ChildName", "la.ChildId ChildId"])
           .getRawMany();
         return response200(res, encryptData(result, secretKey), RESPONSEAPI_MESSAGE.FETCHED);
@@ -441,7 +433,7 @@ export class WebController {
 
     if (!ActivityId) return response400(res, "Missing 'ActivityId' in req formate");
     try {
-      let fetchedRecord = await activityRepo.findOneBy({ id: Equal(ActivityId) });
+      let fetchedRecord = await repository.activityRepo.findOneBy({ id: Equal(ActivityId) });
       let result = fetchedRecord.TypeOfLand == "Both" ? [{ value: "Common Land", name: "Common Land" }, { value: "Private Land", name: "Private Land" }]
         : fetchedRecord.TypeOfLand == "Private Land" ? [{ value: "Private Land", name: "Private Land" }]
           : fetchedRecord.TypeOfLand == "Common Land" ? [{ value: "Common Land", name: "Common Land" }]
@@ -458,8 +450,8 @@ export class WebController {
 
     if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
     try {
-      let result = await childRoleRepo.createQueryBuilder('rl')
-        .leftJoinAndSelect(Roles, 'lr', "lr.id = rl.ChildId")
+      let result = await repository.childRoleRepo.createQueryBuilder('rl')
+        .leftJoinAndSelect(repoNames.RolesTable, 'lr', "lr.id = rl.ChildId")
         .select(["lr.id as value", "lr.RoleName as name"])
         .where("rl.RoleId = :RoleId", { RoleId: RoleId })
         .getRawMany();
@@ -476,17 +468,17 @@ export class WebController {
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
       if (ReqType == 1) {
-        let fetchedRecord = await assignedMastersRepo.findOneBy({ UserId: Equal(id) });
+        let fetchedRecord = await repository.assignedMastersRepo.findOneBy({ UserId: Equal(id) });
         let newData = { ...fetchedRecord, ...bodyData };
-        let fecthedUser = await assignedMastersRepo.save(newData);
+        let fecthedUser = await repository.assignedMastersRepo.save(newData);
         delete fecthedUser.id;
-        await assignMastersHistoryRepo.save({ ...fecthedUser, ...{ History: "New user Added" } });
+        await repository.assignMastersHistoryRepo.save({ ...fecthedUser, ...{ History: "New user Added" } });
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == 2) {
-        let fetchedRecord = await userDataRepo.findOneBy({ UserId: Equal(UserId) });
+        let fetchedRecord = await repository.userDataRepo.findOneBy({ UserId: Equal(UserId) });
         let newData = { ...fetchedRecord, ...bodyData };
-        let fecthedUser = await userDataRepo.save(newData);
-        await assignMastersHistoryRepo.save({ ...fecthedUser, ...{ History: "Surveyer Added" } });
+        let fecthedUser = await repository.userDataRepo.save(newData);
+        await repository.assignMastersHistoryRepo.save({ ...fecthedUser, ...{ History: "Surveyer Added" } });
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else {
         return response400(res, RESPONSEAPI_MESSAGE.CORRECT);
@@ -504,23 +496,23 @@ export class WebController {
     try {
       if (ReqType == 1) {
         if (loginType == "District") {
-          let result = await masterDataRepo.createQueryBuilder('dd')
-            .innerJoinAndSelect(AssignedMasters, 'am', 'am.DistrictCode=dd.DistrictCode')
+          let result = await repository.masterDataRepo.createQueryBuilder('dd')
+            .innerJoinAndSelect(repoNames.AssignedMastersTable, 'am', 'am.DistrictCode=dd.DistrictCode')
             .select(["DISTINCT dd.DistrictCode as value", "dd.DistrictName as name"])
             .where("am.Mobile = :Mobile and am.ListType = :ListType", { Mobile, ListType })
             .orderBy("DistrictName", "ASC")
             .getRawMany();
           return response200(res, result);
         };
-        let fetchedData = await masterDataRepo.createQueryBuilder('dd')
+        let fetchedData = await repository.masterDataRepo.createQueryBuilder('dd')
           .select(["DISTINCT dd.DistrictCode as value", "dd.DistrictName as name"])
           .orderBy("DistrictName", "ASC")
           .getRawMany();
         return response200(res, fetchedData);
       } else if (ReqType == 2) {
         if (loginType == "Taluk") {
-          let result = await masterDataRepo.createQueryBuilder('tt')
-            .leftJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=tt.TalukCode and am.DistrictCode=tt.DistrictCode')
+          let result = await repository.masterDataRepo.createQueryBuilder('tt')
+            .leftJoinAndSelect(repoNames.AssignedMastersTable, 'am', 'am.TalukCode=tt.TalukCode and am.DistrictCode=tt.DistrictCode')
             .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
             .where("am.Mobile = :Mobile and am.ListType = :ListType", { Mobile, ListType })
             .orderBy("TalukName", "ASC")
@@ -528,7 +520,7 @@ export class WebController {
           return response200(res, result);
         };
         if (!UDCode) return response400(res, "Missing 'UDCode' in req formate");
-        let fetchedData = await masterDataRepo.createQueryBuilder('tt')
+        let fetchedData = await repository.masterDataRepo.createQueryBuilder('tt')
           .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
           .where("tt.DistrictCode = :dc", { dc: UDCode })
           .orderBy("TalukName", "ASC")
@@ -536,8 +528,8 @@ export class WebController {
         return response200(res, fetchedData);
       } else if (ReqType == 3) {
         if (loginType == "Hobli") {
-          let result = await masterDataRepo.createQueryBuilder('gd')
-            .innerJoinAndSelect(AssignedMasters, 'am', 'am.TalukCode=gd.TalukCode and am.DistrictCode=gd.DistrictCode and am.HobliCode=gd.HobliCode')
+          let result = await repository.masterDataRepo.createQueryBuilder('gd')
+            .innerJoinAndSelect(repoNames.AssignedMastersTable, 'am', 'am.TalukCode=gd.TalukCode and am.DistrictCode=gd.DistrictCode and am.HobliCode=gd.HobliCode')
             .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as name"])
             .where("am.Mobile = :Mobile and am.ListType = :ListType", { Mobile, ListType })
             .orderBy("HobliName", "ASC")
@@ -546,7 +538,7 @@ export class WebController {
         };
         if (!UDCode) return { code: 400, message: "Provide UDCode" };
         if (!UTCode) return { code: 400, message: "Provide UTCode" };
-        let result = await masterDataRepo.createQueryBuilder('gd')
+        let result = await repository.masterDataRepo.createQueryBuilder('gd')
           .select(["DISTINCT gd.HobliCode as value", "gd.HobliName as name"])
           .where("gd.TalukCode = :tc and gd.DistrictCode = :dc", { tc: UTCode, dc: UDCode })
           .orderBy("HobliName", "ASC")
@@ -557,7 +549,7 @@ export class WebController {
         if (!UDCode) return response400(res, "Missing 'UDCode' in req formate");
         if (!UHCode) return response400(res, "Missing 'UHCode' in req formate");
 
-        let result = await masterDataRepo.createQueryBuilder('vd')
+        let result = await repository.masterDataRepo.createQueryBuilder('vd')
           .select(["DISTINCT vd.VillageCode as value", "vd.VillageName as name"])
           .where("vd.HobliCode = :hc and vd.DistrictCode = :dc and vd.TalukCOde = :tc", { hc: UHCode, dc: UDCode, tc: UTCode })
           .getRawMany();
@@ -595,14 +587,14 @@ export class WebController {
     try {
       const offset = (Page - 1) * RowsPerPage;
       if (DataType == "Private") {
-        const [totalData, total] = await dprsPrivateLandRepo.findAndCount({
+        const [totalData, total] = await repository.dprsPrivateLandRepo.findAndCount({
           take: RowsPerPage,
           skip: offset,
           order: { id: "ASC" }
         });
         return response200(res, { total, totalData }, RESPONSEAPI_MESSAGE.FETCHED);
       } else if (DataType == "Common") {
-        const [totalData, total] = await dprsCommonLandRepo.findAndCount({
+        const [totalData, total] = await repository.dprsCommonLandRepo.findAndCount({
           take: RowsPerPage,
           skip: offset,
           order: { id: "ASC" }
@@ -642,7 +634,7 @@ export class WebController {
       let chunkSize = 50;
       for (let i = 0; i < convertedData.length; i += chunkSize) {
         const chunk = convertedData.slice(i, i + chunkSize);
-        await dprsPrivateLandRepo.save(chunk);
+        await repository.dprsPrivateLandRepo.save(chunk);
       }
       // Clean up the uploaded file
       fs.unlinkSync(file.path);
@@ -676,7 +668,7 @@ export class WebController {
       let chunkSize = 50;
       for (let i = 0; i < convertedData.length; i += chunkSize) {
         const chunk = convertedData.slice(i, i + chunkSize);
-        await dprsCommonLandRepo.save(chunk);
+        await repository.dprsCommonLandRepo.save(chunk);
       }
       // Clean up the uploaded file
       fs.unlinkSync(file.path);
@@ -687,10 +679,14 @@ export class WebController {
   };
 
   async uploadImages(req, res) {
-    const bodyData = req.body;
-    const { ImageName, ImageData, UserId } = bodyData;
+    let bodyData = {
+      ImageName: req.file.originalname,
+      ImageData: req.file.buffer,
+      UserId: req.user.userid
+    };
+    const { ImageData, ImageName, UserId } = bodyData;
     try {
-      let savedData = await uploadImgAndVideoRepo.save({ ImageData, ImageName, RecordType: 'Image', UserId });
+      let savedData = await repository.uploadImgAndVideoRepo.save({ ImageData, ImageName, RecordType: 'Image', UserId });
       let insertedId = savedData.id;
       // Construct video URL
       const imageUrl = `${process.env.PRO_URL}/wapi/admin/getImage/${insertedId}`;
@@ -707,7 +703,7 @@ export class WebController {
     if (!id) return response400(res, "Missing 'id' in req formate");
 
     try {
-      let result = await uploadImgAndVideoRepo.findOneBy({ id: Equal(id) });
+      let result = await repository.uploadImgAndVideoRepo.findOneBy({ id: Equal(id) });
       if (!result) return response404(res, "Image not found");
         res.setHeader('Content-Disposition', `inline; filename="${result.ImageName}"`);
         res.setHeader('Content-Type', 'image/png');
@@ -738,7 +734,7 @@ export class WebController {
       let chunkSize = 50;
       for (let i = 0; i < convertedData.length; i += chunkSize) {
         const chunk = convertedData.slice(i, i + chunkSize);
-        await await masterDataRepo.save(chunk);
+        await repository.masterDataRepo.save(chunk);
       }
       return response200(res, {}, RESPONSEAPI_MESSAGE.FETCHED);
     } catch (error) {
@@ -766,7 +762,7 @@ export class WebController {
     if (!TalukCode) return response400(res, "Missing 'Taluk' in req formate");
     if (!HobliCode) return response400(res, "Missing 'Hobli' in req formate");
     try {
-      let result = await masterDataRepo.createQueryBuilder('md')
+      let result = await repository.masterDataRepo.createQueryBuilder('md')
         .select(['DISTINCT md.SubWatershedCode as value, md.SubWatershedName name'])
         .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode",
           { dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode })
@@ -782,7 +778,7 @@ export class WebController {
     const { SchemeId } = bodyData;
     if (!SchemeId) return response400(res, "Missing 'Scheme' in req formate");
     try {
-      let result = await sectorsRepo.createQueryBuilder('se')
+      let result = await repository.sectorsRepo.createQueryBuilder('se')
         .select(['DISTINCT se.id as value, se.SectorName as name'])
         .where("se.SchemeId = :SchemeId",
           { SchemeId: SchemeId })
@@ -852,7 +848,7 @@ export class WebController {
     const bodyData = req.body;
     const { SubmissionId } = bodyData;
     try {
-      let result = await await watershedImgAndVideoRepo.find({ where: { SubmissionId: Equal(SubmissionId) } });
+      let result = await repository.watershedImgAndVideoRepo.find({ where: { SubmissionId: Equal(SubmissionId) } });
       return response200(res, result);
     } catch (error) {
       return apiErrorHandler(error, req, res);
@@ -863,9 +859,9 @@ export class WebController {
     const bodyData = req.body;
     const { SubmissionId } = bodyData;
     try {
-      let resultForOri = await waterShedDataRepo.findOneBy({ SubmissionId: Equal(SubmissionId) });
+      let resultForOri = await repository.waterShedDataRepo.findOneBy({ SubmissionId: Equal(SubmissionId) });
       let newData = { ...resultForOri, ...bodyData };
-      let resultForHistory = await waterShedDataHistoryRepo.createQueryBuilder('ud')
+      let resultForHistory = await repository.waterShedDataHistoryRepo.createQueryBuilder('ud')
         .where("ud.SubmissionId = :id", { id: SubmissionId })
         .orderBy("ud.CreatedDate", "DESC")
         .getOne();
@@ -873,8 +869,8 @@ export class WebController {
       delete resultForHistory.CreatedDate;
       delete resultForHistory.UpdatedDate;
       let newUpdatedDate = { ...resultForHistory, ...bodyData };
-      await waterShedDataHistoryRepo.save(newUpdatedDate);
-      await waterShedDataRepo.save(newData);
+      await repository.waterShedDataHistoryRepo.save(newUpdatedDate);
+      await repository.waterShedDataRepo.save(newData);
       return response200(res, {});
     } catch (error) {
       return apiErrorHandler(error, req, res);
@@ -885,7 +881,7 @@ export class WebController {
     const bodyData = req.body;
     const { SubmissionId, UserId } = bodyData;
     try {
-      let result = await watershedImgAndVideoRepo.find({ where: { SubmissionId: Equal(SubmissionId), UserId: Equal(UserId) } });
+      let result = await repository.watershedImgAndVideoRepo.find({ where: { SubmissionId: Equal(SubmissionId), UserId: Equal(UserId) } });
       return response200(res, result);
     } catch (error) {
       return apiErrorHandler(error, req, res);
