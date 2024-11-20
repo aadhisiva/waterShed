@@ -15,7 +15,6 @@ import { AppDataSource } from './db/config';
 import Logger from './loggers/winstonLogger';
 
 //controllers
-import { adminRouter, mobileRouter } from "./apiController";
 import mobileRoutes from "./routes/mobileRoutes";
 import webRoutes from "./routes/webRoutes";
 import { errorHandler, logRequestResponse } from "./utils/reqResHandler";
@@ -68,11 +67,6 @@ app.use((req, res, next) => {
   return next();
 });
 
-// we are adding port connection here
-app.get("/wapi/run", (req, res) => {
-  res.send("running")
-});
-
 if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }; // for creating uploads folder for file requests
@@ -85,8 +79,8 @@ app.use(async (req: Request, res: any, next) => {
   // Capture response body
   let responseBody: any;
   res.send = async function (body: any) {
-      responseBody = body;
-      return originalSend(body);
+    responseBody = body;
+    return originalSend(body);
   };
 
   // Call the next middleware/route handler
@@ -94,10 +88,14 @@ app.use(async (req: Request, res: any, next) => {
 
   // Log request and response after the response is sent
   res.on('finish', async () => {
-      await logRequestResponse(req, res, responseBody);
+    await logRequestResponse(req, res, responseBody);
   });
 });
 
+// we are adding port connection here
+app.get("/wapi/run", (req, res) => {
+  res.send("running")
+});
 // controllers
 // app.use('/wapi/admin', adminRouter);
 app.use('/wapi/admin', webRoutes);

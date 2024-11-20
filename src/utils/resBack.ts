@@ -21,8 +21,8 @@ export const response404 = (res: Response, msg: string) => {
 export const response200 = (res: Response, data?: any, message?: string) => {
   return res.status(200).send({
     code: 200,
-    status: "OK",
-    message: "SUCCESS",
+    status: "Success",
+    message: message || "Success",
     data: data || {}
   });
 };

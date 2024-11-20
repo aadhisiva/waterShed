@@ -7,7 +7,7 @@ import { Departments } from "../entities/department";
 import { DprsCommonLand } from "../entities/dprsCommon";
 import { DprsPrivateLand } from "../entities/dprsPrivate";
 import { MasterData } from "../entities/masterData";
-import { MobileLogs } from "../entities/mobileLogs";
+import { MobileLog } from "../entities/mobile_logs";
 import { OtpLogs } from "../entities/otpLogs";
 import { QuestionMapping } from "../entities/QuestionMapping";
 import { Questions } from "../entities/questions";
@@ -44,7 +44,6 @@ export const repository = {
     categoryRepo: AppDataSource.getRepository(Category),
     assignedMastersRepo: AppDataSource.getRepository(AssignedMasters),
     webLogsRepo: AppDataSource.getRepository(webLogs),
-    mobileLogsRepo: AppDataSource.getRepository(MobileLogs),
     otpLogsRepo: AppDataSource.getRepository(OtpLogs),
     roleAccessRepo: AppDataSource.getRepository(RolesAccess),
     departmentsRepo: AppDataSource.getRepository(Departments),
@@ -72,12 +71,12 @@ export const repoNames = {
     CategoryTable: Category,
     AssignedMastersTable: AssignedMasters,
     webLogsTable: webLogs,
-    MobileLogsTable: MobileLogs,
     OtpLogsTable: OtpLogs,
     RolesAccessTable: RolesAccess,
     DepartmentsTable: Departments,
     QuestionsTable: Questions,
     ChildRolesTable: ChildRoles,
     AssignMastersHistoryTable: AssignMastersHistory,
-    VersionsTable: Versions
+    VersionsTable: Versions,
+    MobileLogTable: MobileLog
 }

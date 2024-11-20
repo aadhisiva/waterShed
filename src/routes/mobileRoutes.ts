@@ -13,22 +13,21 @@ const uploadImage = multer({ storage: memoryStorage });
 
 router.post('/updateRecordFromTalukLevel', authenticateToken, webController.updateRecordFromTalukLevel);
 router.post('/addImagesToSubId', authenticateToken, webController.addImagesToSubId);
-router.post('/loginToTaluk', webController.loginToTaluk);
+
+router.post('/loginToTaluk', authVersion, webController.loginToTaluk);
 router.post('/verfiyTalukOtp', webController.verfiyTalukOtp);
-router.post('/getTalukLevelSurvey', webController.getTalukLevelSurvey);
+router.post('/getTalukLevelSurvey', authenticateToken, webController.getTalukLevelSurvey);
 
 router.post('/sendOtp', authVersion, webController.sendOtp);
-router.post('/assignedHobliDetails', authenticateToken, webController.assignedHobliDetails);
-router.post('/verifyOtp', authenticateToken, webController.verifyOtp);
+router.post('/assignedHobliDetails', webController.assignedHobliDetails);
+router.post('/verifyOtp', webController.verifyOtp);
 
 router.post('/updateRecordFromTalukLevel', authenticateToken, webController.updateRecordFromTalukLevel);
 router.post('/addImagesToSubId', authenticateToken, webController.addImagesToSubId);
-router.post('/loginToTaluk', authenticateToken, webController.loginToTaluk);
-router.post('/verfiyTalukOtp', authenticateToken, webController.verfiyTalukOtp);
-router.post('/getTalukLevelSurvey', authenticateToken, webController.getTalukLevelSurvey);
 router.post('/getWatershedOrSub', authenticateToken, webController.getWatershedOrSub);
 router.post('/getAllSchemes', authenticateToken, webController.getAllSchemes);
 router.post('/getAllRoles', webController.getAllRoles);
+
 router.post('/getSectors', authenticateToken, webController.getSectors);
 router.post('/getActivity', authenticateToken, webController.getActivity);
 router.post('/getCategory', authenticateToken, webController.getCategory);
@@ -41,7 +40,7 @@ router.post('/getAllSubmissionList', authenticateToken, webController.getAllSubm
 router.post('/getRecord', authenticateToken, webController.getRecord);
 router.post('/updateSurveyData', authenticateToken, webController.updateSurveyData);
 router.post('/retriveMasters', authenticateToken, webController.retriveMasters);
-router.post('/uploadImages', uploadImage.single('image'), webController.uploadImages);
-router.post('/getImage/:id', authenticateToken, webController.getImage);
+router.post('/uploadImages', uploadImage.single('image'), authenticateToken, webController.uploadImages);
+router.get('/getImage/:id', webController.getImage);
 
 export default router;

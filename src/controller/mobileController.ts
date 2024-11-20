@@ -4,7 +4,7 @@ import { Service } from "typedi";
 
 import { AppDataSource } from "../db/config";
 import { response200, response400, response404 } from "../utils/resBack";
-import { generateOTP, generateUniqueId } from "../utils/resuableCode";
+import { generateUniqueId } from "../utils/resuableCode";
 import { apiErrorHandler } from "../utils/reqResHandler";
 import { repoNames, repository } from "../db/repos";
 import { RESPONSEAPI_MESSAGE } from "../utils/constants";
@@ -64,13 +64,13 @@ export class MobileController {
     };
   };
 
-
   async loginToTaluk(req, res) {
     const bodyData = req.body;
     const { RoleId, Mobile } = bodyData;
     if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
     if (!Mobile) return response400(res, "Missing 'Mobile' in req formate");
-    bodyData.Otp = generateOTP(4);
+    // bodyData.Otp = generateOTP(4);
+    bodyData.Otp = '1111';
     try {
       let fetchedUser = await repository.assignedMastersRepo.findOneBy({ RoleId: Equal(RoleId), Mobile: Equal(Mobile) });
       let newData = { ...fetchedUser, ...bodyData };
@@ -78,7 +78,7 @@ export class MobileController {
       let fetchedWithRole = await repository.assignedMastersRepo.createQueryBuilder('vs')
         .innerJoinAndSelect(repoNames.MasterDataTable, 'md', 'md.DistrictCode=vs.DistrictCode and md.TalukCode=vs.TalukCode')
         .select([`DISTINCT vs.DistrictCode DistrictCode, vs.TalukCode TalukCode, vs.UserId UserId, 
-    CONCAT('D-',md.DistrictName,'-T-',md.TalukName) as AssignedTaluk`
+          CONCAT('D-',md.DistrictName,'-T-',md.TalukName) as AssignedTaluk`
         ])
         .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile: Mobile, RoleId: RoleId })
         .getRawMany();
@@ -87,9 +87,9 @@ export class MobileController {
           ...obj,
           Token: jsonwebtoken.sign({ DistrictCode: obj.DistrictCode, TalukCode: obj?.TalukCode, RoleId: obj.RoleId, UserId: obj.UserId },
             process.env.SECRET_KEY, options)
-        }
-      })
-      return response200(res, result);
+        };
+      });
+      return response200(res, { Otp: bodyData.Otp, mappedRes: result });
     } catch (error) {
       return apiErrorHandler(error, req, res);
     };
@@ -112,16 +112,21 @@ export class MobileController {
   };
 
   async getTalukLevelSurvey(req, res) {
-    const bodyData = req.body;
-    const { CategoryId, SubActivityId, SchemeId, SectorId, ActivityId, StatusOfWork, PageNo = 1, PageSize = 10 } = bodyData;
+    const bodyData = {...req.body, ...{UserId: req.user?.UserId}};
+    const { CategoryId, UserId, SubActivityId, SchemeId, SectorId, ActivityId, StatusOfWork, PageNo = 1, PageSize = 10 } = bodyData;
+    const Category = CategoryId == '' ? null : CategoryId;
+    const SubActivity = SubActivityId == '' ? null : SubActivityId;
+    const Status = StatusOfWork == '' ? null : StatusOfWork;
+    
     if (!SchemeId) return response400(res, "Missing 'SchemeId' in req formate");
     if (!SectorId) return response400(res, "Missing 'SectorId' in req formate");
+    if (!UserId) return response400(res, "Missing 'UserId' in req formate");
+    if (!ActivityId) return response400(res, "Missing 'ActivityId' in req formate");
     try {
-      let ActivityType = !SubActivityId || SubActivityId == '' ? "No" : "Yes";
       let sp = `execute MobileTalukLevelSurveyList @0,@1,@2,@3,@4,@5,@6,@7,@8`;
       let spForCounts = `execute MobileTalukLevelSurveyCounts @0,@1,@2,@3,@4,@5,@6`;
-      let resultForData = await AppDataSource.query(sp, [SchemeId, SectorId, CategoryId, ActivityId, SubActivityId, StatusOfWork, ActivityType, PageNo, PageSize]);
-      let resultForCounts = await AppDataSource.query(spForCounts, [SchemeId, SectorId, CategoryId, ActivityId, SubActivityId, StatusOfWork, ActivityType]);
+      let resultForData = await AppDataSource.query(sp, [UserId, SchemeId, SectorId, Category , ActivityId, SubActivity, Status, PageNo, PageSize]);
+      let resultForCounts = await AppDataSource.query(spForCounts, [UserId, SchemeId, SectorId, Category, ActivityId, SubActivity, Status]);
       let result = {
         TotalCount: resultForCounts[0]?.TotalCount || 0,
         PageNo: PageNo,
@@ -443,8 +448,8 @@ export class MobileController {
   };
 
   async saveSurveyData(req, res) {
-    const bodyData = req.body;
-    const { UserId, imagesList } = bodyData;
+    const bodyData = {...req.body, ...{UserId : req.user.UserId}};
+    const { imagesList, UserId } = bodyData;
     // if(!Village) return response400(res,"Missing 'Village' in req formate");
     bodyData.SubmissionId = "WS" + "-" + generateUniqueId().slice(2) + "-" + Math.floor(Math.random() * 1000);
     try {
@@ -480,7 +485,7 @@ export class MobileController {
   };
 
   async getSubmissionList(req, res) {
-    const bodyData = req.body;
+    const bodyData = {...req.body, ...{UserId : req.user?.UserId}};
     const { UserId, PageNo = 1, PageSize = 10, StatusOfWork, CategoryId, SchemeId, SectorId, ActivityId, SubActivityId } = bodyData;
     if (!UserId) return response400(res, "Missing 'UserId' in req formate");
     try {
@@ -508,7 +513,7 @@ export class MobileController {
   };
 
   async getAllSubmissionList(req, res) {
-    const bodyData = req.body;
+    const bodyData = {...req.body, ...{UserId : req.user?.UserId}};
     const { UserId, PageNo = 1, PageSize = 10, CategoryId, SchemeId, SectorId, ActivityId, SubActivityId } = bodyData;
     if (!UserId) return response400(res, "Missing 'UserId' in req formate");
     try {
@@ -536,7 +541,7 @@ export class MobileController {
   };
 
   async getRecord(req, res) {
-    const bodyData = req.body;
+    const bodyData = {...req.body, ...{UserId : req.user.UserId}};
     const { UserId, SubmissionId, SectorId } = bodyData;
     if (!UserId) return response400(res, "Missing 'UserId' in req formate");
     if (!SubmissionId) return response400(res, "Missing 'SubmissionId' in req formate");
@@ -556,7 +561,7 @@ export class MobileController {
   };
 
   async updateSurveyData(req, res) {
-    const bodyData = req.body;
+    const bodyData = {...req.body, ...{UserId : req.user.UserId}};
     const { UserId, SubmissionId, SectorId } = bodyData;
     if (!UserId) return response400(res, "Missing 'UserId' in req formate");
     if (!SubmissionId) return response400(res, "Missing 'SubmissionId' in req formate");
@@ -593,18 +598,18 @@ export class MobileController {
         result[0]['TalukArray'] = await repository.masterDataRepo.createQueryBuilder('md')
           .select("DISTINCT TalukCode, TalukName")
           .where("md.DistrictCode= :id", { id: result[0]?.DistrictCode })
-          .getRawMany();;
+          .getRawMany();
         for (let i = 0; i < result[0]['TalukArray'].length; i++) {
           let each = result[0]['TalukArray'][i];
           each['HobliArray'] = await repository.masterDataRepo.createQueryBuilder('md')
             .select("DISTINCT HobliCode, HobliName")
-            .where("md.TalukCode= :id and md.DistrictCode = :dcode", { id: result[0]?.DistrictCode, dcode: each.TalukCode })
+            .where("md.TalukCode= :id and md.DistrictCode = :dcode", { id: each.TalukCode, dcode: result[0]?.DistrictCode })
             .getRawMany();;
           for (let j = 0; j < each['HobliArray'].length; j++) {
             let eachHobliObj = each['HobliArray'][j];
             eachHobliObj['VillageArray'] = await repository.masterDataRepo.createQueryBuilder('md')
               .select("DISTINCT VillageName")
-              .where("md.TalukCode= :id and md.DistrictCode = :dcode and md.HobliCode= :hcode", { id: result[0]?.DistrictCode, dcode: each.TalukCode, hcode: eachHobliObj.HobliCode })
+              .where("md.TalukCode= :id and md.DistrictCode = :dcode and md.HobliCode= :hcode", { id: each.TalukCode, dcode: result[0]?.DistrictCode, hcode: eachHobliObj.HobliCode })
               .getRawMany();;
           };
         };
@@ -616,15 +621,15 @@ export class MobileController {
   };
 
   async uploadImages(req, res) {
-    let bodyData = {
-      ImageName: req.file.originalname,
-      ImageData: req.file.buffer,
-      UserId: req.user.userid
-    };
-    const { ImageData, ImageName, UserId } = bodyData;
-    if (!ImageName) return response400(res, "Missing 'ImageName' in req formate");
-    if (!ImageData) return response400(res, "Missing 'ImageData' in req formate");
     try {
+      let bodyData = {
+        ImageName: req.file.originalname,
+        ImageData: req.file.buffer,
+        UserId: req.user?.userid
+      };
+      const { ImageData, ImageName, UserId } = bodyData;
+      if (!ImageName) return response400(res, "Missing 'ImageName' in req formate");
+      if (!ImageData) return response400(res, "Missing 'ImageData' in req formate");
       let fetchedRecord = await repository.uploadImgAndVideoRepo.save({ ImageData, ImageName, RecordType: 'Image', UserId });
       let insertedId = fetchedRecord.id;
       // Construct video URL
@@ -637,7 +642,7 @@ export class MobileController {
   };
 
   async getImage(req, res) {
-    const bodyData = req.body;
+    const bodyData = req.params;
     const { id } = bodyData;
     try {
       let fetchedRecord = await repository.uploadImgAndVideoRepo.findOneBy({ id: Equal(id) });

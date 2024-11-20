@@ -31,6 +31,7 @@ router.post('/addOrGetschemes', authenticateToken, webController.addOrGetschemes
 router.post('/addOrGetSectors', authenticateToken, webController.addOrGetSectors);
 router.post('/addOrGetsActivity', authenticateToken, webController.addOrGetsActivity);
 router.post('/addOrGetsCategory', authenticateToken, webController.addOrGetsCategory);
+router.post('/addOrGetRoleAccess', authenticateToken, webController.addOrGetRoleAccess );
 router.post('/addOrGetRoles', authenticateToken, webController.addOrGetRoles);
 router.post('/addOrGetQuestions', authenticateToken, webController.addOrGetQuestions);
 router.post('/mapQuestionOrUpdate', authenticateToken, webController.mapQuestionOrUpdate);
@@ -42,11 +43,11 @@ router.post('/assignmentProcess', authenticateToken, webController.assignmentPro
 router.post('/getMasterDropDown', authenticateToken, webController.getMasterDropDown);
 router.post('/getAssignedMasters', authenticateToken, webController.getAssignedMasters);
 router.post('/getDprsLand', authenticateToken, webController.getDprsLand);
-router.post('/uploadPrivateLand', authenticateToken, upload.single('file'), webController.uploadPrivateLand);
-router.post('/uploadCommonLand', authenticateToken, upload.single('file'), webController.uploadCommonLand);
-router.post('/uploadImage', uploadImage.single('image'), webController.uploadImages);
-router.post('/getImage/:id', authenticateToken, webController.getImage);
-router.post('/uplodMasters', authenticateToken, upload.single('file'), webController.uploadDistrictMasters);
+router.post('/uploadPrivateLand', upload.single('file'), webController.uploadPrivateLand);
+router.post('/uploadCommonLand', upload.single('file'), webController.uploadCommonLand);
+router.post('/uploadImage', uploadImage.single('image'), authenticateToken, webController.uploadImages);
+router.get('/getImage/:id', webController.getImage);
+router.post('/uplodMasters', upload.single('file'), webController.uploadDistrictMasters);
 
 router.post('/getRoleForReports', authenticateToken, webController.getRoleForReports);
 router.post('/getSubWatershed', authenticateToken, webController.getSubWatershed);

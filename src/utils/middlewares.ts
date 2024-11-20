@@ -6,9 +6,9 @@ import jwt from "jsonwebtoken";
 export async function authVersion(req, res, next) {
     // Read the version from the request header
     const authVersion = req.headers["version"];
-    if (!authVersion) return res.status(403).send({ code: 403, status: "Failed", message: "Api Version Not Provided." })
+    if (!authVersion) return res.status(403).send({ code: 403, status: "Failed", message: "Provided version in header." })
     let getVersion = await repository.versionRepo.find();
-    let checkVersion = authVersion == getVersion[0].Version;
+    let checkVersion = (authVersion == getVersion[0].Version || authVersion == getVersion[1].Version);
     if (!checkVersion) return res.status(403).send({ code: 403, status: "Failed", message: API_VERSION_ISSUE });
     next();
 };

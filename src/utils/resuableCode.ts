@@ -45,37 +45,6 @@ export function generateUniqueId() {
   return year + month + day + new Date().getHours() + new Date().getMinutes() + new Date().getSeconds() + new Date().getMilliseconds();
 };
 
-export const saveWebLogs = async (WebPage, Message, UserId, Request, Response, ResponseType) => {
-  // generate time
-  let newBody = {
-    WebPage,
-    Message,
-    UserId,
-    Request: JSON.stringify(Request),
-    Response: JSON.stringify(Response),
-    ResponseType
-  }
-  return await repository.webLogsRepo.save(newBody);
-};
-export const saveMobileLogs = async (logMessage, UserId, Request, Response, ResponseType) => {
-  // generate time
-  let newBody = {
-    logMessage,
-    UserId,
-    Request: JSON.stringify(Request),
-    Response: JSON.stringify(Response),
-    ResponseType
-  }
-  return await repository.mobileLogsRepo.save(newBody);
-};
-export const getRoleAndUserId = (req, message) => {
-  // create new Object
-  let newBody = {
-    userId: req.headers["userid"],
-    logMessage: message
-  }
-  return newBody;;
-};
 export const saveMobileOtps = async (Mobile, text, response, UserId='', otp) => {
   // create new Object
   let newBody = {
@@ -87,7 +56,6 @@ export const saveMobileOtps = async (Mobile, text, response, UserId='', otp) => 
   }
   return await repository.otpLogsRepo.save(newBody);
 };
-
 
 export const checkXlsxKeysExistOrNot= (data) => {
   let entityKeys = Object.keys(

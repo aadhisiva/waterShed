@@ -276,6 +276,33 @@ export class WebController {
     };
   };
 
+  async addOrGetRoleAccess(req, res) {
+    const bodyData = req.body;
+    const { ReqType, id } = bodyData;
+
+    if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
+    try {
+      if (ReqType == "Add") {
+        let fetchedRecord = await repository.roleAccessRepo.findOneBy({ id: Equal(id) });
+        let newData = { ...fetchedRecord, ...bodyData };
+        await repository.roleAccessRepo.save(newData);
+        return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
+      } else if (ReqType == "Get") {
+        let result = await repository.roleAccessRepo.createQueryBuilder('role')
+        .leftJoinAndSelect(repoNames.RolesTable, 'rl', "rl.id = role.RoleId")
+        .select(["role.id as id", "rl.RoleName as RoleName", "role.RoleId as RoleId",
+            "role.District as District", "role.Taluk as Taluk", "role.Hobli as Hobli",
+            "role.Village as Village", "role.Type Type"])
+        .getRawMany();
+        return response200(res, encryptData(result, secretKey), RESPONSEAPI_MESSAGE.FETCHED);
+      } else {
+        return response400(res, RESPONSEAPI_MESSAGE.CORRECT);
+      }
+    } catch (error) {
+      return apiErrorHandler(error, req, res);
+    };
+  };
+
   async addOrGetRoles(req, res) {
     const bodyData = req.body;
     const { ReqType, id } = bodyData;
@@ -613,12 +640,12 @@ export class WebController {
 
     // Read the file
     if (!file) return response400(res, "No file uploaded");
-    // Use streams for handling large files
-    const workbook = XLSX.readFile(file.path, { cellText: false });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' });
     try {
+      // Use streams for handling large files
+      const workbook = XLSX.readFile(file.path, { cellText: false });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' });
       let findError = checkXlsxKeysExistOrNot(jsonData[0]);
       if (findError.error) {
         return res.send({ code: 422, message: findError.message, data: {} });
@@ -650,11 +677,11 @@ export class WebController {
     // Read the file
     if (!file) return response400(res, "No file uploaded");
     // Use streams for handling large files
-    const workbook = XLSX.readFile(file.path, { cellText: false });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' });
     try {
+      const workbook = XLSX.readFile(file.path, { cellText: false });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' });
       let findError = checkXlsxKeysExistOrNot(jsonData[0]);
       if (findError.error) return response400(res, findError.message);
       // Convert data to strings if needed
@@ -679,13 +706,17 @@ export class WebController {
   };
 
   async uploadImages(req, res) {
-    let bodyData = {
-      ImageName: req.file.originalname,
-      ImageData: req.file.buffer,
-      UserId: req.user.userid
-    };
-    const { ImageData, ImageName, UserId } = bodyData;
+    const file = req.file;
+
+    // Read the file
+    if (!file) return response400(res, "No file uploaded");
     try {
+      let bodyData = {
+        ImageName: file.originalname,
+        ImageData: file.buffer,
+        UserId: req.user?.userid
+      };
+      const { ImageData, ImageName, UserId } = bodyData;
       let savedData = await repository.uploadImgAndVideoRepo.save({ ImageData, ImageName, RecordType: 'Image', UserId });
       let insertedId = savedData.id;
       // Construct video URL
@@ -698,7 +729,7 @@ export class WebController {
   };
 
   async getImage(req, res) {
-    const bodyData = req.body;
+    const bodyData = req.params;
     const { id } = bodyData;
     if (!id) return response400(res, "Missing 'id' in req formate");
 
@@ -718,12 +749,12 @@ export class WebController {
 
     // Read the file
     if (!file) return response400(res, "No file uploaded");
-    const workbook = XLSX.readFile(file.path, { cellText: false });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' });
-
+    
     try {
+      const workbook = XLSX.readFile(file.path, { cellText: false });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' });
       const convertedData = jsonData.map((row) => {
         const convertedRow = {};
         Object.keys(row).forEach((key) => {

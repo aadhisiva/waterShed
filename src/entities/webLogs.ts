@@ -6,31 +6,30 @@ import {
   } from "typeorm";
   
   
-  @Entity()
+  @Entity({name: "WebLogs"})
   export class webLogs {
-  
     @PrimaryGeneratedColumn()
-    id: number;
-  
-    @Column({ nullable:true, type: 'nvarchar', length: 100 })
-    UserId: string;
-  
-    @Column({ nullable:true, type: 'nvarchar', length: 100 })
-    WebPage: string;
+    id!: string;
 
-    @Column({ nullable:true, type: 'nvarchar', length: 200})
-    Message: string;
+    @Column({ type: "varchar", length: 255, default: null})
+    Method!: string;
 
-    @Column({ nullable:true, type: 'text' })
-    Request: string;
+    @Column({ type: "varchar", length: 255, default: null})
+    Code!: string;
 
-    @Column({ nullable:true, type: 'text' })
-    Response: string;
+    @Column({ type: "varchar", length: 255, default: null})
+    UserId!: string;
 
-    @Column({ nullable:true, type: 'nvarchar', length: 200})
-    ResponseType: string;
+    @Column({ type: "varchar", length: 255, default: null})
+    Endpoint!: string;
+
+    @Column({ type: "text", nullable: true })
+    RequestBody!: string;
+
+    @Column({ type: 'text', nullable: true })
+    ResponseBody!: string;
 
     @CreateDateColumn()
-    CreatedDate: Date;
+    CreatedDate!: Date;
   };
   

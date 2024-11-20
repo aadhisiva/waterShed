@@ -8,7 +8,6 @@ import { DprsCommonLand } from "../entities/dprsCommon";
 import { DprsPrivateLand } from "../entities/dprsPrivate";
 import { MasterData } from "../entities/masterData";
 import { MobileLog } from "../entities/mobile_logs";
-import { MobileLogs } from "../entities/mobileLogs";
 import { OtpLogs } from "../entities/otpLogs";
 import { QuestionMapping } from "../entities/QuestionMapping";
 import { Questions } from "../entities/questions";
@@ -17,7 +16,6 @@ import { RolesAccess } from "../entities/roleAccess";
 import { Roles } from "../entities/roles";
 import { Schemes } from "../entities/schemes";
 import { Sectors } from "../entities/sectors";
-import { superAdmin } from "../entities/superAdmin";
 import { UploadImgAndVideo } from "../entities/uploadImgAndVideos";
 import { UserData } from "../entities/userData";
 import { Versions } from "../entities/versions";
@@ -30,9 +28,7 @@ export const allEntities = [
     Versions,
     MasterData,
     webLogs,
-    superAdmin,
     OtpLogs,
-    MobileLogs,
     UserData,
     RolesAccess,
     Activity,
