@@ -34,7 +34,6 @@ export default function SelectReportFields({
   const [{ RoleAccess, Mobile }] = useSelectorForUser();
 
   const {state} = useLocation();
-  console.log("state",state)
 
   const {
     DistrictCode,
@@ -54,15 +53,15 @@ export default function SelectReportFields({
           ? 'Taluk'
           : '';
 
-  const checkAdmin = RoleAccess.District == 'Yes';
-  const checkDistrict = RoleAccess.Taluk == 'Yes';
+//   const checkAdmin = RoleAccess.District == 'Yes';
+//   const checkDistrict = RoleAccess.Taluk == 'Yes';
 
   const getDistricts = async () => {
     try {
       setLoading(true);
       let { data } = await axiosInstance.post('getMasterDropdown', {
         ReqType: 1,
-        loginType: checkAdmin ? '' : 'District',
+        loginType: assignReqType,
         ListType: assignReqType,
         Mobile: Mobile,
         Type: '',
@@ -96,7 +95,7 @@ export default function SelectReportFields({
       let { data } = await axiosInstance.post('getMasterDropdown', {
         ReqType: 2,
         UDCode: value,
-        loginType: checkDistrict ? '' : 'Taluk',
+        loginType: assignReqType,
         ListType: assignReqType,
         Mobile: Mobile,
         Type: '',

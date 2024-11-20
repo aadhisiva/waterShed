@@ -11,6 +11,7 @@ import TextFieldMU from '../formhandle/TextField';
 import SelectField from '../formhandle/SelectField';
 import axiosInstance from '../../axiosInstance';
 import SpinnerLoader from '../spinner/spinner';
+import { decryptData } from '../../utils/decrypt';
 
 interface RolesModalProps {
   open: boolean;
@@ -116,8 +117,9 @@ export default function RoleAccessModal({
     setLoading(true);
     let { data } = await axiosInstance.post('addOrGetRoles', { ReqType: 'Dd' });
     let response = await axiosInstance.post('departments', { ReqType: 'Dd' });
+    let decrypt = decryptData(data.data);
     if (data?.code == 200) {
-      setRoleOptions(data.data);
+      setRoleOptions(decrypt);
       setDepartmentOptions(response.data.data);
       setLoading(false);
     } else {

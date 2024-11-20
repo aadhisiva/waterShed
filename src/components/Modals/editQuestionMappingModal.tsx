@@ -61,7 +61,6 @@ export default function EditQuestionMappingModal({
     ActivityId: formData.ActivityId,
     QuestionId: formData.QuestionId
   };
-console.log("formData",formData)
   const validationSchema = {
     ActivityId: {
       validate: (value: string) => {

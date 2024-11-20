@@ -17,19 +17,23 @@ export default function PreviewDetails() {
   const [imgAndVideo, setImgAndVideos] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const { id, UserId, SubmissionId } = useLocation().state;
+  const { id, UserId, SubmissionId, ActivityId, SubActivityId } = useLocation().state;
   const navigate = useNavigate();
 
   useEffect(() => {
     getDataFromApi();
   }, []);
+console.log("if", !SubActivityId || SubActivityId == '')
 
   const getDataFromApi = async () => {
     try {
       setLoading(true);
+      const isSub = !SubActivityId || SubActivityId == '';
       let { data } = await axiosInstance.post('getRecordById', {
         id: id,
         SubmissionId: SubmissionId,
+        ActivityType: isSub ? 'No': 'Yes',
+        ActivityId: isSub ? ActivityId : SubActivityId
       });
       let response = await axiosInstance.post('fetchImagAndVideo', {
         SubmissionId: SubmissionId,

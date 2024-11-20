@@ -111,7 +111,7 @@ export default function SchmesWithCount() {
                     key={i}
                     color={COLORS[i]}
                     obj={obj}
-                    onClick={undefined}
+                    onClick={onClick}
                   />
                 </Grid>
               ))}

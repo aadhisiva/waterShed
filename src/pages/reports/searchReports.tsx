@@ -58,10 +58,10 @@ const headCells = [
     label: 'Activit Name',
   },
   {
-    id: 'CreatedRole',
+    id: 'TypeOfLand',
     numeric: false,
     disablePadding: false,
-    label: 'Created Role',
+    label: 'Type Of Land',
   },
   {
     id: 'ApplicationStatus',

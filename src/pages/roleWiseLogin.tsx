@@ -95,7 +95,6 @@ export default function RoleWiseLogin() {
       }
     }, 2000);
   } catch(e){
-    console.log("e",e)
     setLoading(false);
   }
   }
