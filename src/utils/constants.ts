@@ -48,4 +48,7 @@ export enum RESPONSEAPI_MESSAGE {
     CORRECT = "Send correct info to server",
     OTP_VERFIY = "Otp versification successfully",
     OTP_VERFIY_FAILED = "Otp versification failed",
-}
+};
+
+
+export const SEEK_CALRIFICATION = "Seek Clarification";

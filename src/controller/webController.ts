@@ -490,12 +490,12 @@ export class WebController {
 
   async assignmentProcess(req, res) {
     const bodyData = req.body;
-    const { ReqType, UserId, id } = bodyData;
+    const { ReqType, UserId } = bodyData;
 
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
       if (ReqType == 1) {
-        let fetchedRecord = await repository.assignedMastersRepo.findOneBy({ UserId: Equal(id) });
+        let fetchedRecord = await repository.assignedMastersRepo.findOneBy({ UserId: Equal(UserId) });
         let newData = { ...fetchedRecord, ...bodyData };
         let fecthedUser = await repository.assignedMastersRepo.save(newData);
         delete fecthedUser.id;
@@ -774,12 +774,12 @@ export class WebController {
   };
   /* **************** search reports ****************** */
   async getRoleForReports(req, res) {
-    const bodyData = req.body;
-    const { DepartmentId } = bodyData;
+    const bodyData = { ...req.body, ...{UserId: req.user.UserId }};
+    const { DepartmentId, UserId } = bodyData;
     if (!DepartmentId) return response400(res, "Missing 'DepartmentId' in req formate");
     try {
-      let sp = `execute WebSchemeWithCount @0`;
-      let result = await AppDataSource.query(sp, [DepartmentId]);
+      let sp = `execute WebSchemeWithCount @0,@1`;
+      let result = await AppDataSource.query(sp, [DepartmentId, UserId]);
       return response200(res, result);
     } catch (error) {
       return apiErrorHandler(error, req, res);
@@ -821,13 +821,14 @@ export class WebController {
   };
 
   async fetchSearchReports(req, res) {
-    const bodyData = req.body;
-    const { DistrictCode = 'NULL', TalukCode = 'NULL', HobliCode = 'NULL', SubWatershed = 'NULL', Sector = 'NULL', Scheme = "NULL", PageNumber = 1, RowsPerPage = 10, SurveyStatus = 'NULL' } = bodyData;
+    const bodyData = { ...req.body, ...{UserId: req.user.UserId }};
+    const { DistrictCode = 'NULL', TalukCode = 'NULL', HobliCode = 'NULL', SubWatershed = 'NULL', Sector = 'NULL', Scheme = "NULL", PageNumber = 1, RowsPerPage = 10, SurveyStatus = 'NULL', UserId, ApplicationStatus } = bodyData;
     try {
-      let spQueryForCounts = `execute WebFetchSearchCountsBasedOnInputs @0,@1,@2,@3,@4,@5`;
-      let spQuery = `execute WebFetchSearchDataBasedOnInputs @0,@1,@2,@3,@4,@5,@6,@7`;
-      let responseForCounts = await AppDataSource.query(spQueryForCounts, [DistrictCode, TalukCode, HobliCode, SubWatershed, Sector, Scheme, SurveyStatus]);
-      let response = await AppDataSource.query(spQuery, [DistrictCode, TalukCode, HobliCode, SubWatershed, Sector, Scheme, SurveyStatus, PageNumber, RowsPerPage]);
+      const AppStatus = ApplicationStatus == '' ? null : ApplicationStatus;
+      let spQueryForCounts = `execute WebFetchSearchCountsBasedOnInputs @0,@1,@2,@3,@4,@5,@6,@7,@8`;
+      let spQuery = `execute WebFetchSearchDataBasedOnInputs @0,@1,@2,@3,@4,@5,@6,@7,@8,@9,@10`;
+      let responseForCounts = await AppDataSource.query(spQueryForCounts, [DistrictCode, TalukCode, HobliCode, SubWatershed, Sector, Scheme, SurveyStatus, UserId, AppStatus]);
+      let response = await AppDataSource.query(spQuery, [DistrictCode, TalukCode, HobliCode, SubWatershed, Sector, Scheme, SurveyStatus, UserId, AppStatus, PageNumber, RowsPerPage]);
       let result = {
         TotalCount: responseForCounts[0].TotalCount,
         Page: PageNumber,
@@ -888,7 +889,10 @@ export class WebController {
 
   async updateStatusFromWeb(req, res) {
     const bodyData = req.body;
-    const { SubmissionId } = bodyData;
+    const { SubmissionId, RoleId, VerfiedId } = bodyData;
+    if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
+    if (!SubmissionId) return response400(res, "Missing 'SubmissionId' in req formate");
+    if (!VerfiedId) return response400(res, "Missing 'VerfiedId' in req formate");
     try {
       let resultForOri = await repository.waterShedDataRepo.findOneBy({ SubmissionId: Equal(SubmissionId) });
       let newData = { ...resultForOri, ...bodyData };
@@ -896,9 +900,9 @@ export class WebController {
         .where("ud.SubmissionId = :id", { id: SubmissionId })
         .orderBy("ud.CreatedDate", "DESC")
         .getOne();
-      delete resultForHistory.id;
-      delete resultForHistory.CreatedDate;
-      delete resultForHistory.UpdatedDate;
+      delete resultForHistory?.id;
+      delete resultForHistory?.CreatedDate;
+      delete resultForHistory?.UpdatedDate;
       let newUpdatedDate = { ...resultForHistory, ...bodyData };
       await repository.waterShedDataHistoryRepo.save(newUpdatedDate);
       await repository.waterShedDataRepo.save(newData);
@@ -920,13 +924,15 @@ export class WebController {
   };
 
   async getDepartments(req, res) {
+    const bodyData = { ...req.body, ...{UserId: req.user.UserId }};
+    const { UserId } = bodyData;
     try {
-      let sp = `execute WebDepartmentsWithCount`;
-      let result = await AppDataSource.query(sp);
+    if (!UserId) return response400(res, "Missing 'UserId' in req formate");
+      let sp = `execute WebDepartmentsWithCount @0`;
+      let result = await AppDataSource.query(sp, [UserId]);
       return response200(res, result);
     } catch (error) {
       return apiErrorHandler(error, req, res);
     };
   };
-
 };

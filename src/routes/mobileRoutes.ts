@@ -37,10 +37,16 @@ router.post('/getCommonLand', authenticateToken, webController.getCommonLand);
 router.post('/saveSurveyData', authenticateToken, webController.saveSurveyData);
 router.post('/getSubmissionList', authenticateToken, webController.getSubmissionList);
 router.post('/getAllSubmissionList', authenticateToken, webController.getAllSubmissionList);
+/* New */
+router.post('/getSurveyByUserAndStatus', authenticateToken, webController.getSurveyByUserAndStatus);
+router.post('/getAllSurveyListByUserId', authenticateToken, webController.getAllSurveyListByUserId);
+
 router.post('/getRecord', authenticateToken, webController.getRecord);
 router.post('/updateSurveyData', authenticateToken, webController.updateSurveyData);
 router.post('/retriveMasters', authenticateToken, webController.retriveMasters);
 router.post('/uploadImages', uploadImage.single('image'), authenticateToken, webController.uploadImages);
 router.get('/getImage/:id', webController.getImage);
+
+router.get('/updateFromLowerLevel', authenticateToken, webController.updateFromLowerLevel);
 
 export default router;

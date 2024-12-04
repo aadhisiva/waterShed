@@ -20,22 +20,36 @@ export class MobileController {
 
   async updateRecordFromTalukLevel(req, res) {
     const bodyData = req.body;
-    const { SubmissionId, VerifiedMobile, VerifiedRole } = bodyData;
+    const { SubmissionId, VerifiedMobile, VerifiedRole, ApplicationStatus } = bodyData;
     if (!SubmissionId) return response400(res, "Missing 'SubmissionId' in req formate");
     if (!VerifiedMobile) return response400(res, "Missing 'VerifiedMobile' in req formate");
     if (!VerifiedRole) return response400(res, "Missing 'VerifiedRole' in req formate");
     try {
       let result = await repository.waterShedDataRepo.findOneBy({ SubmissionId: Equal(SubmissionId) });
+      if (!result?.CreatedRole) return response400(res, "Created role has not added");
+      /* fetching all roles for checking id */
+      let fecthedRoles = await repository.rolesRepo.find();
+      if (fecthedRoles.length == 0) return response400(res, "Role not found.");
+      /* searching child id with createdrole */
+      let findChildId = fecthedRoles.find(obj => obj.RoleName == result.CreatedRole);
+      if (!findChildId) return response400(res, "ChildId not found.");
+      /* searching child id with verfiedrole */
+      let findCurrentId = fecthedRoles.find(obj => obj.RoleName == VerifiedRole);
+      if (!findChildId) return response400(res, "ChildId not found.");
+
+      if (ApplicationStatus == "Seek Clarification") bodyData.RoleId = findChildId.id;
+      bodyData.VerifiedId = Number(findCurrentId.id);
       let newData = { ...result, ...bodyData };
       await repository.waterShedDataRepo.save(newData);
       let resultForHistory = await repository.waterShedDataHistoryRepo.createQueryBuilder('ud')
         .where("ud.SubmissionId = :id", { id: SubmissionId })
         .orderBy("ud.CreatedDate", "DESC")
         .getOne();
-      delete resultForHistory.id;
-      delete resultForHistory.CreatedDate;
-      delete resultForHistory.UpdatedDate;
-      let newUpdatedDate = { ...resultForHistory, ...bodyData };
+      resultForHistory = !resultForHistory ? newData : resultForHistory;
+      delete resultForHistory?.id;
+      delete resultForHistory?.CreatedDate;
+      delete resultForHistory?.UpdatedDate;
+      let newUpdatedDate = { ...resultForHistory, ...bodyData, ...{ History: `Updated Application From TalukLevel - ${VerifiedRole}` } };
       await repository.waterShedDataHistoryRepo.save(newUpdatedDate);
       return response200(res, {}, "Updated existing application");
     } catch (error) {
@@ -112,12 +126,12 @@ export class MobileController {
   };
 
   async getTalukLevelSurvey(req, res) {
-    const bodyData = {...req.body, ...{UserId: req.user?.UserId}};
+    const bodyData = { ...req.body, ...{ UserId: req.user?.UserId } };
     const { CategoryId, UserId, SubActivityId, SchemeId, SectorId, ActivityId, StatusOfWork, PageNo = 1, PageSize = 10 } = bodyData;
     const Category = CategoryId == '' ? null : CategoryId;
     const SubActivity = SubActivityId == '' ? null : SubActivityId;
     const Status = StatusOfWork == '' ? null : StatusOfWork;
-    
+
     if (!SchemeId) return response400(res, "Missing 'SchemeId' in req formate");
     if (!SectorId) return response400(res, "Missing 'SectorId' in req formate");
     if (!UserId) return response400(res, "Missing 'UserId' in req formate");
@@ -125,13 +139,13 @@ export class MobileController {
     try {
       let sp = `execute MobileTalukLevelSurveyList @0,@1,@2,@3,@4,@5,@6,@7,@8`;
       let spForCounts = `execute MobileTalukLevelSurveyCounts @0,@1,@2,@3,@4,@5,@6`;
-      let resultForData = await AppDataSource.query(sp, [UserId, SchemeId, SectorId, Category , ActivityId, SubActivity, Status, PageNo, PageSize]);
+      let resultForData = await AppDataSource.query(sp, [UserId, SchemeId, SectorId, Category, ActivityId, SubActivity, Status, PageNo, PageSize]);
       let resultForCounts = await AppDataSource.query(spForCounts, [UserId, SchemeId, SectorId, Category, ActivityId, SubActivity, Status]);
       let result = {
-        TotalCount: resultForCounts[0]?.TotalCount || 0,
+        totalCount: resultForCounts[0]?.TotalCount || 0,
         PageNo: PageNo,
         PageSize: PageSize,
-        TotalData: resultForData || []
+        totalData: resultForData || []
       };
       return response200(res, result, "Retireved successFully");
     } catch (error) {
@@ -184,7 +198,7 @@ export class MobileController {
     if (!HobliCode) return response400(res, "Missing 'HobliCode' in req formate");
     try {
       let result = await repository.masterDataRepo.createQueryBuilder('md')
-        .select(["DISTINCT CONCAT(md.VillageName,' -k- ', md.VillageNameKa) as VillageName"])
+        .select(["DISTINCT md.VillageName as VillageName"])
         .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode",
           { dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode })
         .getRawMany();
@@ -448,20 +462,37 @@ export class MobileController {
   };
 
   async saveSurveyData(req, res) {
-    const bodyData = {...req.body, ...{UserId : req.user.UserId}};
-    const { imagesList, UserId } = bodyData;
-    // if(!Village) return response400(res,"Missing 'Village' in req formate");
+    const bodyData = { ...req.body, ...{ UserId: req.user.UserId } };
+    const { imagesList, UserId, FruitsId, ActivityId, TypeOfLand, SchemeId, SectorId, ApplicationStatus, SubWatershedCode, MicroWatershedCode, RoleId } = bodyData;
     bodyData.SubmissionId = "WS" + "-" + generateUniqueId().slice(2) + "-" + Math.floor(Math.random() * 1000);
+
+    if (!UserId) return response400(res, "Missing 'UserId' in req formate");
+    if (!ActivityId) return response400(res, "Missing 'ActivityId' in req formate");
+    if (!TypeOfLand) return response400(res, "Missing 'TypeOfLand' in req formate");
+    if (!SchemeId) return response400(res, "Missing 'SchemeId' in req formate");
+    if (!SectorId) return response400(res, "Missing 'SectorId' in req formate");
+    if (!ApplicationStatus) return response400(res, "Missing 'ApplicationStatus' in req formate");
+    if (!SubWatershedCode) return response400(res, "Missing 'SubWatershedCode' in req formate");
+    if (!MicroWatershedCode) return response400(res, "Missing 'MicroWatershedCode' in req formate");
+    if (!MicroWatershedCode) return response400(res, "Missing 'MicroWatershedCode' in req formate");
+    if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
     try {
+      if (TypeOfLand == "Private Land") {
+        if (!FruitsId) return response400(res, "Missing 'FruitsId' in req formate");
+        let fetchedRecord = await repository.waterShedDataRepo.findOneBy({ FruitsId: Equal(FruitsId), ActivityId: Equal(ActivityId) });
+        if (fetchedRecord && fetchedRecord?.ApplicationStatus !== "Rejected") return response400(res, `Application already registered with SubId ${fetchedRecord?.SubmissionId} with FruitId ${fetchedRecord?.FruitsId} in this same activity.`);
+      };
       let findData = await repository.userDataRepo.createQueryBuilder('ud')
         .innerJoinAndSelect(repoNames.RolesTable, 'rr', "rr.id = ud.RoleId")
-        .select(["ud.Mobile as Mobile", "ud.Name as Name", "rr.RoleName as RoleName"])
+        .select(["ud.Mobile as Mobile", "ud.Name as Name", "rr.RoleName as RoleName", "rr.id as RoleId"])
         .where("ud.UserId = :id", { id: UserId })
         .getRawOne();
       if (!findData) return response404(res, "User not found");
+
       bodyData.CreatedRole = findData['RoleName'];
-      bodyData.CreatedMobile = findData.Mobile;
-      bodyData.CreatedName = findData.Name;
+      bodyData.CreatedMobile = findData?.Mobile;
+      bodyData.CreatedName = findData?.Name;
+      bodyData.VerifiedId = Number(bodyData?.RoleId);
       let result = await repository.waterShedDataRepo.save(bodyData);
       await repository.waterShedDataHistoryRepo.save({ ...result, ...{ History: "New Application Added" } });
       if (Array.isArray(imagesList)) {
@@ -470,7 +501,7 @@ export class MobileController {
           let eachList = imagesList[i];
           eachList['SubmissionId'] = result.SubmissionId;
           eachList['UserId'] = UserId;
-          eachList['StatusOfWork'] = result.StatusOfWork;
+          eachList['StatusOfWork'] = "Site Selection";
           let saveImage = await repository.watershedImgAndVideoRepo.save(eachList);
           if (saveImage?.code == 422) {
             error = saveImage.message;
@@ -485,7 +516,7 @@ export class MobileController {
   };
 
   async getSubmissionList(req, res) {
-    const bodyData = {...req.body, ...{UserId : req.user?.UserId}};
+    const bodyData = { ...req.body, ...{ UserId: req.user?.UserId } };
     const { UserId, PageNo = 1, PageSize = 10, StatusOfWork, CategoryId, SchemeId, SectorId, ActivityId, SubActivityId } = bodyData;
     if (!UserId) return response400(res, "Missing 'UserId' in req formate");
     try {
@@ -513,7 +544,7 @@ export class MobileController {
   };
 
   async getAllSubmissionList(req, res) {
-    const bodyData = {...req.body, ...{UserId : req.user?.UserId}};
+    const bodyData = { ...req.body, ...{ UserId: req.user?.UserId } };
     const { UserId, PageNo = 1, PageSize = 10, CategoryId, SchemeId, SectorId, ActivityId, SubActivityId } = bodyData;
     if (!UserId) return response400(res, "Missing 'UserId' in req formate");
     try {
@@ -540,8 +571,59 @@ export class MobileController {
     };
   };
 
+
+  async getSurveyByUserAndStatus(req, res) {
+    const bodyData = { ...req.body, ...{ UserId: req.user?.UserId } };
+    const { UserId, PageNo = 1, PageSize = 10, StatusOfWork, CategoryId, SchemeId, SectorId, ActivityId, SubActivityId, ApplicationStatus } = bodyData;
+    if (!UserId) return response400(res, "Missing 'UserId' in req formate");
+    if (!SchemeId) return response400(res, "Missing 'SchemeId' in req formate");
+    if (!SectorId) return response400(res, "Missing 'SectorId' in req formate");
+    if (!ActivityId) return response400(res, "Missing 'ActivityId' in req formate");
+    if (!StatusOfWork) return response400(res, "Missing 'StatusOfWork' in req formate");
+    try {
+      let sp = `execute MobileSurveyList @0,@1,@2,@3,@4,@5,@6,@7,@8,@9`;
+      let spForCounts = `execute MobileSurveyListCounts @0,@1,@2,@3,@4,@5,@6,@7`;
+      let resultForData = await AppDataSource.query(sp, [UserId, SchemeId, SectorId, CategoryId, ActivityId, SubActivityId, StatusOfWork, ApplicationStatus, PageNo, PageSize]);
+      let resultForCounts = await AppDataSource.query(spForCounts, [UserId, SchemeId, SectorId, CategoryId, ActivityId, SubActivityId, StatusOfWork, ApplicationStatus]);
+      let result = {
+        totalCount: resultForCounts[0]?.TotalCount || 0,
+        PageNo: PageNo,
+        PageSize: PageSize,
+        totalData: resultForData || []
+      };
+      return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
+    } catch (error) {
+      return apiErrorHandler(error, req, res);
+    };
+  };
+
+  async getAllSurveyListByUserId(req, res) {
+    const bodyData = { ...req.body, ...{ UserId: req.user?.UserId } };
+    const { UserId, PageNo = 1, PageSize = 10, CategoryId, SchemeId, SectorId, ActivityId, SubActivityId, StatusOfWork, ApplicationStatus } = bodyData;
+    if (!UserId) return response400(res, "Missing 'UserId' in req formate");
+    if (!SchemeId) return response400(res, "Missing 'SchemeId' in req formate");
+    if (!SectorId) return response400(res, "Missing 'SectorId' in req formate");
+    if (!ActivityId) return response400(res, "Missing 'ActivityId' in req formate");
+    try {
+      let sp = `execute MobileSurveyList @0,@1,@2,@3,@4,@5,@6,@7,@8,@9`;
+      let spForCounts = `execute MobileSurveyListCounts @0,@1,@2,@3,@4,@5,@6,@7`;
+      let resultForData = await AppDataSource.query(sp, [UserId, SchemeId, SectorId, CategoryId, ActivityId, SubActivityId, StatusOfWork, ApplicationStatus, PageNo, PageSize]);
+      let resultForCounts = await AppDataSource.query(spForCounts, [UserId, SchemeId, SectorId, CategoryId, ActivityId, SubActivityId, StatusOfWork, ApplicationStatus]);
+      let result = {
+        totalCount: resultForCounts[0]?.TotalCount || 0,
+        PageNo: PageNo,
+        PageSize: PageSize,
+        totalData: resultForData || []
+      };
+      return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
+    } catch (error) {
+      return apiErrorHandler(error, req, res);
+    };
+  };
+
+
   async getRecord(req, res) {
-    const bodyData = {...req.body, ...{UserId : req.user.UserId}};
+    const bodyData = { ...req.body, ...{ UserId: req.user.UserId } };
     const { UserId, SubmissionId, SectorId } = bodyData;
     if (!UserId) return response400(res, "Missing 'UserId' in req formate");
     if (!SubmissionId) return response400(res, "Missing 'SubmissionId' in req formate");
@@ -549,11 +631,10 @@ export class MobileController {
     try {
       let query = `execute getRecordForPreview @0,@1,@2`;
       let result = await AppDataSource.query(query, [UserId, SubmissionId, SectorId]);
-      let fetchedImages = await repository.watershedImgAndVideoRepo.find({
-        where: { SubmissionId: Equal(SubmissionId), UserId: Equal(UserId) },
+      result[0]['ImagesList'] = await repository.watershedImgAndVideoRepo.find({
+        where: { SubmissionId: Equal(SubmissionId) },
         select: ["Latitude", "Longitude", "RecordType", "Url"]
       })
-      result['ImagesList'] = fetchedImages;
       return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
     } catch (error) {
       return apiErrorHandler(error, req, res);
@@ -561,7 +642,7 @@ export class MobileController {
   };
 
   async updateSurveyData(req, res) {
-    const bodyData = {...req.body, ...{UserId : req.user.UserId}};
+    const bodyData = { ...req.body, ...{ UserId: req.user.UserId } };
     const { UserId, SubmissionId, SectorId } = bodyData;
     if (!UserId) return response400(res, "Missing 'UserId' in req formate");
     if (!SubmissionId) return response400(res, "Missing 'SubmissionId' in req formate");
@@ -650,6 +731,32 @@ export class MobileController {
       res.setHeader('Content-Disposition', `inline; filename="${fetchedRecord.ImageName}"`);
       res.setHeader('Content-Type', 'image/jpeg');
       res.send(fetchedRecord.ImageData);
+    } catch (error) {
+      return apiErrorHandler(error, req, res);
+    };
+  };
+
+  async updateFromLowerLevel(req, res) {
+    const bodyData = { ...req.body, ...{ UserId: req.user.UserId } };
+    const { SubmissionId, VerifiedRole } = bodyData;
+    if (!SubmissionId) return response400(res, "Missing 'SubmissionId' in req formate");
+    if (!VerifiedRole) return response400(res, "Missing 'VerifiedRole' in req formate");
+    try {
+      let resultForOri = await repository.waterShedDataRepo.findOneBy({ SubmissionId: Equal(SubmissionId) });
+      bodyData.VerifiedId = Number(bodyData.RoleId);
+      let newData = { ...resultForOri, ...bodyData };
+      let resultForHistory = await repository.waterShedDataHistoryRepo.createQueryBuilder('ud')
+        .where("ud.SubmissionId = :id", { id: SubmissionId })
+        .orderBy("ud.CreatedDate", "DESC")
+        .getOne();
+      resultForHistory = !resultForHistory ? newData : resultForHistory;
+      delete resultForHistory?.id;
+      delete resultForHistory?.CreatedDate;
+      delete resultForHistory?.UpdatedDate;
+      let newUpdatedDate = { ...resultForHistory, ...bodyData, ...{ History: `Updated Application From Survey Level - ${VerifiedRole}` } };
+      await repository.waterShedDataHistoryRepo.save(newUpdatedDate);
+      await repository.waterShedDataRepo.save(newData);
+      return response200(res, {});
     } catch (error) {
       return apiErrorHandler(error, req, res);
     };

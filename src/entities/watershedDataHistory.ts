@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from "typeorm";
 import { UserData } from "./userData";
+import { Roles } from "./roles";
 
 @Entity({ name: "WaterShedDataHistory" })
 export class WaterShedDataHistory {
@@ -50,7 +51,7 @@ export class WaterShedDataHistory {
   Taluk: string;
 
   @Column({ type: 'nvarchar', default: null, length: 250 })
-  ProjectNameSubWatershed: string;
+  SubWatershedName: string;
 
   @Column({ type: 'nvarchar', default: null, length: 200 })
   GramPanchayat: string;
@@ -348,6 +349,16 @@ export class WaterShedDataHistory {
 
   @Column({ type: 'nvarchar', default: null, length: 300 })
   NumberOfVents: string;
+  
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  Comments: string;
+
+  @ManyToOne(() => Roles, lr => lr.waterShedDataHistoryFK)
+  @JoinColumn({ name: "CurrentLevelId" })
+  RoleId: string;
+
+  @Column({ type: 'int', default: null })
+  VerifiedId: number;
 
   @CreateDateColumn()
   CreatedDate: Date;

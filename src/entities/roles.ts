@@ -14,6 +14,8 @@ import { Schemes } from "./schemes";
 import { RolesAccess } from "./roleAccess";
 import { AssignedMasters } from "./assignedMasters";
 import { ChildRoles } from "./childRoles";
+import { WaterShedData } from "./watershedData";
+import { WaterShedDataHistory } from "./watershedDataHistory";
   
   @Entity({ name: "Roles" })
   export class Roles {
@@ -32,7 +34,7 @@ import { ChildRoles } from "./childRoles";
     IsMobile: string;
 
     @OneToMany(() => UserData, user => user.RoleId, {cascade: true, onDelete: 'CASCADE'})
-    UserData: UserData[]
+    UserDataFK: UserData[]
 
     @OneToMany(() => Schemes, sc => sc.RoleId, {cascade: true, onDelete: 'CASCADE'})
     Schemes: Schemes[];
@@ -40,8 +42,11 @@ import { ChildRoles } from "./childRoles";
     @OneToMany(() => RolesAccess, ra => ra.RoleId, {cascade: true, onDelete: 'CASCADE'})
     RolesAccess: RolesAccess[];
 
-    // @OneToMany(() => loginData, ld => ld.RoleId, {cascade: true, onDelete: 'CASCADE'})
-    // loginData: loginData[];
+    @OneToMany(() => WaterShedData, ld => ld.RoleId, {cascade: true, onDelete: 'CASCADE'})
+    waterShedDataFK: WaterShedData[];
+
+    @OneToMany(() => WaterShedDataHistory, ld => ld.RoleId, {cascade: true, onDelete: 'CASCADE'})
+    waterShedDataHistoryFK: WaterShedDataHistory[];
 
     @OneToMany(() => AssignedMasters, am => am.RoleId, {cascade: true, onDelete: 'CASCADE'})
     AssignedMasterFK: AssignedMasters[];

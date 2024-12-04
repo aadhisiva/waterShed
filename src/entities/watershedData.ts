@@ -8,6 +8,7 @@ import {
   JoinColumn
 } from "typeorm";
 import { UserData } from "./userData";
+import { Roles } from "./roles";
 
 @Entity({ name: "WaterShedData" })
 export class WaterShedData {
@@ -333,6 +334,16 @@ export class WaterShedData {
 
   @Column({ type: 'nvarchar', default: null, length: 300 })
   NumberOfVents: string;
+
+  @Column({ type: 'nvarchar', default: null, length: 300 })
+  Comments: string;
+
+  @ManyToOne(() => Roles, lr => lr.waterShedDataFK)
+  @JoinColumn({ name: "CurrentLevelId" })
+  RoleId: string;
+
+  @Column({ type: 'int', default: null })
+  VerifiedId: number;
 
   @CreateDateColumn()
   CreatedDate: Date;

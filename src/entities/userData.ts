@@ -39,7 +39,7 @@ export class UserData {
   @Column({ type: "nvarchar", length: 50, default: null })
   Otp: string;
 
-  @ManyToOne(() => Roles, lr => lr.AssignedMasterFK)
+  @ManyToOne(() => Roles, lr => lr.UserDataFK)
   @JoinColumn({ name: "RoleId" })
   RoleId: Roles;
 
