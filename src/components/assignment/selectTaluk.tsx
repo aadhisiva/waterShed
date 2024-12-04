@@ -85,7 +85,7 @@ export default function SelectTaluk({ handleSubmitForm }: SelectDistrictProps) {
   };
 
   return (
-    <Container
+    <Box
     sx={{
       position: 'relative',
       border: '1px solid',
@@ -151,6 +151,6 @@ export default function SelectTaluk({ handleSubmitForm }: SelectDistrictProps) {
           </Grid>
         </Grid>
       </form>
-    </Container>
+    </Box>
   );
 }

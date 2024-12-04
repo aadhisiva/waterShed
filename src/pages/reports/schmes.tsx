@@ -3,7 +3,7 @@ import CardFormate from '../../components/common/card';
 import { Box, Grid } from '@mui/material';
 import axiosInstance from '../../axiosInstance';
 import SpinnerLoader from '../../components/spinner/spinner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SEARCH_REPORTS } from '../../utils/routingPath';
 import { COLORS } from '../../utils/constants';
 import BorderWithTitle from '../../components/common/borderWithTitle';
@@ -14,6 +14,7 @@ export default function SchmesWithCount() {
   const [departments, setDepartments] = useState([]);
 
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     fecthIntialData();
@@ -55,10 +56,10 @@ export default function SchmesWithCount() {
   };
 
   const onClick = (obj: any) => {
+    // searchParams.set("SchemeId", obj.id);
+    // setSearchParams(searchParams);
     navigate(SEARCH_REPORTS, { state: obj });
   };
-
-  // let random = Math.floor(Math.random() * COLORS.length);
 
   return (
     <Box>

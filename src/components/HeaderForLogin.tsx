@@ -171,7 +171,7 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
   const muiUtils = React.useContext(MUIWrapperContext);
   const navigate = useNavigate();
   const [dispatch] = useDisptachForAction();
-  const [{ RoleAccess }] = useSelectorForUser();
+  const [{ RoleAccess, RoleName }] = useSelectorForUser();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -221,6 +221,7 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
+      <MenuItem>{RoleName}</MenuItem>
       <MenuItem onClick={handleLogout}>Logout</MenuItem>
       {/* <MenuItem onClick={handleMenuClose}>My account</MenuItem> */}
     </Menu>
@@ -275,6 +276,7 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
         >
           <AccountCircle />
         </IconButton>
+        <p>{RoleName}</p>
         <p onClick={handleLogout}>Logout</p>
       </MenuItem>
     </Menu>

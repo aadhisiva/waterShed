@@ -237,6 +237,11 @@ export const routesTaluk = [
         name: "Assign Hobli",
         icon: AssignmentIcon,
         path: ASSIGN_HOBLI
+    },
+    {
+        name: "Scheme Reports",
+        icon: ReportIcon,
+        path: SCHEME_WITH_COUNT
     }
 ];
 

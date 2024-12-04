@@ -56,7 +56,6 @@ axiosInstance.interceptors.response.use(
       case 422:
         // Handle validation errors
         // const validationErrors = response.data.errors;
-        // console.log('Validation Errors:', validationErrors);
         alert(response.data.message || 'Please Try again.' );
         // You can handle these errors in your components accordingly
         break;

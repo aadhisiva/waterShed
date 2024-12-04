@@ -4,8 +4,11 @@ import SelectField from '../../components/formhandle/SelectField';
 import useDisptachForAction from '../../components/customHooks/useDis';
 import useSelectorForUser from '../../components/customHooks/useSelectForUser';
 import axiosInstance from '../../axiosInstance';
-import { useLocation } from 'react-router-dom';
-import { COMPLETED, ON_GOING_PROCESS, SITE_SELECTION } from '../../utils/constants';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import {
+  applicationStatusList,
+  statusOfWorkList,
+} from '../../utils/constants';
 
 interface SelectReportFieldsProps {
   handleSearchResult: any;
@@ -20,6 +23,7 @@ export default function SelectReportFields({
     SubWatershed: '',
     Sector: '',
     SurveyStatus: '',
+    ApplicationStatus: ''
   });
 
   const [districtDropDown, setDistrictDropDown] = useState([]);
@@ -33,7 +37,7 @@ export default function SelectReportFields({
   const [dispatch] = useDisptachForAction();
   const [{ RoleAccess, Mobile }] = useSelectorForUser();
 
-  const {state} = useLocation();
+  const { state } = useLocation();
 
   const {
     DistrictCode,
@@ -42,6 +46,7 @@ export default function SelectReportFields({
     Sector,
     HobliCode,
     SurveyStatus,
+    ApplicationStatus
   } = selectedItems;
 
   let assignReqType =
@@ -49,25 +54,22 @@ export default function SelectReportFields({
       ? ''
       : RoleAccess.Taluk == 'Yes'
         ? 'District'
-        : RoleAccess.Gp == 'Yes'
+        : RoleAccess.Hobli == 'Yes'
           ? 'Taluk'
           : '';
-
-//   const checkAdmin = RoleAccess.District == 'Yes';
-//   const checkDistrict = RoleAccess.Taluk == 'Yes';
 
   const getDistricts = async () => {
     try {
       setLoading(true);
       let { data } = await axiosInstance.post('getMasterDropdown', {
         ReqType: 1,
-        loginType: assignReqType,
+        loginType: assignReqType == 'Taluk' ? 'District' : assignReqType,
         ListType: assignReqType,
         Mobile: Mobile,
         Type: '',
       });
       let response = await axiosInstance.post('getSectorsBySchemeId', {
-        SchemeId: state?.id
+        SchemeId: state?.id,
       });
       setDistrictDropDown(data?.data);
       setSectorsDropDown(response.data?.data);
@@ -91,6 +93,7 @@ export default function SelectReportFields({
         SubWatershed: '',
         Sector: '',
         SurveyStatus: '',
+        ApplicationStatus: '',
       }));
       let { data } = await axiosInstance.post('getMasterDropdown', {
         ReqType: 2,
@@ -113,6 +116,7 @@ export default function SelectReportFields({
         SubWatershed: '',
         Sector: '',
         SurveyStatus: '',
+        ApplicationStatus: '',
       }));
       let { data } = await axiosInstance.post('getMasterDropdown', {
         ReqType: 3,
@@ -132,11 +136,12 @@ export default function SelectReportFields({
         SubWatershed: '',
         Sector: '',
         SurveyStatus: '',
+        ApplicationStatus: '',
       }));
       let { data } = await axiosInstance.post('getSubWatershed', {
         DistrictCode,
         TalukCode,
-        HobliCode: value
+        HobliCode: value,
       });
       setSubWatershedDropDown(data.data);
     }
@@ -149,6 +154,40 @@ export default function SelectReportFields({
         SubWatershed: value,
         Sector: '',
         SurveyStatus: '',
+        ApplicationStatus: '',
+      }));
+    }
+  };
+
+  const handleSectorSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const {name, value} = e.target;
+    if (Sector !== value) {
+      setSelectItems((prev) => ({
+        ...prev,
+        [name]: value,
+        SurveyStatus: '',
+        ApplicationStatus: '',
+      }));
+    }
+  };
+
+  const handleStatusOfWorkSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const {name, value} = e.target;
+    if (SurveyStatus !== value) {
+      setSelectItems((prev) => ({
+        ...prev,
+        [name]: value,
+        ApplicationStatus: '',
+      }));
+    }
+  };
+
+  const handleApplicationStatusSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const {name, value} = e.target;
+    if (ApplicationStatus !== value) {
+      setSelectItems((prev) => ({
+        ...prev,
+        [name]: value,
       }));
     }
   };
@@ -162,13 +201,10 @@ export default function SelectReportFields({
       SubWatershed: '',
       Sector: '',
       SurveyStatus: '',
+      ApplicationStatus: ''
     }));
   };
-const statusOfWorkList = [
-  {name: SITE_SELECTION, value: SITE_SELECTION},
-  {name: ON_GOING_PROCESS, value: ON_GOING_PROCESS},
-  {name: COMPLETED, value: COMPLETED}
-]
+
   return (
     <Box
       sx={{
@@ -242,12 +278,7 @@ const statusOfWorkList = [
             name="Sector"
             label="Sector Name"
             value={Sector}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setSelectItems({
-                ...selectedItems,
-                Sector: e.target.value
-              })
-            }
+            onChange={handleSectorSelect}
             options={sectorsList}
           />
         </Grid>
@@ -256,20 +287,29 @@ const statusOfWorkList = [
             name="SurveyStatus"
             label="StatusOfWork"
             value={SurveyStatus}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setSelectItems({
-                ...selectedItems,
-                SurveyStatus: e.target.value
-              })
-            }
+            onChange={handleStatusOfWorkSelect}
             options={statusOfWorkList}
+          />
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <SelectField
+            name="ApplicationStatus"
+            label="Application Status"
+            value={ApplicationStatus}
+            onChange={handleApplicationStatusSelect}
+            options={applicationStatusList}
           />
         </Grid>
         <Grid item md={3} sm={6}>
           <Button
             type="button"
             variant="contained"
-            onClick={() => handleSearchResult(selectedItems)}
+            onClick={() =>
+              handleSearchResult({
+                ...selectedItems,
+                ...{ clearFilters: handleClearFilters },
+              })
+            }
             color="primary"
           >
             Search Reports

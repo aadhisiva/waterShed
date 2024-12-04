@@ -86,7 +86,8 @@ export default function OtpVerifyPage({ userData, handleResendOTP }: any) {
         ...{
           RoleName: findObj.RoleName,
           RoleId: values.RoleId,
-          RoleAccess: userAccess['access']
+          RoleAccess: userAccess['access'],
+          UserId: userAccess['UserId']
         },
       }),
     );

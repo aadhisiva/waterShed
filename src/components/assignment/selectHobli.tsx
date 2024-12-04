@@ -116,7 +116,7 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
   };
 
   return (
-    <Container
+    <Box
     sx={{
       position: 'relative',
       border: '1px solid',
@@ -194,6 +194,6 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
           </Grid>
         </Grid>
       </form>
-    </Container>
+    </Box>
   );
 }

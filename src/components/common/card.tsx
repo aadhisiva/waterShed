@@ -44,6 +44,16 @@ export default function CardFormate({obj, onClick, color}: CardFormateProps)  {
         {/* <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
           Word of the Day
         </Typography> */}
+        {obj?.logo && 
+         <img
+            srcSet={obj?.logo}
+            src={obj?.logo}
+            alt={"watershed"}
+            loading="lazy"
+            width={100}
+            height={100}
+          />
+        }
         <Typography variant="h5" component="div">
           {obj.name}
         </Typography>

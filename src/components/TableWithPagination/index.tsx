@@ -10,6 +10,7 @@ import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import EditIcon from '@mui/icons-material/Edit';
+import ViewListIcon from '@mui/icons-material/ViewList';
 
 import { EnhancedTableHead } from './Header';
 import { EnhancedTableToolbar } from './Toolbar';
@@ -70,10 +71,10 @@ interface EnhancedTableDataProps {
   rowsPerPage?: number | any;
   setRowsPerPage?: any;
   totalCount: number;
+  isButtonType?: string;
 };
 
 const debounceDelay = 500;
-
 export default function TableWithPagination({
   handleClickModify,
   rows,
@@ -85,7 +86,8 @@ export default function TableWithPagination({
   setPage,
   rowsPerPage,
   setRowsPerPage,
-  totalCount
+  totalCount,
+  isButtonType
 }: EnhancedTableDataProps) {
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState('');
@@ -195,12 +197,19 @@ export default function TableWithPagination({
                             key={labelId + '' + index}
                             onClick={() => handleClickModify(row)}
                           >
-                            <Tooltip title="Edit">
+                            <Tooltip title={isButtonType !== "Edit" ? isButtonType : "Edit"}>
                               <IconButton>
+                                {isButtonType !== "Edit" ? 
+                                <ViewListIcon
+                                  color="primary"
+                                  sx={{ fontSize: 15 }}
+                                />
+                                :
                                 <EditIcon
                                   color="primary"
                                   sx={{ fontSize: 15 }}
                                 />
+                        }
                               </IconButton>
                             </Tooltip>
                           </TableCell>

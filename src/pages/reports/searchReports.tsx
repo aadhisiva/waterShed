@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import SelectReportFields from './selectReportFields';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Box } from '@mui/material';
 import axiosInstance from '../../axiosInstance';
 import EnhancedTableData from '../../components/TableData';
 import { PREVIEW_HISTORY } from '../../utils/routingPath';
 import TableWithPagination from '../../components/TableWithPagination';
 import SpinnerLoader from '../../components/spinner/spinner';
+import useSelectorForUser from '../../components/customHooks/useSelectForUser';
 
 const headCells = [
   {
@@ -76,6 +77,12 @@ const headCells = [
     label: 'StatusOfWork',
   },
   {
+    id: 'CurrentLevel',
+    numeric: false,
+    disablePadding: false,
+    label: 'Current Level',
+  },
+  {
     id: 'Action',
     numeric: false,
     disablePadding: false,
@@ -113,6 +120,7 @@ export default function SearchReports() {
       Sector,
       HobliCode,
       SurveyStatus,
+      ApplicationStatus
     } = searchObject;
 
     setLoading(true);
@@ -124,12 +132,10 @@ export default function SearchReports() {
         SubWatershed: SubWatershed || null,
         Sector: Sector || null,
         Scheme: state.id || null,
-        SurveyStatus: SurveyStatus,
-        // StartDate: SurveyStatus,
-        // EndDate: null,
+        SurveyStatus: SurveyStatus || null,
+        ApplicationStatus: ApplicationStatus || null,
         PageNumber: activePage + 1,
-        RowsPerPage: rowsPerPage,
-        // LossType: lossType || null,
+        RowsPerPage: rowsPerPage
       });
       setOriginalData(data.data?.TotalData);
       setTotalCount(data.data?.TotalCount);
@@ -142,6 +148,7 @@ export default function SearchReports() {
 
   const handleSearchResult = async (values: any) => {
     setSearchObject(values);
+    // values.clearFilters();
     setSearching(true);
   };
   return (
@@ -151,7 +158,7 @@ export default function SearchReports() {
       <Box sx={{ mt: 6 }}>
         <TableWithPagination
           handleClickModify={(obj: any) =>
-            navigate(PREVIEW_HISTORY, { state: obj })
+            navigate(PREVIEW_HISTORY, { state: {...obj, ...{searchStatus : searchObject.ApplicationStatus} }})
           }
           rows={copyOforiginalData}
           originalData={originalData}
@@ -160,6 +167,7 @@ export default function SearchReports() {
           title="Search Reports"
           totalCount={Number(totalCount)}
           page={activePage}
+          isButtonType='Edit'
           setPage={setActivePage}
           rowsPerPage={rowsPerPage}
           setRowsPerPage={setRowsPerPage}
