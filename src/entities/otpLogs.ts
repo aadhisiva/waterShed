@@ -26,6 +26,6 @@ import {
     UserId: string;
   
     @CreateDateColumn()
-    createdDate: Date;
+    CreatedDate: Date;
   }
   

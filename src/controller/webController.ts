@@ -889,10 +889,10 @@ export class WebController {
 
   async updateStatusFromWeb(req, res) {
     const bodyData = req.body;
-    const { SubmissionId, RoleId, VerfiedId } = bodyData;
+    const { SubmissionId, RoleId, VerifiedId } = bodyData;
     if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
     if (!SubmissionId) return response400(res, "Missing 'SubmissionId' in req formate");
-    if (!VerfiedId) return response400(res, "Missing 'VerfiedId' in req formate");
+    if (!VerifiedId) return response400(res, "Missing 'VerifiedId' in req formate");
     try {
       let resultForOri = await repository.waterShedDataRepo.findOneBy({ SubmissionId: Equal(SubmissionId) });
       let newData = { ...resultForOri, ...bodyData };

@@ -414,7 +414,8 @@ export class MobileController {
       const page = Page; // Example: current page number
       const pageSize = PageSize; // Example: number of records per page
       const [results, total] = await repository.dprsPrivateLandRepo.createQueryBuilder('dprs')
-        .where('dprs.Village = :Village or dprs.Village = :VillageKa', { Village: VillageEn.trim(), VillageKa: VillageKa.trim() })
+        // .where('dprs.Village = :Village or dprs.Village = :VillageKa', { Village: VillageEn.trim(), VillageKa: VillageKa.trim() })
+        .where('dprs.Village = :Village', { Village: VillageEn.trim() })
         .orderBy('dprs."id"', 'ASC') // Make sure to use an appropriate column for ordering
         .skip((page - 1) * pageSize)
         .take(pageSize)
@@ -442,7 +443,8 @@ export class MobileController {
       const page = Page; // Example: current page number
       const pageSize = PageSize; // Example: number of records per page
       const [results, total] = await repository.dprsCommonLandRepo.createQueryBuilder('dprs')
-        .where('dprs.Village = :Village or dprs.Village = :VillageKa', { Village: VillageEn.trim(), VillageKa: VillageKa.trim() })
+        // .where('dprs.Village = :Village or dprs.Village = :VillageKa', { Village: VillageEn.trim(), VillageKa: VillageKa.trim() })
+        .where('dprs.Village = :Village', { Village: VillageEn.trim() })
         .orderBy('dprs."id"', 'ASC') // Make sure to use an appropriate column for ordering
         .skip((page - 1) * pageSize)
         .take(pageSize)
