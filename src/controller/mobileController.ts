@@ -127,20 +127,21 @@ export class MobileController {
 
   async getTalukLevelSurvey(req, res) {
     const bodyData = { ...req.body, ...{ UserId: req.user?.UserId } };
-    const { CategoryId, UserId, SubActivityId, SchemeId, SectorId, ActivityId, StatusOfWork, PageNo = 1, PageSize = 10 } = bodyData;
+    const { CategoryId, UserId, SubActivityId, SchemeId, SectorId, ActivityId, StatusOfWork, PageNo = 1, PageSize = 10, ApplicationStatus } = bodyData;
     const Category = CategoryId == '' ? null : CategoryId;
     const SubActivity = SubActivityId == '' ? null : SubActivityId;
     const Status = StatusOfWork == '' ? null : StatusOfWork;
+    const AppStatus = ApplicationStatus == '' ? null : ApplicationStatus;
 
     if (!SchemeId) return response400(res, "Missing 'SchemeId' in req formate");
     if (!SectorId) return response400(res, "Missing 'SectorId' in req formate");
     if (!UserId) return response400(res, "Missing 'UserId' in req formate");
     if (!ActivityId) return response400(res, "Missing 'ActivityId' in req formate");
     try {
-      let sp = `execute MobileTalukLevelSurveyList @0,@1,@2,@3,@4,@5,@6,@7,@8`;
-      let spForCounts = `execute MobileTalukLevelSurveyCounts @0,@1,@2,@3,@4,@5,@6`;
-      let resultForData = await AppDataSource.query(sp, [UserId, SchemeId, SectorId, Category, ActivityId, SubActivity, Status, PageNo, PageSize]);
-      let resultForCounts = await AppDataSource.query(spForCounts, [UserId, SchemeId, SectorId, Category, ActivityId, SubActivity, Status]);
+      let sp = `execute MobileTalukLevelSurveyList @0,@1,@2,@3,@4,@5,@6,@7,@8,@9`;
+      let spForCounts = `execute MobileTalukLevelSurveyCounts @0,@1,@2,@3,@4,@5,@6,@7`;
+      let resultForData = await AppDataSource.query(sp, [UserId, SchemeId, SectorId, Category, ActivityId, SubActivity, Status, AppStatus, PageNo, PageSize]);
+      let resultForCounts = await AppDataSource.query(spForCounts, [UserId, SchemeId, SectorId, Category, ActivityId, SubActivity, Status, AppStatus]);
       let result = {
         totalCount: resultForCounts[0]?.TotalCount || 0,
         PageNo: PageNo,
