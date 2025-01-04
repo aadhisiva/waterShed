@@ -1,4 +1,4 @@
-import { ACTIVITY, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, ROLES, SCHEMES, SECTORS, ROLES_ACCESS, QUESTION_MASTER, QUESTION_DROPDOWNS, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_TALUK, ASSIGN_HOBLI, ASSIGN_VILLAGE, CHILD_ROLES, MASTER_UPLOAD, CATEGORY, SCHEME_WITH_COUNT } from "./routingPath";
+import { ACTIVITY, DASHBOARD, DEPARTMENT, DPRS_COMMON, DPRS_PRIVATE, ROLES, SCHEMES, SECTORS, ROLES_ACCESS, QUESTION_MASTER, QUESTION_DROPDOWNS, ACTIVITY_MAPPING, ASSIGN_DISTRICT, ASSIGN_TALUK, ASSIGN_HOBLI, ASSIGN_VILLAGE, CHILD_ROLES, MASTER_UPLOAD, CATEGORY, SCHEME_WITH_COUNT, APPLI_HISTORY } from "./routingPath";
 import CorporateFareIcon from '@mui/icons-material/CorporateFare';
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import LocalActivityIcon from '@mui/icons-material/LocalActivity';
@@ -203,9 +203,14 @@ export const routesOfAdmin = [
         path: ASSIGN_DISTRICT
     },
     {
-        name: "Scheme Reports",
+        name: "Survey Reports",
         icon: ReportIcon,
         path: SCHEME_WITH_COUNT
+    },
+    {
+        name: "Application History",
+        icon: ReportIcon,
+        path: APPLI_HISTORY
     }
 ];
 
@@ -221,9 +226,14 @@ export const routesDistrict = [
         path: ASSIGN_TALUK
     },
     {
-        name: "Scheme Reports",
+        name: "Survey Reports",
         icon: ReportIcon,
         path: SCHEME_WITH_COUNT
+    },
+    {
+        name: "Application History",
+        icon: ReportIcon,
+        path: APPLI_HISTORY
     }
 ];
 

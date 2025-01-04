@@ -25,3 +25,4 @@ export const SCHEME_WITH_COUNT = "/Scheme-with-count";
 export const SEARCH_REPORTS = "/Search-Reports";
 export const PREVIEW_HISTORY = "/Preview-History";
 export const PREVIEW_DETAILS = "/Preview-Details";
+export const APPLI_HISTORY = "/Applications-History";

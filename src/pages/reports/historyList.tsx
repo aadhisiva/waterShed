@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import SelectReportFields from './selectReportFields';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import axiosInstance from '../../axiosInstance';
 import { PREVIEW_HISTORY } from '../../utils/routingPath';
 import TableWithPagination from '../../components/TableWithPagination';
 import SpinnerLoader from '../../components/spinner/spinner';
+import SelectFieldsForHistory from './selectFieldsForHistory';
 
 const headCells = [
   {
@@ -121,18 +121,17 @@ export default function SearchReports() {
       ApplicationStatus
     } = searchObject;
 
+    console.log("searchObject", searchObject)
+
     setLoading(true);
     try {
       let { data } = await axiosInstance.post('fetchSearchReports', {
         DistrictCode: DistrictCode || null,
         TalukCode: TalukCode || null,
         HobliCode: HobliCode || null,
-        SubWatershed: SubWatershed || null,
-        Sector: Sector || null,
-        Scheme: state.id || null,
         SurveyStatus: SurveyStatus || null,
         ApplicationStatus: ApplicationStatus || null,
-        ReportType: "SurveyReport",
+        ReportType: "History",
         PageNumber: activePage + 1,
         RowsPerPage: rowsPerPage
       });
@@ -153,7 +152,7 @@ export default function SearchReports() {
   return (
     <Box sx={{ padding: 2 }}>
       <SpinnerLoader isLoading={loading} />
-      <SelectReportFields handleSearchResult={handleSearchResult} />
+      <SelectFieldsForHistory handleSearchResult={handleSearchResult} />
       <Box sx={{ mt: 6 }}>
         <TableWithPagination
           handleClickModify={(obj: any) =>

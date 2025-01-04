@@ -30,7 +30,8 @@ import {
   SEARCH_REPORTS,
   SECTORS,
   PREVIEW_HISTORY,
-  PREVIEW_DETAILS
+  PREVIEW_DETAILS,
+  APPLI_HISTORY
 } from '../utils/routingPath';
 
 const LoginPageLazy = lazy(() => import('../pages/LoginPage'));
@@ -70,6 +71,7 @@ const SchmesWithCountLazy = lazy(() => import('../pages/reports/schmes'));
 const SearchReportsLazy = lazy(() => import('../pages/reports/searchReports'));
 const PreviewHistoryLazy = lazy(() => import('../pages/reports/previewHistory'));
 const PreviewDetailsLazy = lazy(() => import('../pages/reports/previewDetails'));
+const HistoryListLazy = lazy(() => import('../pages/reports/historyList'));
 
 export default function RoutesPro() {
   const router = createBrowserRouter(
@@ -104,6 +106,7 @@ export default function RoutesPro() {
           <Route path={SEARCH_REPORTS} Component={SearchReportsLazy} />
           <Route path={PREVIEW_HISTORY} Component={PreviewHistoryLazy} />
           <Route path={PREVIEW_DETAILS} Component={PreviewDetailsLazy} />
+          <Route path={APPLI_HISTORY} Component={HistoryListLazy} />
         </Route>
         <Route
           path="/login"

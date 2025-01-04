@@ -4,8 +4,8 @@ import { store } from './store/configureStore';
 import { clearSessionEndTime, userLoggedOut } from './reducers/authReducer';
 
 const axiosInstance = axios.create({
-  // baseURL: 'http://localhost:8888/wapi/admin/', // Replace with your API base URL
-  baseURL: 'https://mis.watershed.karnataka.gov.in/wapi/admin', // Replace with your API base URL
+  baseURL: 'http://localhost:8888/wapi/admin/', // Replace with your API base URL
+  // baseURL: 'https://mis.watershed.karnataka.gov.in/wapi/admin', // Replace with your API base URL
 });
 
 axiosInstance.interceptors.request.use(

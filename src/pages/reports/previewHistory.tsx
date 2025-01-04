@@ -325,7 +325,7 @@ const adminStatus = ApplicationStatus == 'Approved' &&
                       statusOfWorkList.findIndex(
                         (obj) => obj.name == StatusOfWork,
                       ) + 1,
-                      3,
+                      4,
                     )}
                   />
                 </Grid>

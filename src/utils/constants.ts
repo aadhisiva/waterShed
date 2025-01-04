@@ -24,7 +24,8 @@ export const COLORS = [
 export const statusOfWorkList = [
   { name: SITE_SELECTION, value: SITE_SELECTION },
   { name: ON_GOING_PROCESS, value: ON_GOING_PROCESS },
-  { name: COMPLETED, value: COMPLETED }
+  { name: COMPLETED, value: COMPLETED },
+  { name: SURVEY_COMPLETED, value: SURVEY_COMPLETED }
 ];
 
 export const applicationStatusList = [
