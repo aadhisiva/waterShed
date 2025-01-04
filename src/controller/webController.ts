@@ -7,7 +7,7 @@ import fs from "fs";
 
 import { AppDataSource } from "../db/config";
 import { response200, response400, response404 } from "../utils/resBack";
-import { checkXlsxKeysExistOrNot, generateOTP } from "../utils/resuableCode";
+import { checkCommonXlsxKeysExistOrNot, checkXlsxKeysExistOrNot, generateOTP } from "../utils/resuableCode";
 import { apiErrorHandler } from "../utils/reqResHandler";
 import { encryptData } from "../utils/sensitiveData";
 import { RESPONSEAPI_MESSAGE } from "../utils/constants";
@@ -289,11 +289,11 @@ export class WebController {
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
         let result = await repository.roleAccessRepo.createQueryBuilder('role')
-        .leftJoinAndSelect(repoNames.RolesTable, 'rl', "rl.id = role.RoleId")
-        .select(["role.id as id", "rl.RoleName as RoleName", "role.RoleId as RoleId",
+          .leftJoinAndSelect(repoNames.RolesTable, 'rl', "rl.id = role.RoleId")
+          .select(["role.id as id", "rl.RoleName as RoleName", "role.RoleId as RoleId",
             "role.District as District", "role.Taluk as Taluk", "role.Hobli as Hobli",
             "role.Village as Village", "role.Type Type"])
-        .getRawMany();
+          .getRawMany();
         return response200(res, encryptData(result, secretKey), RESPONSEAPI_MESSAGE.FETCHED);
       } else {
         return response400(res, RESPONSEAPI_MESSAGE.CORRECT);
@@ -342,9 +342,9 @@ export class WebController {
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
       if (ReqType == "Add") {
-        let fetchedRecord = await repository.rolesRepo.findOneBy({ id: Equal(id) });
+        let fetchedRecord = await repository.questionsRepo.findOneBy({ id: Equal(id) });
         let newData = { ...fetchedRecord, ...bodyData };
-        await repository.rolesRepo.save(newData);
+        await repository.questionsRepo.save(newData);
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
         let result = await repository.questionsRepo.createQueryBuilder('qu')
@@ -377,11 +377,11 @@ export class WebController {
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == "Get") {
         let result = await repository.questionMappingRepo.createQueryBuilder('qm')
-        .leftJoinAndSelect(repoNames.ActivityTable, 'ac', "ac.id = qm.ActivityId")
-        .leftJoinAndSelect(repoNames.QuestionsTable, 'qu', "qu.id = qm.QuestionId")
-        .select(["qm.id as id", "ac.ActivityName as ActivityName", "qu.Question as Question", "ac.id as ActivityId", "qu.id as QuestionId",
+          .leftJoinAndSelect(repoNames.ActivityTable, 'ac', "ac.id = qm.ActivityId")
+          .leftJoinAndSelect(repoNames.QuestionsTable, 'qu', "qu.id = qm.QuestionId")
+          .select(["qm.id as id", "ac.ActivityName as ActivityName", "qu.Question as Question", "ac.id as ActivityId", "qu.id as QuestionId",
             "qu.QuestionType as QuestionType", "qm.TypeOfLand as TypeOfLand"])
-        .getRawMany();
+          .getRawMany();
         return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED);
       } else if (ReqType == "Edit") {
         let fetchedRecord = await repository.questionMappingRepo.findOneBy({ id: Equal(id) });
@@ -682,7 +682,7 @@ export class WebController {
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' });
-      let findError = checkXlsxKeysExistOrNot(jsonData[0]);
+      let findError = checkCommonXlsxKeysExistOrNot(jsonData[0]);
       if (findError.error) return response400(res, findError.message);
       // Convert data to strings if needed
       const convertedData: Partial<ExcelData>[] = jsonData.map((row: any) => {
@@ -736,9 +736,9 @@ export class WebController {
     try {
       let result = await repository.uploadImgAndVideoRepo.findOneBy({ id: Equal(id) });
       if (!result) return response404(res, "Image not found");
-        res.setHeader('Content-Disposition', `inline; filename="${result.ImageName}"`);
-        res.setHeader('Content-Type', 'image/png');
-        res.send(result.ImageData);
+      res.setHeader('Content-Disposition', `inline; filename="${result.ImageName}"`);
+      res.setHeader('Content-Type', 'image/png');
+      res.send(result.ImageData);
     } catch (error) {
       return apiErrorHandler(error, req, res);
     };
@@ -749,7 +749,7 @@ export class WebController {
 
     // Read the file
     if (!file) return response400(res, "No file uploaded");
-    
+
     try {
       const workbook = XLSX.readFile(file.path, { cellText: false });
       const sheetName = workbook.SheetNames[0];
@@ -774,7 +774,7 @@ export class WebController {
   };
   /* **************** search reports ****************** */
   async getRoleForReports(req, res) {
-    const bodyData = { ...req.body, ...{UserId: req.user.UserId }};
+    const bodyData = { ...req.body, ...{ UserId: req.user.UserId } };
     const { DepartmentId, UserId } = bodyData;
     if (!DepartmentId) return response400(res, "Missing 'DepartmentId' in req formate");
     try {
@@ -821,14 +821,22 @@ export class WebController {
   };
 
   async fetchSearchReports(req, res) {
-    const bodyData = { ...req.body, ...{UserId: req.user.UserId }};
-    const { DistrictCode = 'NULL', TalukCode = 'NULL', HobliCode = 'NULL', SubWatershed = 'NULL', Sector = 'NULL', Scheme = "NULL", PageNumber = 1, RowsPerPage = 10, SurveyStatus = 'NULL', UserId, ApplicationStatus } = bodyData;
+    const bodyData = { ...req.body, ...{ UserId: req.user.UserId } };
+    const { DistrictCode = 'NULL', TalukCode = 'NULL', HobliCode = 'NULL', SubWatershed = 'NULL', Sector = 'NULL', Scheme = "NULL", PageNumber = 1,
+      RowsPerPage = 10, SurveyStatus = 'NULL', UserId, ApplicationStatus, ReportType } = bodyData;
+      
+    const AppStatusInput = ApplicationStatus == '' ? null : ApplicationStatus;
+    const ReportInput = ReportType == '' ? null : ReportType;
+    const SubWatershedInput = SubWatershed == '' ? null : SubWatershed;
+    const SectorInput = Sector == '' ? null : Sector;
+    const HobliInput = HobliCode == '' ? null : HobliCode;
+    const TalukInput = TalukCode == '' ? null : TalukCode;
+    const SurveyStatusInput = SurveyStatus == '' ? null : SurveyStatus;
     try {
-      const AppStatus = ApplicationStatus == '' ? null : ApplicationStatus;
-      let spQueryForCounts = `execute WebFetchSearchCountsBasedOnInputs @0,@1,@2,@3,@4,@5,@6,@7,@8`;
-      let spQuery = `execute WebFetchSearchDataBasedOnInputs @0,@1,@2,@3,@4,@5,@6,@7,@8,@9,@10`;
-      let responseForCounts = await AppDataSource.query(spQueryForCounts, [DistrictCode, TalukCode, HobliCode, SubWatershed, Sector, Scheme, SurveyStatus, UserId, AppStatus]);
-      let response = await AppDataSource.query(spQuery, [DistrictCode, TalukCode, HobliCode, SubWatershed, Sector, Scheme, SurveyStatus, UserId, AppStatus, PageNumber, RowsPerPage]);
+      let spQueryForCounts = `execute WebFetchSearchCountsBasedOnInputs @0,@1,@2,@3,@4,@5,@6,@7,@8,@9`;
+      let spQuery = `execute WebFetchSearchDataBasedOnInputs @0,@1,@2,@3,@4,@5,@6,@7,@8,@9,@10,@11`;
+      let responseForCounts = await AppDataSource.query(spQueryForCounts, [DistrictCode, TalukInput, HobliInput, SubWatershedInput, SectorInput, Scheme, SurveyStatusInput, UserId, AppStatusInput, ReportInput]);
+      let response = await AppDataSource.query(spQuery, [DistrictCode, TalukInput, HobliInput, SubWatershedInput, SectorInput, Scheme, SurveyStatusInput, UserId, AppStatusInput, ReportInput, PageNumber, RowsPerPage]);
       let result = {
         TotalCount: responseForCounts[0].TotalCount,
         Page: PageNumber,
@@ -924,10 +932,10 @@ export class WebController {
   };
 
   async getDepartments(req, res) {
-    const bodyData = { ...req.body, ...{UserId: req.user.UserId }};
+    const bodyData = { ...req.body, ...{ UserId: req.user.UserId } };
     const { UserId } = bodyData;
     try {
-    if (!UserId) return response400(res, "Missing 'UserId' in req formate");
+      if (!UserId) return response400(res, "Missing 'UserId' in req formate");
       let sp = `execute WebDepartmentsWithCount @0`;
       let result = await AppDataSource.query(sp, [UserId]);
       return response200(res, result);
