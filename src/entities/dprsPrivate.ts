@@ -96,9 +96,91 @@ export class DprsPrivateLand {
   @Column({ type: "nvarchar", length: 400, default: null })
   "SWC+ WW Cost (Rs.)": string;
 
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  SpilwayDundavartiNo: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  SpilwaySizeInmtr: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  Farmpondcost: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  SpilwayCost: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  FarmPondsize: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  HortiSpecies1: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  NoofPlants1: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  CostPlant1: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  HortCost1: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  HortiSpecies2: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  NoofPlants2: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  CostPlant2: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  HortCost2: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  TotalHortCost: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  BundPlantationForestry: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  NoofPlants: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  CostPlan: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  Forestrycost: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  TotalBeneficiaryCost: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  HortiSpecies3: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  NoofPlants3: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  CostPlant3: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  HortCost3: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  Bundsowingspecies: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  BundsowingCost: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  Forestry: string;
+
+  @Column({ type: "nvarchar", length: 400, nullable: true })
+  UnitCostPlant: string;
+
   @CreateDateColumn()
   CreatedDate: Date;
 
   @UpdateDateColumn()
   UpdatedDate: Date;
 };
+
