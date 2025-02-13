@@ -541,7 +541,7 @@ export class WebController {
           let result = await repository.masterDataRepo.createQueryBuilder('tt')
             .leftJoinAndSelect(repoNames.AssignedMastersTable, 'am', 'am.TalukCode=tt.TalukCode and am.DistrictCode=tt.DistrictCode')
             .select(["DISTINCT tt.TalukCode as value", "tt.TalukName as name"])
-            .where("am.Mobile = :Mobile and am.ListType = :ListType", { Mobile, ListType })
+            .where("am.Mobile = :Mobile and am.ListType = :ListType and am.DistrictCode = :DistrictCode", { Mobile, ListType, DistrictCode: UDCode })
             .orderBy("TalukName", "ASC")
             .getRawMany();
           return response200(res, result);
