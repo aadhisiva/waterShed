@@ -408,15 +408,22 @@ export class MobileController {
 
   async getPrivateLand(req, res) {
     const bodyData = req.body;
-    const { Village, Page = 1, PageSize = 20 } = bodyData;
+    const { Village, Page = 1, PageSize = 20, SearchTerm } = bodyData;
     if (!Village) return response400(res, "Missing 'Village' in req formate");
     try {
-      let [VillageEn, VillageKa] = Village.split("-k-");
       const page = Page; // Example: current page number
       const pageSize = PageSize; // Example: number of records per page
       const [results, total] = await repository.dprsPrivateLandRepo.createQueryBuilder('dprs')
         // .where('dprs.Village = :Village or dprs.Village = :VillageKa', { Village: VillageEn.trim(), VillageKa: VillageKa.trim() })
-        .where('dprs.Village = :Village', { Village: VillageEn.trim() })
+        .where('dprs.Village = :Village', { Village: Village })        
+        // Apply search term to multiple columns using OR conditions
+        .andWhere(
+          SearchTerm ? 
+            // Search the term in name, address, or owner columns (adjust columns as needed)
+            '(dprs."Owner Name" LIKE :searchTerm OR dprs."Survey hissa" LIKE :searchTerm OR dprs."Fruit ID" LIKE :searchTerm)' 
+            : '1 = 1',
+          { searchTerm: `%${SearchTerm.trim()}%` }
+        )
         .orderBy('dprs."id"', 'ASC') // Make sure to use an appropriate column for ordering
         .skip((page - 1) * pageSize)
         .take(pageSize)
@@ -437,15 +444,21 @@ export class MobileController {
 
   async getCommonLand(req, res) {
     const bodyData = req.body;
-    const { Village, Page = 1, PageSize = 20 } = bodyData;
+    const { Village, Page = 1, PageSize = 20, SearchTerm } = bodyData;
     if (!Village) return response400(res, "Missing 'Village' in req formate");
     try {
-      let [VillageEn, VillageKa] = Village.split("-k-");
       const page = Page; // Example: current page number
       const pageSize = PageSize; // Example: number of records per page
       const [results, total] = await repository.dprsCommonLandRepo.createQueryBuilder('dprs')
         // .where('dprs.Village = :Village or dprs.Village = :VillageKa', { Village: VillageEn.trim(), VillageKa: VillageKa.trim() })
-        .where('dprs.Village = :Village', { Village: VillageEn.trim() })
+        .where('dprs.Village = :Village', { Village: Village })
+        .andWhere(
+          SearchTerm ? 
+            // Search the term in name, address, or owner columns (adjust columns as needed)
+            '(dprs."Survey No" LIKE :searchTerm)' 
+            : '1 = 1',
+          { searchTerm: `%${SearchTerm.trim()}%` }
+        )
         .orderBy('dprs."id"', 'ASC') // Make sure to use an appropriate column for ordering
         .skip((page - 1) * pageSize)
         .take(pageSize)
