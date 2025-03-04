@@ -40,6 +40,12 @@ export class DprsPrivateLand {
   "Gunta": string;
 
   @Column({ type: "nvarchar", length: 400, default: null })
+  KGISVillageCode: string;
+
+  @Column({ type: "nvarchar", length: 12, default: null })
+  PhoneNumber: string;
+
+  @Column({ type: "nvarchar", length: 400, default: null })
   "Area (ha)": string;
 
   @Column({ type: "nvarchar", length: 400, default: null })

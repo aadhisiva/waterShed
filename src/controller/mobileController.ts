@@ -4,10 +4,12 @@ import { Service } from "typedi";
 
 import { AppDataSource } from "../db/config";
 import { response200, response400, response404 } from "../utils/resBack";
-import { generateUniqueId } from "../utils/resuableCode";
+import { generateOTP, generateUniqueId, saveMobileOtps } from "../utils/resuableCode";
 import { apiErrorHandler } from "../utils/reqResHandler";
 import { repoNames, repository } from "../db/repos";
 import { RESPONSEAPI_MESSAGE } from "../utils/constants";
+import { sendOtpAsSingleSms } from "../sms/smsServceResusable";
+import { RESPONSEMSG } from "../utils/statusCodes";
 
 const options = {
   expiresIn: '12h', // Token expiration time
@@ -83,8 +85,8 @@ export class MobileController {
     const { RoleId, Mobile } = bodyData;
     if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
     if (!Mobile) return response400(res, "Missing 'Mobile' in req formate");
-    // bodyData.Otp = generateOTP(4);
-    bodyData.Otp = '1111';
+    bodyData.Otp = generateOTP(4);
+    // bodyData.Otp = '1111';
     try {
       let fetchedUser = await repository.assignedMastersRepo.findOneBy({ RoleId: Equal(RoleId), Mobile: Equal(Mobile) });
       let newData = { ...fetchedUser, ...bodyData };
@@ -96,6 +98,15 @@ export class MobileController {
         ])
         .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile: Mobile, RoleId: RoleId })
         .getRawMany();
+        let sendSingleSms = await sendOtpAsSingleSms(Mobile, bodyData.Otp);
+        if (sendSingleSms.code !== 200) return response400(res, RESPONSEMSG.OTP_FAILED);
+        await saveMobileOtps(
+          Mobile,
+          sendSingleSms?.otpMessage,
+          sendSingleSms?.response,
+          "",
+          bodyData?.Otp
+      );
       let result = (fetchedWithRole || []).map(obj => {
         return {
           ...obj,
@@ -147,7 +158,7 @@ export class MobileController {
         PageNo: PageNo,
         PageSize: PageSize,
         totalData: resultForData || []
-      };
+      };  
       return response200(res, result, "Retireved successFully");
     } catch (error) {
       return apiErrorHandler(error, req, res);
@@ -160,7 +171,8 @@ export class MobileController {
 
     if (!Mobile) return response400(res, "Missing 'Mobile' in req formate");
     if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
-    bodyData.Otp = "1111";
+    // bodyData.Otp = "1111";
+    bodyData.Otp = generateOTP(4);
     try {
       let fetchedVersion = await repository.versionRepo.find();
       bodyData.Version = fetchedVersion[0].Version;
@@ -176,7 +188,15 @@ export class MobileController {
         ])
         .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile: Mobile, RoleId: RoleId })
         .getRawMany();
-
+        let sendSingleSms = await sendOtpAsSingleSms(Mobile, bodyData.Otp);
+        if (sendSingleSms.code !== 200) return response400(res, RESPONSEMSG.OTP_FAILED);
+        await saveMobileOtps(
+          Mobile,
+          sendSingleSms?.otpMessage,
+          sendSingleSms?.response,
+          "",
+          bodyData?.Otp
+      );
       let result = (fecthedRecord || []).map(obj => {
         return {
           ...obj,
@@ -199,7 +219,7 @@ export class MobileController {
     if (!HobliCode) return response400(res, "Missing 'HobliCode' in req formate");
     try {
       let result = await repository.masterDataRepo.createQueryBuilder('md')
-        .select(["DISTINCT md.VillageName as VillageName"])
+        .select(["DISTINCT md.VillageName as VillageName, md.VillageCode as VillageCode"])
         .where("md.DistrictCode = :dcode and md.TalukCode = :tcode and md.HobliCode = :hcode",
           { dcode: DistrictCode, tcode: TalukCode, hcode: HobliCode })
         .getRawMany();

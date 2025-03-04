@@ -52,53 +52,23 @@ export function stringToFinalmessage(message) {
         .join('');
 };
 
-@Service()
-export class SMSServices {
-
-    // send sendSingleSMS to user
-    async sendSingleSMS(userName, password, senderId, message, mobileno, secureKey, templateId) {
-        try {
-            let data = {
-                username: userName.trim(),
-                password: convertPasswordToSha1(password),
-                senderid: senderId.trim(),
-                content: message.trim(),
-                smsservicetype: "singlemsg",
-                mobileno: mobileno,
-                key: hashGenerator(userName, senderId, message, secureKey),
-                templateid: templateId.trim()
-            };
-            let response = await post_url(process.env.SMS_API, data); // calling post_to_url_unicode to send single sms
-            let result = ((response.data?.includes("402" ) !== true) || (response.status !== 200) || (response?.statusText !== "OK"))? 422 : 200;
-            return { code: result, response: response?.data };
-        } catch (e) {
-            Logger.error("error",e);
-            return e.message;
-        }
+export const sendSingleSMS = async (userName, password, senderId, message, mobileno, secureKey, templateId) => {
+    try {
+        let data = {
+            username: userName.trim(),
+            password: convertPasswordToSha1(password),
+            senderid: senderId.trim(),
+            content: message.trim(),
+            smsservicetype: "otpmsg",
+            mobileno: mobileno,
+            key: hashGenerator(userName, senderId, message, secureKey),
+            templateid: templateId.trim()
+        };
+        let response = await post_url(process.env.SMS_API, data); // calling post_to_url_unicode to send single sms
+        let result = ((response.data?.includes("402") !== true) || (response.status !== 200) || (response?.statusText !== "OK")) ? 422 : 200;
+        return { code: result, response: response?.data };
+    } catch (e) {
+        Logger.error("error", e);
+        return e.message;
     }
-
-    // send sendSingleUnicode to user
-    async sendSingleUnicode(userName, password, senderId, messageUnicode, mobileno, secureKey, templateId) {
-        try {
-            let finalmessage = stringToFinalmessage(messageUnicode.trim());
-            let key = hashGenerator(userName, senderId, finalmessage, secureKey);
-            let data = {
-                username: userName.trim(),
-                password: convertPasswordToSha1(password),
-                senderid: senderId.trim(),
-                content: finalmessage.trim(),
-                smsservicetype: "unicodemsg",
-                mobileno: mobileno.trim(),
-                key: key.trim(),
-                templateid: templateId.trim()
-            };
-            let resposne = await post_url(process.env.SMS_API, data); // calling post_url to send single unicode sms
-            return resposne.status;
-        } catch (e) {
-            Logger.error("error",e);
-            return e;
-        }
-    };
-
-
 };

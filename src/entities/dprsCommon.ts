@@ -23,6 +23,9 @@ export class DprsCommonLand {
 
   @Column({ type: "nvarchar", length: 400, default: null })
   "Village": string;
+  
+  @Column({ type: "nvarchar", length: 400, default: null })
+  KGISVillageCode: string;
 
   @Column({ type: "nvarchar", length: 400, default: null })
   "Survey No": string;

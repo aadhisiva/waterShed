@@ -16,6 +16,12 @@ import {
     VillageName: string;
 
     @Column({ default: null,  type: 'nvarchar', length: 70 })
+    KGISMicroWatershedID: string;
+
+    @Column({ default: null,  type: 'nvarchar', length: 70 })
+    VillageCode: string;
+
+    @Column({ default: null,  type: 'nvarchar', length: 70 })
     DistrictCode: string;
 
     @Column({ default: null,  type: 'nvarchar', length: 70 })
@@ -26,30 +32,12 @@ import {
 
     @Column({ default: null,  type: 'nvarchar', length: 100 })
     DistrictName: string;
-
-    @Column({ default: null,  type: 'nvarchar', length: 100 })
-    DistrictNameKa: string;
-
+    
     @Column({ default: null,  type: 'nvarchar', length: 100 })
     TalukName: string;
 
     @Column({ default: null,  type: 'nvarchar', length: 100 })
-    TalukNameKa: string;
-
-    @Column({ default: null,  type: 'nvarchar', length: 100 })
     HobliName: string;
-
-    @Column({ default: null,  type: 'nvarchar', length: 100 })
-    HobliNameKa: string;
-
-    @Column({ default: null,  type: 'nvarchar', length: 100 })
-    VillageNameKa: string;
-  
-    @Column({ default: null,  type: 'nvarchar', length: 100 })
-    CircleName: string;
-
-    @Column({ default: null,  type: 'nvarchar', length: 100 })
-    CircleNameKa: string;
 
     @Column({ default: null,  type: 'nvarchar', length: 100 })
     MicroWatershedCode: string;

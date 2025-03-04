@@ -7,11 +7,13 @@ import fs from "fs";
 
 import { AppDataSource } from "../db/config";
 import { response200, response400, response404 } from "../utils/resBack";
-import { checkCommonXlsxKeysExistOrNot, checkXlsxKeysExistOrNot, generateOTP } from "../utils/resuableCode";
+import { checkCommonXlsxKeysExistOrNot, checkXlsxKeysExistOrNot, generateOTP, saveMobileOtps } from "../utils/resuableCode";
 import { apiErrorHandler } from "../utils/reqResHandler";
 import { encryptData } from "../utils/sensitiveData";
 import { RESPONSEAPI_MESSAGE } from "../utils/constants";
 import { repoNames, repository } from "../db/repos";
+import { sendOtpAsSingleSms } from "../sms/smsServceResusable";
+import { RESPONSEMSG } from "../utils/statusCodes";
 
 interface ExcelData {
   [key: string]: string | number;
@@ -55,8 +57,8 @@ export class WebController {
     const bodyData = req.body;
     const { Mobile, Id } = bodyData;
 
-    // bodyData.Otp = generateOTP(4);
-    bodyData.Otp = "1111";
+    bodyData.Otp = generateOTP(4);
+    // bodyData.Otp = "1111";
     bodyData.Id = Id.slice(10, -10)
 
     if (!Id) return response400(res, "Missing 'Id' in req formate");
@@ -69,12 +71,20 @@ export class WebController {
 
       let fecthedRole = await repository.roleAccessRepo.findOneBy({ RoleId: Equal(bodyData.Id) });
       if (!fecthedRole) return response404(res, "Role access not found");
-
+      let sendSingleSms = await sendOtpAsSingleSms(Mobile, bodyData.Otp);
+      if (sendSingleSms.code !== 200) return response400(res, RESPONSEMSG.OTP_FAILED);
+      await saveMobileOtps(
+        Mobile,
+        sendSingleSms?.otpMessage,
+        sendSingleSms?.response,
+        Id,
+        bodyData?.Otp
+      );
       let result = {
         UserId: fetchedUser['UserId'],
         access: fecthedRole
       };
-      return response200(res, encryptData(result, secretKey));
+      return response200(res, encryptData(result, secretKey), RESPONSEMSG.OTP);
     } catch (error) {
       return apiErrorHandler(error, req, res);
     };
@@ -824,7 +834,7 @@ export class WebController {
     const bodyData = { ...req.body, ...{ UserId: req.user.UserId } };
     const { DistrictCode = 'NULL', TalukCode = 'NULL', HobliCode = 'NULL', SubWatershed = 'NULL', Sector = 'NULL', Scheme = "NULL", PageNumber = 1,
       RowsPerPage = 10, SurveyStatus = 'NULL', UserId, ApplicationStatus, ReportType } = bodyData;
-      
+
     const AppStatusInput = ApplicationStatus == '' ? null : ApplicationStatus;
     const ReportInput = ReportType == '' ? null : ReportType;
     const SubWatershedInput = SubWatershed == '' ? null : SubWatershed;
