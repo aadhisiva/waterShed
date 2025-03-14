@@ -162,7 +162,7 @@ export default function HeaderWithSidebar({children, logoutTime, modalOpen, setM
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     React.useState<null | HTMLElement>(null);
   const [language, setLanguage] = React.useState("en");
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
  
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);

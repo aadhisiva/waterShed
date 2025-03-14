@@ -15,13 +15,13 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
   const [talukDropdown, setTalukDropdown] = useState([]);
   const [hobliDropdown, setHobliDropdown] = useState([]);
 
-  const [{Mobile}] = useSelectorForUser();
-  
+  const [{ Mobile, RoleAccess }] = useSelectorForUser();
+
   const initialValues: any = {
     DistrictCode: '',
     TalukCode: '',
     HobliCode: '',
-    Type: ''
+    Type: '',
   };
 
   const validationSchema = {
@@ -48,14 +48,13 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
         }
         return null;
       },
-    }
+    },
   };
 
   const onSubmit = (values: any) => {
     // Handle form submission logic, e.g., API call
     handleSubmitForm(values);
   };
-
   const {
     values,
     errors,
@@ -72,29 +71,52 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
 
   useEffect(() => {
     handleDistictDropdown();
-  },[]);
+  }, []);
   const handleDistictDropdown = async () => {
+    let checkRole =
+      RoleAccess?.District == 'Yes' && RoleAccess?.Type == 'Admin'
+        ? 'Admin'
+        : RoleAccess?.District == 'Yes' && RoleAccess?.Type == 'Both'
+          ? 'Admin'
+          : 'District';
     setLoading(true);
     setValues({
       ...values,
-      DistrictCode: "",
-      TalukCode: "",
-      HobliCode: ""
+      DistrictCode: '',
+      TalukCode: '',
+      HobliCode: '',
     });
-    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, loginType: "District",ListType: "Taluk", Mobile });
+    let { data } = await axiosInstance.post('getMasterDropdown', {
+      ReqType: 1,
+      loginType: checkRole,
+      ListType: 'Taluk',
+      Mobile,
+    });
     setDistrictDropdown(data.data);
     setLoading(false);
   };
 
   const handleTalukDropDown = async (e: ChangeEvent<HTMLInputElement>) => {
+    let checkRole =
+      RoleAccess?.District == 'Yes' && RoleAccess?.Type == 'Admin'
+        ? 'Admin'
+        : RoleAccess?.District == 'Yes' && RoleAccess?.Type == 'Both'
+          ? 'Admin'
+          : 'Taluk';
     setLoading(true);
     setValues({
       ...values,
       DistrictCode: e.target.value,
-      TalukCode: "",
-      HobliCode: ""
+      TalukCode: '',
+      HobliCode: '',
     });
-    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 2, UDCode: e.target.value, loginType: "Taluk",ListType: "Taluk", Mobile });
+    let { data } = await axiosInstance.post('getMasterDropdown', {
+      ReqType: 2,
+      UDCode: e.target.value,
+      loginType: checkRole,
+      ListType: 'Taluk',
+      Mobile,
+    });
     setTalukDropdown(data.data);
     setLoading(true);
   };
@@ -104,7 +126,7 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
     setValues({
       ...values,
       TalukCode: e.target.value,
-      HobliCode: ""
+      HobliCode: '',
     });
     let { data } = await axiosInstance.post('getMasterDropDown', {
       ReqType: 3,
@@ -117,22 +139,22 @@ export default function SelectHobli({ handleSubmitForm }: SelectDistrictProps) {
 
   return (
     <Box
-    sx={{
-      position: 'relative',
-      border: '1px solid',
-      borderRadius: '10px',
-      padding: '10px', // Adjust padding as needed
-      overflow: 'visible',
-      '&::before': {
-        content: '"Assignment"', // Replace with your title text
-        position: 'absolute',
-        top: '-15px', // Adjust to place the title on the border
-        left: '20px', // Adjust to align the title horizontally
-        background: '#fff', // Background color to cover border
-        padding: '0 10px', // Adjust padding to your preference
-        fontWeight: 'bold',
-      }
-    }}
+      sx={{
+        position: 'relative',
+        border: '1px solid',
+        borderRadius: '10px',
+        padding: '10px', // Adjust padding as needed
+        overflow: 'visible',
+        '&::before': {
+          content: '"Assignment"', // Replace with your title text
+          position: 'absolute',
+          top: '-15px', // Adjust to place the title on the border
+          left: '20px', // Adjust to align the title horizontally
+          background: '#fff', // Background color to cover border
+          padding: '0 10px', // Adjust padding to your preference
+          fontWeight: 'bold',
+        },
+      }}
     >
       <form onSubmit={handleSubmit}>
         {/* <span>lkyjftr</span> */}

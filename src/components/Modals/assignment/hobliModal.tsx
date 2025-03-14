@@ -32,22 +32,25 @@ export default function HobliModal({
   const [rolesOption, setRolesOption] = React.useState([]);
   const [hobliOptions, setHobliOptions] = React.useState([]);
 
-  const [{RoleId, Mobile, Name, RoleName}] = useSelectorForUser();
+  const [{RoleId, Mobile, RoleAccess, RoleName}] = useSelectorForUser();
 
   React.useEffect(() => {
-    fecthIntialData();
+    let checkRole = (RoleAccess?.District == "Yes" && RoleAccess?.Type == "Admin") ?
+      "Hobli" : (RoleAccess?.District == "Yes" && RoleAccess?.Type == "Both") ?
+      "Hobli" :  "";
+    fecthIntialData(checkRole);
   }, []);
 
-  const fecthIntialData = async () => {
+  const fecthIntialData = async (checkRole: string) => {
     setLoading(true);
-    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, loginType: "District",ListType: "Taluk", Mobile });
-    let tresponse = await axiosInstance.post("getMasterDropdown", { ReqType: 2, UDCode: formData.DistrictCode, loginType: "Taluk",ListType: "Taluk", Mobile });;
+    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, loginType: checkRole == "" && "District", ListType: "Taluk", Mobile });
+    let tresponse = await axiosInstance.post("getMasterDropdown", { ReqType: 2, UDCode: formData.DistrictCode, loginType: checkRole == "" && "Taluk",ListType: "Taluk", Mobile });;
     let hresponse = await axiosInstance.post('getMasterDropDown', {
       ReqType: 3,
       UDCode: formData.DistrictCode,
       UTCode: formData.TalukCode,
     });
-    let response = await axiosInstance.post('getChildBasedOnParent', { RoleId });
+    let response = await axiosInstance.post('getChildBasedOnParent', { RoleId, AssignType: checkRole });
     if (data?.code == 200) {
       setDistrictOptions(data.data);
       setTalukOptions(tresponse.data.data);

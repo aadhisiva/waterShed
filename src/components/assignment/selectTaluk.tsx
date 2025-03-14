@@ -13,7 +13,7 @@ export default function SelectTaluk({ handleSubmitForm }: SelectDistrictProps) {
   const [loading, setLoading] = useState(false);
   const [districtDropdown, setDistrictDropdown] = useState([]);
   const [talukDropdown, setTalukDropdown] = useState([]);
-  const [{Mobile}] = useSelectorForUser();
+  const [{Mobile, RoleAccess}] = useSelectorForUser();
 
   const initialValues: any = {
     DistrictCode: '',
@@ -59,12 +59,15 @@ export default function SelectTaluk({ handleSubmitForm }: SelectDistrictProps) {
   };
 
   useEffect(() => {
-    handleDistictDropdown();
+    let checkRole = (RoleAccess?.District == "Yes" && RoleAccess?.Type == "Admin") ?
+      "Admin" : (RoleAccess?.District == "Yes" && RoleAccess?.Type == "Both") ?
+      "Admin" :  "District";
+    handleDistictDropdown(checkRole);
   }, [])
 
-  const handleDistictDropdown = async () => {
+  const handleDistictDropdown = async (checkRole: string) => {
     setLoading(true);
-    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, ListType: 'District', loginType: 'District', Mobile })
+    let { data } = await axiosInstance.post("getMasterDropdown", { ReqType: 1, ListType: 'District', loginType: checkRole, Mobile })
     setDistrictDropdown(data.data);
     setLoading(false);
   };

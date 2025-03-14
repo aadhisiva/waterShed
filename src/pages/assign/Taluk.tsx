@@ -21,12 +21,6 @@ const headCells = [
     label: 'Taluk Name',
   },
   {
-    id: 'TalukNameKA',
-    numeric: false,
-    disablePadding: true,
-    label: 'Taluk Name Ka',
-  },
-  {
     id: 'RoleName',
     numeric: false,
     disablePadding: true,

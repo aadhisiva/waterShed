@@ -31,20 +31,23 @@ export default function TalukModal({
   const [talukOptions, setTalukOptions] = React.useState([]);
   const [rolesOption, setRolesOption] = React.useState([]);
 
-  const [{RoleId, Mobile, Name, RoleName}] = useSelectorForUser();
+  const [{RoleId, Mobile, RoleAccess, RoleName}] = useSelectorForUser();
 
   React.useEffect(() => {
-    fecthIntialData();
+    let checkRole = (RoleAccess?.District == "Yes" && RoleAccess?.Type == "Admin") ?
+      "Taluk" : (RoleAccess?.District == "Yes" && RoleAccess?.Type == "Both") ?
+      "Taluk" :  "";
+    fecthIntialData(checkRole);
   }, []);
 
-  const fecthIntialData = async () => {
+  const fecthIntialData = async (checkRole: string) => {
     setLoading(true);
     let { data } = await axiosInstance.post('getMasterDropDown', { ReqType: 1, ListType: 'District', loginType: 'District', Mobile });
     let tresponse = await axiosInstance.post('getMasterDropDown', {
       ReqType: 2,
       UDCode: formData.DistrictCode,
     });
-    let response = await axiosInstance.post('getChildBasedOnParent', { RoleId });
+    let response = await axiosInstance.post('getChildBasedOnParent', { RoleId, AssignType: checkRole });
     if (data?.code == 200) {
       setDistrictOptions(data.data);
       setTalukOptions(tresponse.data.data);

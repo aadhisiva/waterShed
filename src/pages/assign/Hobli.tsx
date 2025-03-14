@@ -35,12 +35,6 @@ const headCells = [
     label: 'Hobli Name',
   },
   {
-    id: 'HobliNameKA',
-    numeric: false,
-    disablePadding: true,
-    label: 'Hobli Name Ka',
-  },
-  {
     id: 'RoleName',
     numeric: false,
     disablePadding: true,
@@ -78,7 +72,7 @@ export default function AssignHobli() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({});
 
-  const [{Mobile}] = useSelectorForUser();
+  const [{ Mobile, RoleAccess }] = useSelectorForUser();
 
   const handleClickModify = (data: Data) => {
     setOpenModal(true);
@@ -91,19 +85,30 @@ export default function AssignHobli() {
   };
 
   const fecthIntialData = async () => {
+    let checkRole =
+      RoleAccess?.District == 'Yes' && RoleAccess?.Type == 'Admin'
+        ? 'All'
+        : RoleAccess?.District == 'Yes' && RoleAccess?.Type == 'Both'
+          ? 'All'
+          : '';
     setLoading(true);
-    let { data } = await axiosInstance.post('getAssignedMasters', {
-      ReqType: "Surveyer",
-      DataType: "",
-      Mobile
-    });
-    if (data?.code == 200) {
-      setTableData(data.data);
-      setCopyTableData(data.data);
+    try {
+      let response = await axiosInstance.post('getAssignedMasters', {
+        ReqType: 'Surveyer',
+        DataType: checkRole,
+        Mobile,
+      });
+      if (response?.data?.code == 200) {
+        setTableData(response.data.data);
+        setCopyTableData(response.data.data);
+        setLoading(false);
+      } else {
+        setLoading(false);
+        alert(response.data.message || 'please try again');
+      }
+    } catch (e) {
+      setOpenModal(false);
       setLoading(false);
-    } else {
-      setLoading(false);
-      alert(data.message || 'please try again');
     }
   };
   useEffect(() => {
@@ -114,18 +119,23 @@ export default function AssignHobli() {
     setLoading(true);
     values['ListType'] = 'Hobli';
     values['ReqType'] = 2;
-    let { data } = await axiosInstance.post('assignmentProcess', values);
-    if (data.code == 200) {
-      await fecthIntialData();
+    try {
+      let response = await axiosInstance.post('assignmentProcess', values);
+      if (response.data.code == 200) {
+        await fecthIntialData();
+        setOpenModal(false);
+        setLoading(false);
+      } else {
+        setOpenModal(false);
+        setLoading(false);
+        alert(response.data.message || 'please try again');
+      }
+    } catch (e) {
       setOpenModal(false);
       setLoading(false);
-    } else {
-      setOpenModal(false);
-      setLoading(false);
-      alert(data.message || 'please try again');
     }
   };
-
+  
   const renderDeoartModal = openModal && (
     <HobliModal
       open={openModal}
