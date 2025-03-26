@@ -118,6 +118,18 @@ export default function QuestionDropdownTypeModal({
     {
       value: 'Yes/No',
       name: 'Yes/No',
+    },
+    {
+      value: 'TopicCoveredIn-SHG',
+      name: 'TopicCoveredIn-SHG',
+    },
+    {
+      value: 'TopicCoveredIn-UG',
+      name: 'TopicCoveredIn-UG',
+    },
+    {
+      value: 'TopicCoveredIn-EC',
+      name: 'TopicCoveredIn-EC',
     }
   ];
   return (

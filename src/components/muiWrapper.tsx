@@ -61,6 +61,9 @@ import React from "react";
     const theme = useMemo(
       () =>
         createTheme({
+          typography: {
+            'fontFamily': 'Poppins, "Open Sans", Epilogue, sans-serif'
+          },
           palette: {
             mode,
           },

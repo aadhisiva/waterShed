@@ -7,6 +7,7 @@ import lightTheme from './components/theme/lightTheme';
 import darkTheme from './components/theme/darkTheme';
 import MUIWrapper from './components/muiWrapper';
 import { CssBaseline } from '@mui/material';
+import "./App.css";
 
 export default function App() {
   const [theme, setTheme] = useState(lightTheme);
