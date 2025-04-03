@@ -15,10 +15,12 @@ router.post('/updateRecordFromTalukLevel', authenticateToken, webController.upda
 router.post('/addImagesToSubId', authenticateToken, webController.addImagesToSubId);
 
 router.post('/loginToTaluk', authVersion, webController.loginToTaluk);
+router.post('/resendOtpToTaluk', authVersion, webController.resendOtpToTaluk);
 router.post('/verfiyTalukOtp', webController.verfiyTalukOtp);
 router.post('/getTalukLevelSurvey', authenticateToken, webController.getTalukLevelSurvey);
 
 router.post('/sendOtp', authVersion, webController.sendOtp);
+router.post('/resendOtp', authVersion, webController.resendOtp);
 router.post('/assignedHobliDetails', webController.assignedHobliDetails);
 router.post('/verifyOtp', webController.verifyOtp);
 
@@ -35,6 +37,7 @@ router.post('/getQuestionsBasedOnActivity', authenticateToken, webController.get
 router.post('/getPrivateLand', authenticateToken, webController.getPrivateLand);
 router.post('/getCommonLand', authenticateToken, webController.getCommonLand);
 router.post('/saveSurveyData', authenticateToken, webController.saveSurveyData);
+router.post('/saveSurveyImages', authenticateToken, webController.saveSurveyImages);
 router.post('/getSubmissionList', authenticateToken, webController.getSubmissionList);
 router.post('/getAllSubmissionList', authenticateToken, webController.getAllSubmissionList);
 /* New */
@@ -47,6 +50,9 @@ router.post('/retriveMasters', authenticateToken, webController.retriveMasters);
 router.post('/uploadImages', uploadImage.single('image'), authenticateToken, webController.uploadImages);
 router.get('/getImage/:id', webController.getImage);
 
-router.get('/updateFromLowerLevel', authenticateToken, webController.updateFromLowerLevel);
+router.post('/updateFromLowerLevel', authenticateToken, webController.updateFromLowerLevel);
+
+router.post('/updateExistingPrivateLand', authenticateToken, webController.updateExistingPrivateLand);
+router.post('/fetchSurveyBySubId', authenticateToken, webController.fetchSurveyDetailsBySubId);
 
 export default router;

@@ -85,19 +85,17 @@ export class MobileController {
     const { RoleId, Mobile } = bodyData;
     if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
     if (!Mobile) return response400(res, "Missing 'Mobile' in req formate");
-    bodyData.Otp = generateOTP(4);
-    // bodyData.Otp = '1111';
+    bodyData.Otp = "";
     try {
       let fetchedUser = await repository.assignedMastersRepo.findOneBy({ RoleId: Equal(RoleId), Mobile: Equal(Mobile) });
-      let newData = { ...fetchedUser, ...bodyData };
-      await repository.assignedMastersRepo.save(newData);
-      let fetchedWithRole = await repository.assignedMastersRepo.createQueryBuilder('vs')
-        .innerJoinAndSelect(repoNames.MasterDataTable, 'md', 'md.DistrictCode=vs.DistrictCode and md.TalukCode=vs.TalukCode')
-        .select([`DISTINCT vs.DistrictCode DistrictCode, vs.TalukCode TalukCode, vs.UserId UserId, 
-          CONCAT('D-',md.DistrictName,'-T-',md.TalukName) as AssignedTaluk`
-        ])
-        .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile: Mobile, RoleId: RoleId })
-        .getRawMany();
+      let findOnlyUser = await repository.assignedMastersRepo.findOneBy({ Mobile: Equal(Mobile) });
+      bodyData.Otp = findOnlyUser.Otp;
+      let checkOtp = fetchedUser?.IsSent > new Date(new Date().setHours(0, 0, 0, 0));
+      if (!checkOtp) {
+        bodyData.Otp = generateOTP(4);
+        let newData = { ...fetchedUser, ...bodyData };
+        newData.IsSent = new Date();
+        await repository.assignedMastersRepo.save(newData);
         let sendSingleSms = await sendOtpAsSingleSms(Mobile, bodyData.Otp);
         if (sendSingleSms.code !== 200) return response400(res, RESPONSEMSG.OTP_FAILED);
         await saveMobileOtps(
@@ -106,7 +104,15 @@ export class MobileController {
           sendSingleSms?.response,
           "",
           bodyData?.Otp
-      );
+        );
+      }
+      let fetchedWithRole = await repository.assignedMastersRepo.createQueryBuilder('vs')
+        .innerJoinAndSelect(repoNames.MasterDataTable, 'md', 'md.DistrictCode=vs.DistrictCode and md.TalukCode=vs.TalukCode')
+        .select([`DISTINCT vs.DistrictCode DistrictCode, vs.TalukCode TalukCode, vs.UserId UserId, 
+          CONCAT('D-',md.DistrictName,'-T-',md.TalukName) as AssignedTaluk`
+        ])
+        .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile: Mobile, RoleId: RoleId })
+        .getRawMany();
       let result = (fetchedWithRole || []).map(obj => {
         return {
           ...obj,
@@ -120,6 +126,33 @@ export class MobileController {
     };
   };
 
+  async resendOtpToTaluk(req, res) {
+    const bodyData = req.body;
+    const { RoleId, Mobile } = bodyData;
+    if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
+    if (!Mobile) return response400(res, "Missing 'Mobile' in req formate");
+    bodyData.Otp = "";
+    try {
+      let findOnlyUser = await repository.assignedMastersRepo.findOneBy({ Mobile: Equal(Mobile) });
+      bodyData.Otp = generateOTP(4);
+      let newData = { ...findOnlyUser, ...bodyData };
+      newData.IsSent = new Date();
+      await repository.assignedMastersRepo.save(newData);
+      let sendSingleSms = await sendOtpAsSingleSms(Mobile, bodyData.Otp);
+      if (sendSingleSms.code !== 200) return response400(res, RESPONSEMSG.OTP_FAILED);
+      await saveMobileOtps(
+        Mobile,
+        sendSingleSms?.otpMessage,
+        sendSingleSms?.response,
+        "",
+        bodyData?.Otp
+      );
+      return response200(res, { Otp: bodyData.Otp });
+    } catch (error) {
+      return apiErrorHandler(error, req, res);
+    };
+  };
+
   async verfiyTalukOtp(req, res) {
     const bodyData = req.body;
     const { RoleId, Mobile, Otp } = bodyData;
@@ -128,7 +161,9 @@ export class MobileController {
     if (!Otp) return response400(res, "Missing 'Otp' in req formate");
     try {
       let fetchedUser = await repository.assignedMastersRepo.findOneBy({ RoleId: Equal(RoleId), Mobile: Equal(Mobile) });
-      let otpCheck = fetchedUser.Otp == Otp;
+      if (!fetchedUser) return response404(res, "fetchedUser not found");
+      let fetchMobileUser = await repository.assignedMastersRepo.findOneBy({ Mobile: Equal(Mobile) });
+      let otpCheck = fetchMobileUser?.Otp == Otp;
       if (otpCheck) return response400(res, "Otp verfification failed");
       return response200(res, {}, "Otp verification successfully");
     } catch (error) {
@@ -158,7 +193,7 @@ export class MobileController {
         PageNo: PageNo,
         PageSize: PageSize,
         totalData: resultForData || []
-      };  
+      };
       return response200(res, result, "Retireved successFully");
     } catch (error) {
       return apiErrorHandler(error, req, res);
@@ -172,22 +207,20 @@ export class MobileController {
     if (!Mobile) return response400(res, "Missing 'Mobile' in req formate");
     if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
     // bodyData.Otp = "1111";
-    bodyData.Otp = generateOTP(4);
     try {
       let fetchedVersion = await repository.versionRepo.find();
       bodyData.Version = fetchedVersion[0].Version;
-
+      bodyData.Otp = "";
       let findData = await repository.userDataRepo.findOneBy({ Mobile: Equal(Mobile), RoleId: Equal(RoleId) });
       if (!findData) return response404(res, "User not found");
-      let newData = { ...findData, ...bodyData };
-      await repository.userDataRepo.save(newData);
-      let fecthedRecord = await repository.userDataRepo.createQueryBuilder('vs')
-        .innerJoinAndSelect(repoNames.MasterDataTable, 'md', 'md.DistrictCode=vs.DistrictCode and md.TalukCode=vs.TalukCode and md.HobliCode=vs.HobliCode')
-        .select([`DISTINCT vs.DistrictCode DistrictCode, vs.TalukCode TalukCode, vs.HobliCode HobliCode, vs.UserId UserId, 
-            CONCAT('D-',md.DistrictName,'-T-',md.TalukName,'-H-',md.HobliName) as assignedHobli`
-        ])
-        .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile: Mobile, RoleId: RoleId })
-        .getRawMany();
+      let findOnlyUser = await repository.userDataRepo.findOneBy({ Mobile: Equal(Mobile) });
+      bodyData.Otp = findOnlyUser.Otp;
+      let checkOtp = findOnlyUser.IsSent > new Date(new Date().setHours(0, 0, 0, 0));
+      if (!checkOtp) {
+        bodyData.Otp = generateOTP(4);
+        let newData = { ...findOnlyUser, ...bodyData };
+        newData.IsSent = new Date();
+        await repository.userDataRepo.save(newData);
         let sendSingleSms = await sendOtpAsSingleSms(Mobile, bodyData.Otp);
         if (sendSingleSms.code !== 200) return response400(res, RESPONSEMSG.OTP_FAILED);
         await saveMobileOtps(
@@ -196,7 +229,15 @@ export class MobileController {
           sendSingleSms?.response,
           "",
           bodyData?.Otp
-      );
+        );
+      }
+      let fecthedRecord = await repository.userDataRepo.createQueryBuilder('vs')
+        .innerJoinAndSelect(repoNames.MasterDataTable, 'md', 'md.DistrictCode=vs.DistrictCode and md.TalukCode=vs.TalukCode and md.HobliCode=vs.HobliCode')
+        .select([`DISTINCT vs.DistrictCode DistrictCode, vs.TalukCode TalukCode, vs.HobliCode HobliCode, vs.UserId UserId, 
+            CONCAT('D-',md.DistrictName,'-T-',md.TalukName,'-H-',md.HobliName) as assignedHobli`
+        ])
+        .where("vs.Mobile = :Mobile and vs.RoleId = :RoleId", { Mobile: Mobile, RoleId: RoleId })
+        .getRawMany();
       let result = (fecthedRecord || []).map(obj => {
         return {
           ...obj,
@@ -205,6 +246,33 @@ export class MobileController {
         }
       })
       return response200(res, { Otp: bodyData?.Otp, mappedRes: result }, "Retireved successFully");
+    } catch (error) {
+      return apiErrorHandler(error, req, res);
+    };
+  };
+
+  async resendOtp(req, res) {
+    const bodyData = req.body;
+    const { Mobile, RoleId } = bodyData;
+
+    if (!Mobile) return response400(res, "Missing 'Mobile' in req formate");
+    if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
+    try {
+      let findOnlyUser = await repository.userDataRepo.findOneBy({ Mobile: Equal(Mobile) });
+      bodyData.Otp = generateOTP(4);
+      let newData = { ...findOnlyUser, ...bodyData };
+      newData.IsSent = new Date();
+      await repository.userDataRepo.save(newData);
+      let sendSingleSms = await sendOtpAsSingleSms(Mobile, bodyData.Otp);
+      if (sendSingleSms.code !== 200) return response400(res, RESPONSEMSG.OTP_FAILED);
+      await saveMobileOtps(
+        Mobile,
+        sendSingleSms?.otpMessage,
+        sendSingleSms?.response,
+        "",
+        bodyData?.Otp
+      );
+      return response200(res, { Otp: bodyData?.Otp }, RESPONSEMSG.OTP);
     } catch (error) {
       return apiErrorHandler(error, req, res);
     };
@@ -267,7 +335,8 @@ export class MobileController {
     try {
       let result = await repository.userDataRepo.findOneBy({ Mobile: Equal(Mobile), RoleId: Equal(RoleId) });
       if (!result) return response404(res, "User not found");
-      if (result.Otp !== Otp) return response400(res, RESPONSEAPI_MESSAGE.OTP_VERFIY_FAILED);
+      let findOnlyUser = await repository.userDataRepo.findOneBy({ Mobile: Equal(Mobile) });
+      if (findOnlyUser.Otp !== Otp) return response400(res, RESPONSEAPI_MESSAGE.OTP_VERFIY_FAILED);
       return response200(res, {}, RESPONSEAPI_MESSAGE.OTP_VERFIY);
     } catch (error) {
       return apiErrorHandler(error, req, res);
@@ -435,12 +504,12 @@ export class MobileController {
       const pageSize = PageSize; // Example: number of records per page
       const [results, total] = await repository.dprsPrivateLandRepo.createQueryBuilder('dprs')
         // .where('dprs.Village = :Village or dprs.Village = :VillageKa', { Village: VillageEn.trim(), VillageKa: VillageKa.trim() })
-        .where('dprs.Village = :Village', { Village: Village })        
+        .where('dprs.Village = :Village', { Village: Village })
         // Apply search term to multiple columns using OR conditions
         .andWhere(
-          SearchTerm ? 
+          SearchTerm ?
             // Search the term in name, address, or owner columns (adjust columns as needed)
-            '(dprs."Owner Name" LIKE :searchTerm OR dprs."Survey hissa" LIKE :searchTerm OR dprs."Fruit ID" LIKE :searchTerm)' 
+            '(dprs."Owner Name" LIKE :searchTerm OR dprs."Survey hissa" LIKE :searchTerm OR dprs."Fruit ID" LIKE :searchTerm)'
             : '1 = 1',
           { searchTerm: `%${SearchTerm.trim()}%` }
         )
@@ -473,9 +542,9 @@ export class MobileController {
         // .where('dprs.Village = :Village or dprs.Village = :VillageKa', { Village: VillageEn.trim(), VillageKa: VillageKa.trim() })
         .where('dprs.Village = :Village', { Village: Village })
         .andWhere(
-          SearchTerm ? 
+          SearchTerm ?
             // Search the term in name, address, or owner columns (adjust columns as needed)
-            '(dprs."Survey No" LIKE :searchTerm)' 
+            '(dprs."Survey No" LIKE :searchTerm)'
             : '1 = 1',
           { searchTerm: `%${SearchTerm.trim()}%` }
         )
@@ -529,23 +598,41 @@ export class MobileController {
       bodyData.CreatedMobile = findData?.Mobile;
       bodyData.CreatedName = findData?.Name;
       bodyData.VerifiedId = Number(bodyData?.RoleId);
-      let result = await repository.waterShedDataRepo.save(bodyData);
-      await repository.waterShedDataHistoryRepo.save({ ...result, ...{ History: "New Application Added" } });
-      if (Array.isArray(imagesList)) {
-        let error;
-        for (let i = 0; i < imagesList.length; i++) {
-          let eachList = imagesList[i];
-          eachList['SubmissionId'] = result.SubmissionId;
+      let savedRes = await repository.waterShedDataRepo.save(bodyData);
+      await repository.waterShedDataHistoryRepo.save({ ...savedRes, ...{ History: "New Application Added" } });
+      let result = [];
+      if (ApplicationStatus !== "Incomplete") {
+        result = await Promise.all((imagesList || []).map(async (eachList) => {
+          eachList['SubmissionId'] = savedRes?.SubmissionId;
           eachList['UserId'] = UserId;
           eachList['StatusOfWork'] = "Site Selection";
-          let saveImage = await repository.watershedImgAndVideoRepo.save(eachList);
-          if (saveImage?.code == 422) {
-            error = saveImage.message;
-          };
-        };
-        if (error) return response400(res, error);
+          return await repository.watershedImgAndVideoRepo.save(eachList);
+        }));
       }
-      return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
+      return response200(res, { survey: "Added", imagesList: result }, RESPONSEAPI_MESSAGE.INSERTED);
+    } catch (error) {
+      return apiErrorHandler(error, req, res);
+    };
+  };
+
+
+  async saveSurveyImages(req, res) {
+    const bodyData = { ...req.body, ...{ UserId: req.user.UserId } };
+    const { imagesList, UserId, SubmissionId } = bodyData;
+
+    if (!UserId) return response400(res, "Missing 'UserId' in req formate");
+    if (!SubmissionId) return response400(res, "Missing 'SubmissionId' in req formate");
+    try {
+      let findData = await repository.waterShedDataRepo.findOneBy({ SubmissionId: Equal(SubmissionId) });
+      let newData = { ...findData, ...bodyData };
+      await repository.waterShedDataRepo.save(newData);
+      let result = await Promise.all((imagesList || []).map(async (eachList) => {
+        eachList['SubmissionId'] = SubmissionId;
+        eachList['UserId'] = UserId;
+        eachList['StatusOfWork'] = "Site Selection";
+        return await repository.watershedImgAndVideoRepo.save(eachList);
+      }));
+      return response200(res, result, RESPONSEAPI_MESSAGE.INSERTED);
     } catch (error) {
       return apiErrorHandler(error, req, res);
     };
@@ -606,7 +693,6 @@ export class MobileController {
       return apiErrorHandler(error, req, res);
     };
   };
-
 
   async getSurveyByUserAndStatus(req, res) {
     const bodyData = { ...req.body, ...{ UserId: req.user?.UserId } };
@@ -793,6 +879,32 @@ export class MobileController {
       await repository.waterShedDataHistoryRepo.save(newUpdatedDate);
       await repository.waterShedDataRepo.save(newData);
       return response200(res, {});
+    } catch (error) {
+      return apiErrorHandler(error, req, res);
+    };
+  };
+
+  async updateExistingPrivateLand(req, res) {
+    const bodyData = { ...req.body, ...{ UserId: req.user.UserId } };
+    const { id } = bodyData;
+    if (!id) return response400(res, "Missing 'id' in req formate");
+    try {
+      let fetchedRecord = await repository.dprsPrivateLandRepo.findOneBy({ id: Equal(id) });
+      let newData = { ...fetchedRecord, ...bodyData };
+      let resultForHistory = await repository.dprsPrivateLandRepo.save(newData);
+      return response200(res, resultForHistory, RESPONSEAPI_MESSAGE.UPDATED);
+    } catch (error) {
+      return apiErrorHandler(error, req, res);
+    };
+  };
+
+  async fetchSurveyDetailsBySubId(req, res) {
+    const bodyData = { ...req.body, ...{ UserId: req.user.UserId } };
+    const { SubmissionId } = bodyData;
+    if (!SubmissionId) return response400(res, "Missing 'SubmissionId' in req formate");
+    try {
+      let fetchedRecord = await repository.waterShedDataRepo.findOneBy({ SubmissionId: Equal(SubmissionId) });
+      return response200(res, fetchedRecord, RESPONSEAPI_MESSAGE.FETCHED);
     } catch (error) {
       return apiErrorHandler(error, req, res);
     };

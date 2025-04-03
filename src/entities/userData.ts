@@ -49,6 +49,9 @@ export class UserData {
   @Column({ type: "nvarchar", length: 50, default: null })
   Version: string;
 
+  @Column({ type: "datetime2", default: null })
+  IsSent: Date;
+
   @Column({ type: "nvarchar", length: 20, default: null })
   CreatedMobile: string;
 

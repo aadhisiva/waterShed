@@ -35,15 +35,31 @@ export class WebController {
 
     if (!Mobile) return response400(res, "Missing 'Mobile' in req formate");
     try {
+      bodyData.Otp = "";
       let fetchedUser = await repository.assignedMastersRepo.createQueryBuilder('ud')
         .leftJoinAndSelect(repoNames.RolesTable, 'lr', "lr.id = ud.RoleId")
         .select(["DISTINCT lr.RoleName", "lr.id as RoleId"])
         .where("ud.Mobile = :Mobile", { Mobile })
         .getRawMany();
       if (fetchedUser.length == 0) return response404(res, "User not found");
-      // let fetchedRecord = await repository.assignedMastersRepo.findOneBy({ Mobile: Equal(Mobile) });
-      // let updateObj = { ...fetchedRecord, ...{ Otp: bodyData.Otp } }
-      // await repository.assignedMastersRepo.save(updateObj);
+      let fetchMobileUser = await repository.assignedMastersRepo.findOneBy({ Mobile: Equal(Mobile) });
+      bodyData.Otp = fetchMobileUser.Otp;
+      let checkOtp = fetchMobileUser.IsSent > new Date(new Date().setHours(0, 0, 0, 0));
+      if (!checkOtp) {
+        bodyData.Otp = generateOTP(4);
+        let newData = { ...fetchMobileUser, ...bodyData };
+        newData.IsSent = new Date();
+        await repository.assignedMastersRepo.save(newData);
+        let sendSingleSms = await sendOtpAsSingleSms(Mobile, bodyData.Otp);
+        if (sendSingleSms.code !== 200) return response400(res, RESPONSEMSG.OTP_FAILED);
+        await saveMobileOtps(
+          Mobile,
+          sendSingleSms?.otpMessage,
+          sendSingleSms?.response,
+          "",
+          bodyData?.Otp
+        );
+      }
       let result = {
         UserData: fetchedUser
       };
@@ -66,20 +82,23 @@ export class WebController {
     try {
       let fetchedUser = await repository.assignedMastersRepo.findOneBy({ RoleId: Equal(bodyData.Id), Mobile: Equal(Mobile) });
       if (!fetchedUser) return response404(res, "User not found");
-      let newData = { ...fetchedUser, ...{ Otp: bodyData?.Otp } }
-      await repository.assignedMastersRepo.save(newData);
-
+      // let newData = { ...fetchedUser, ...{ Otp: bodyData?.Otp } };
+      // let checkOtp = fetchedUser.UpdatedDate > new Date(new Date().setHours(0, 0, 0, 0));
+      // if (!checkOtp) {
+      //   let newData = { ...fetchedUser, ...bodyData };
+      //   await repository.assignedMastersRepo.save(newData);
+      //   let sendSingleSms = await sendOtpAsSingleSms(Mobile, bodyData.Otp);
+      //   if (sendSingleSms.code !== 200) return response400(res, RESPONSEMSG.OTP_FAILED);
+      //   await saveMobileOtps(
+      //     Mobile,
+      //     sendSingleSms?.otpMessage,
+      //     sendSingleSms?.response,
+      //     "",
+      //     bodyData?.Otp
+      //   );
+      // }
       let fecthedRole = await repository.roleAccessRepo.findOneBy({ RoleId: Equal(bodyData.Id) });
       if (!fecthedRole) return response404(res, "Role access not found");
-      let sendSingleSms = await sendOtpAsSingleSms(Mobile, bodyData.Otp);
-      if (sendSingleSms.code !== 200) return response400(res, RESPONSEMSG.OTP_FAILED);
-      await saveMobileOtps(
-        Mobile,
-        sendSingleSms?.otpMessage,
-        sendSingleSms?.response,
-        Id,
-        bodyData?.Otp
-      );
       let result = {
         UserId: fetchedUser['UserId'],
         access: fecthedRole
@@ -99,7 +118,8 @@ export class WebController {
     try {
       let fetchedUser = await repository.assignedMastersRepo.findOneBy({ UserId: Equal(Id) });
       if (!fetchedUser) return response404(res, "User not found");
-      let checkOtp = fetchedUser.Otp === Otp;
+      let findUserWithMobiel = await repository.assignedMastersRepo.findOneBy({ Mobile: Equal(fetchedUser?.Mobile) });
+      let checkOtp = findUserWithMobiel?.Otp === Otp;
       if (!checkOtp) return response400(res, "Otp verification failed");
 
       let result = {
@@ -483,10 +503,42 @@ export class WebController {
 
   async getChildBasedOnParent(req, res) {
     const bodyData = req.body;
-    const { RoleId } = bodyData;
+    const { RoleId, AssignType } = bodyData;
 
     if (!RoleId) return response400(res, "Missing 'RoleId' in req formate");
     try {
+      if (AssignType == "Taluk") {
+        let fetchedDistrictRole = await repository.childRoleRepo.createQueryBuilder('rl')
+          .leftJoinAndSelect(repoNames.RolesTable, 'lr', "lr.id = rl.ChildId")
+          .select(["lr.id as value", "lr.RoleName as name"])
+          .where("rl.RoleId = :RoleId", { RoleId: RoleId })
+          .getRawMany();
+        let result = await repository.childRoleRepo.createQueryBuilder('rl')
+          .leftJoinAndSelect(repoNames.RolesTable, 'lr', "lr.id = rl.ChildId")
+          .select(["lr.id as value", "lr.RoleName as name"])
+          .where("rl.RoleId = :RoleId", { RoleId: fetchedDistrictRole[0].value })
+          .getRawMany();
+        return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED)
+      }
+      if (AssignType == "Hobli") {
+        let fetchedDistrictRole = await repository.childRoleRepo.createQueryBuilder('rl')
+          .leftJoinAndSelect(repoNames.RolesTable, 'lr', "lr.id = rl.ChildId")
+          .select(["lr.id as value", "lr.RoleName as name"])
+          .where("rl.RoleId = :RoleId", { RoleId: RoleId })
+          .getRawMany();
+        let fetchedTalukLevelRoles = await repository.childRoleRepo.createQueryBuilder('rl')
+          .leftJoinAndSelect(repoNames.RolesTable, 'lr', "lr.id = rl.ChildId")
+          .select(["lr.id as value", "lr.RoleName as name"])
+          .where("rl.RoleId = :RoleId", { RoleId: fetchedDistrictRole[0].value })
+          .getRawMany();
+          let newArray = fetchedTalukLevelRoles.map((item) => {return item.value});
+          let result = await repository.childRoleRepo.createQueryBuilder('rl')
+          .leftJoinAndSelect(repoNames.RolesTable, 'lr', "lr.id = rl.ChildId")
+          .select(["lr.id as value", "lr.RoleName as name"])
+          .where("rl.RoleId in (:...roles)", { roles: newArray })
+          .getRawMany();  
+        return response200(res, result, RESPONSEAPI_MESSAGE.FETCHED)
+      }
       let result = await repository.childRoleRepo.createQueryBuilder('rl')
         .leftJoinAndSelect(repoNames.RolesTable, 'lr', "lr.id = rl.ChildId")
         .select(["lr.id as value", "lr.RoleName as name"])
@@ -500,7 +552,7 @@ export class WebController {
 
   async assignmentProcess(req, res) {
     const bodyData = req.body;
-    const { ReqType, UserId } = bodyData;
+    const { ReqType, UserId, DistrictCode, TalukCode, HobliCode, Mobile, RoleId } = bodyData;
 
     if (!ReqType) return response400(res, "Missing 'ReqType' in req formate");
     try {
@@ -512,6 +564,8 @@ export class WebController {
         await repository.assignMastersHistoryRepo.save({ ...fecthedUser, ...{ History: "New user Added" } });
         return response200(res, {}, RESPONSEAPI_MESSAGE.INSERTED);
       } else if (ReqType == 2) {
+        let fetchedDuplicate = await repository.userDataRepo.findOneBy({ DistrictCode: Equal(DistrictCode), TalukCode: Equal(TalukCode), HobliCode: Equal(HobliCode), Mobile: Equal(Mobile), RoleId: Equal(RoleId) });
+        if (fetchedDuplicate) return response400(res, "User already assigned to this Hobli");
         let fetchedRecord = await repository.userDataRepo.findOneBy({ UserId: Equal(UserId) });
         let newData = { ...fetchedRecord, ...bodyData };
         let fecthedUser = await repository.userDataRepo.save(newData);

@@ -40,8 +40,10 @@ router.post('/assignChildAndGet', authenticateToken, webController.assignChildAn
 router.post('/getActivityDetails', authenticateToken, webController.getActivityDetails);
 router.post('/getChildBasedOnParent', authenticateToken, webController.getChildBasedOnParent);
 router.post('/assignmentProcess', authenticateToken, webController.assignmentProcess);
+
 router.post('/getMasterDropDown', authenticateToken, webController.getMasterDropDown);
 router.post('/getAssignedMasters', authenticateToken, webController.getAssignedMasters);
+
 router.post('/getDprsLand', authenticateToken, webController.getDprsLand);
 router.post('/uploadPrivateLand', upload.single('file'), webController.uploadPrivateLand);
 router.post('/uploadCommonLand', upload.single('file'), webController.uploadCommonLand);
